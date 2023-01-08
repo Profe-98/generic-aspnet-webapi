@@ -1,0 +1,2873 @@
+{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/apiv1/authentification/login/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5009
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/authentification/login/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/authentification/logout/{token}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5009
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/authentification/logout/{token}",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/authentification/refresh/{refresh_token}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5009
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/authentification/refresh/{refresh_token}",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/authentification/session/{token}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5009
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/authentification/session/{token}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/authentification/validate/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5009
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/authentification/validate/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/account/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/account/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/account/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/account/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/account/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/account/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/auth/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/auth/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/auth/test-mit-dyn-role/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/auth/test-mit-dyn-role/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/auth/test-mit-static-role/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/auth/test-mit-static-role/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/auth/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/auth/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/auth/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/auth/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/communicationmedium/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/communicationmedium/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/communicationmedium/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/communicationmedium/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/communicationmedium/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/communicationmedium/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/connectionstringvalues/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/connectionstringvalues/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/connectionstringvalues/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/connectionstringvalues/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/connectionstringvalues/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/connectionstringvalues/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/connectiontype/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/connectiontype/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/connectiontype/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/connectiontype/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/connectiontype/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/connectiontype/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/controlleractionrelationtohttpmethod/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/controlleractionrelationtohttpmethod/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/controlleractionrelationtohttpmethod/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/controlleractionrelationtohttpmethod/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/controlleractionrelationtohttpmethod/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/controlleractionrelationtohttpmethod/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/crud/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/crud/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/crud/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/crud/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/crud/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/crud/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/httpmethod/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/httpmethod/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/httpmethod/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/httpmethod/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/httpmethod/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/httpmethod/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriver/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriver/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriver/file/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriver/file/{id}",
+      "UpstreamHttpMethod": [
+        "Put"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriver/media/banner/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriver/media/banner/{id}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriver/media/logo/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriver/media/logo/{id}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriver/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriver/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriver/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriver/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messageattachment/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messageattachment/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messageattachment/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messageattachment/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messageattachment/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messageattachment/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriverversion/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriverversion/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriverversion/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriverversion/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriverversion/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriverversion/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/message/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/message/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/message/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/message/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/message/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/message/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriverversionfile/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriverversionfile/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriverversionfile/file/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriverversionfile/file/{id}",
+      "UpstreamHttpMethod": [
+        "Put"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriverversionfile/file/{id}/{file}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriverversionfile/file/{id}/{file}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriverversionfile/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriverversionfile/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriverversionfile/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriverversionfile/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messageconversation/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messageconversation/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messageconversation/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messageconversation/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messageconversation/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messageconversation/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriverversionrelationtoconnectionstringvalues/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriverversionrelationtoconnectionstringvalues/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriverversionrelationtoconnectionstringvalues/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriverversionrelationtoconnectionstringvalues/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriverversionrelationtoconnectionstringvalues/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriverversionrelationtoconnectionstringvalues/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messageconversationstatetype/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messageconversationstatetype/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messageconversationstatetype/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messageconversationstatetype/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messageconversationstatetype/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messageconversationstatetype/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriverversionrelationtoconnectiontype/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriverversionrelationtoconnectiontype/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriverversionrelationtoconnectiontype/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriverversionrelationtoconnectiontype/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/odbcdriverversionrelationtoconnectiontype/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/odbcdriverversionrelationtoconnectiontype/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messagequeue/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messagequeue/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messagequeue/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messagequeue/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messagequeue/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messagequeue/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/operatingsystem/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/operatingsystem/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/operatingsystem/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/operatingsystem/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/operatingsystem/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/operatingsystem/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messagerelationtoaccount/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messagerelationtoaccount/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messagerelationtoaccount/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messagerelationtoaccount/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messagerelationtoaccount/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messagerelationtoaccount/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/role/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/role/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/role/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/role/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/role/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/role/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messagerelationtoattachment/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messagerelationtoattachment/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messagerelationtoattachment/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messagerelationtoattachment/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messagerelationtoattachment/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messagerelationtoattachment/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/rolerelationtocontrolleractionrelationtohttpmethod/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/rolerelationtocontrolleractionrelationtohttpmethod/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/rolerelationtocontrolleractionrelationtohttpmethod/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/rolerelationtocontrolleractionrelationtohttpmethod/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/rolerelationtocontrolleractionrelationtohttpmethod/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/rolerelationtocontrolleractionrelationtohttpmethod/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messagesendingtype/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messagesendingtype/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messagesendingtype/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messagesendingtype/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/messagesendingtype/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/messagesendingtype/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/schemadatacommand/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/schemadatacommand/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/schemadatacommand/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/schemadatacommand/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/schemadatacommand/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/schemadatacommand/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/software/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/software/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/software/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/software/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/software/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/software/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/softwareversion/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/softwareversion/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/softwareversion/file/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/softwareversion/file/{id}",
+      "UpstreamHttpMethod": [
+        "Put"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/softwareversion/file/{id}/{file}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/softwareversion/file/{id}/{file}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/softwareversion/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/softwareversion/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/softwareversion/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/softwareversion/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/softwareversionrelationtooperatingsystem/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/softwareversionrelationtooperatingsystem/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/softwareversionrelationtooperatingsystem/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/softwareversionrelationtooperatingsystem/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/softwareversionrelationtooperatingsystem/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/softwareversionrelationtooperatingsystem/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/systemmessageuser/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/systemmessageuser/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/systemmessageuser/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/systemmessageuser/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/systemmessageuser/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/systemmessageuser/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/user/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/user/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/user/activation/{base64}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/user/activation/{base64}",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/user/profile/picture/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/user/profile/picture/{id}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/user/register/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/user/register/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/user/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/user/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/user/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/user/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/userrelationtorole/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/userrelationtorole/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/userrelationtorole/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/userrelationtorole/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/userrelationtorole/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/userrelationtorole/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/usertype/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/usertype/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/usertype/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/usertype/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/usertype/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/usertype/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/versiontype/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/versiontype/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Patch"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/versiontype/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/versiontype/{id}",
+      "UpstreamHttpMethod": [
+        "Patch",
+        "Delete",
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/versiontype/{id}/relation/{relationname}/{relationid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/versiontype/{id}/relation/{relationname}/{relationid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/health",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5000
+        }
+      ],
+      "UpstreamPathTemplate": "/4b14ba01-2278-4408-acea-cc6758ec38cd/health",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/health",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/9ae7a219-a422-4cb2-80d0-db75911500dd/health",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/health",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5009
+        }
+      ],
+      "UpstreamPathTemplate": "/b70f519a-165a-4985-8094-eb24f6182451/health",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/health",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "11.0.0.200",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/c0682f6d-62a7-465e-8567-0f685b4d8262/health",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:5000/",
+    "DelegatingHandlers": [
+      "GeneralMiddlewareDelegate"
+    ]
+  }
+}

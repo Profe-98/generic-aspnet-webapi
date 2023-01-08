@@ -1,0 +1,38 @@
+{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/apiv1/authentification/login",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5009
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/authentification/login",
+      "UpstreamHttpMethod": [ "Post" ]
+    },
+    {
+      "DownstreamPathTemplate": "/apiv1/authentification/logout/{token}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5009
+        }
+      ],
+      "UpstreamPathTemplate": "/apiv1/authentification/logout/{token}",
+      "UpstreamHttpMethod": [ "Post", "Get" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": "true"
+      }
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:5000/",
+    "DelegatingHandlers": [ "GeneralMiddlewareDelegate" ]
+  }
+}

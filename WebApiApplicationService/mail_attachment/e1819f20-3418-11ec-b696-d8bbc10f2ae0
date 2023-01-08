@@ -1,0 +1,48 @@
+ARC-Seal: i=1; a=rsa-sha256; t=1635004173; cv=none;
+    d=strato.com; s=strato-dkim-0002;
+    b=MVsiGi6vzJKwgbXvCDbrh6NPsmGcq7eij4SZ800xhXitMSn5JMd2UzE8ViBSWXM5UA
+    HfsVAjpF8gYWP0t9nIyC2SP/BfKKCFAJwzJ7LaO9t1IqP4m2lrqXLTEfb0Atdezu3gTm
+    S78/461LZvg6Zkf3pW+2DYCM2bjJ1SbNPHywcQmiYp/TNHUxuXfj54PeoBjUSPDCh2g4
+    rFpd979VC7rNrSZnVRiYyRyQpv/Rp3Dpl0Klud+c98UY++KjMnBaslAU5sDM8S+rfZdM
+    T1ZIfXLSlU6Urra5FTihjMRUfgaqlF9+ISYGG08jPRijxhCn59zkcnIkyemdnQZjXMYA
+    PrHQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1635004173;
+    s=strato-dkim-0002; d=strato.com;
+    h=Sender:To:Message-Id:Subject:Date:From:Cc:Date:From:Subject:Sender;
+    bh=RjE4ww/ML+AFqN4VI5u5hxHlB/oCKh82XndDeElkYjM=;
+    b=gwZ+Z+hObM+lGRFZWVr2ALGnV+qRPfDFkNvaFhnuYVOy/jGQ9Wgz/TzxVgkcqpkqTW
+    2mUEPH2LpHEblR4PoTodrYfGKmTiAqBQlptK3WgjFkPhTfuNdVEWEKBXaBwuDm0L42Ua
+    iHDGW89yb21MLTQIuaXwBiB1CZVc3xeZJZr9OYCGXbeHJcHvhl0MfdLPmOcTF695MWok
+    xXL/Dd91iEQh4WI3UguUXhWyZmdWqGy5UOt3QSeOEwgfMiSm3JFJUby5H7pFffSpTwZ+
+    3v0QUg+Q9adfstk2yvG/7AUX66zXICoyU/Reul+5v06lk59Ozrtop+ngZimjN9JR88GG
+    NyJA==
+ARC-Authentication-Results: i=1; strato.com;
+    dkim=none
+Authentication-Results: strato.com;
+    dkim=none
+X-RZG-AUTH: ":P2kWY0mrft++PRqlSlcQ3paiGQLS2ZJNAOhoUePrbs9aFNDU7eunPYCQKUsXIFOefMZGBUc="
+X-RZG-CLASS-ID: mo00
+Received: from [localhost]
+    by smtp.strato.de (RZmta 47.34.1 DYNA|AUTH)
+    with ESMTPSA id m0bc10x9NFnXz4n
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
+	(Client did not present a certificate)
+    for <mika-roos@web.de>;
+    Sat, 23 Oct 2021 17:49:33 +0200 (CEST)
+From:
+Date: Sat, 23 Oct 2021 17:49:03 +0200
+Subject: Activation Link
+Message-Id: <BBH98HTX3FU4.3QI1UIQV1WY03@0x00405a00-PC>
+To: mika-roos@web.de
+Sender: service@helixdb.org
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Hello test test,
+
+to complete the user activation follow this link: http://localhost:3000/user/activation/eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJ1dWlkIjoiMDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAwIiwidXNlciI6Im1pa2Etcm9vc0B3ZWIuZGUiLCJ1c2VyX3R5cGVfaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDAiLCJlbWFpbCI6IjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMCIsImV4cGlyZXNfdGltZSI6IjMwLjEwLjIwMjEgMTc6NDg6NTAiLCJuYmYiOjE2MzUwMDQxMzAsImV4cCI6MTYzNTYwODkzMCwiaWF0IjoxNjM1MDA0MTMwfQ.RCY9fzQUyZKQfC0QQQThZBnWXT-9DTJ70YfSS3F1zb7f25vbadTm0dI9AFF_v-WfiRKDHY-Dy6_UtYhnlNjTsg
+And enter the following code when you entered the link:
+5220
+
+Ensure that you complete you user activation till 'Samstag, 30. Oktober 2021'.
+Otherwise your account will by deleted automatically.

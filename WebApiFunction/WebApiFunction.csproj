@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPublishable>False</IsPublishable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Cache\Local\Memory\" />
+    <Folder Include="Database\Oracle\" />
+    <Folder Include="Database\PostgreSql\" />
+    <Folder Include="Data\DataTransferObject\" />
+    <Folder Include="Data\Format\Xml\" />
+    <Folder Include="Log\Local\" />
+    <Folder Include="Log\Server\" />
+    <Folder Include="Mail\Imap\" />
+    <Folder Include="Mail\Microsoft\Exchange\" />
+    <Folder Include="Mail\Pop\" />
+    <Folder Include="Mail\Smtp\" />
+    <Folder Include="Metric\Prometheus\" />
+    <Folder Include="Web\ApiGateway\Abstractions\Ocelot\" />
+    <Folder Include="Web\Authorization\" />
+    <Folder Include="Web\Websocket\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.123" />
+    <PackageReference Include="InfluxDB.Client" Version="4.6.0" />
+    <PackageReference Include="MailKit" Version="3.4.1" />
+    <PackageReference Include="Microsoft.AspNet.WebApi" Version="5.2.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="6.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="6.0.10" />
+    <PackageReference Include="MimeKit" Version="3.4.1" />
+    <PackageReference Include="MySql.Data" Version="8.0.31" />
+    <PackageReference Include="nClam" Version="7.0.0" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
+    <PackageReference Include="Serilog" Version="2.12.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.24.0" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+  </ItemGroup>
+
+</Project>

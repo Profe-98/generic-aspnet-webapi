@@ -1,0 +1,37 @@
+{
+  "web_api_configuration": {
+    "encoding": "UTF-8",
+    "node_uuid": "b70f519a-165a-4985-8094-eb24f6182451"
+  },
+  "api_security_configuration": {
+    "api_content_type": "application/json",
+    "jwt": {
+      "jwt_bearer_secret_string": "this is my custom Secret key for authnetication"
+    },
+    "site_protect": {
+      "max_http_request_uri_len": 255,
+      "max_http_header_field_len": 255,
+      "max_http_header_field_value_len": 255,
+      "max_http_content_len": 0
+    }
+  },
+  "logging_configuration": {
+    "log_level": 1,
+    "log_date_format": "yyyy-MM-dd",
+    "log_time_format": "HH:mm:ss",
+    "userinterface_date_format": "yyyy-MM-dd",
+    "userinterface_time_format": "HH:mm:ss"
+  },
+  "anti_virus_configuration": null,
+  "database_configuration": {
+    "host": "10.0.0.199",
+    "port": 3306,
+    "timeout_s": 300,
+    "user": "rest",
+    "password": "meinDatabasePassword!",
+    "database": "rest_api",
+    "old_guids": true,
+    "convert_zero_datetime": true
+  },
+  "gateway_routes_configuration": null
+}

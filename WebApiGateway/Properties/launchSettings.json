@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "WebApiGateway": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "AUTH_HOST": "localhost"
+      },
+      "dotnetRunMessages": "true",
+      "applicationUrl": "http://0.0.0.0:5000"
+    }
+  }
+}

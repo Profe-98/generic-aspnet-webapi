@@ -1,0 +1,17 @@
+﻿- CustomApiControllerBase.cs => UpdateRelation
+
+für neue DB Struktur mit den Relation-Tables anpassen, bsp.: 
+
+apiv1/softwareversion/{id}/relation/{relationname} => Relation ist operating_system
+
+Fully Relationname intern ist aber operating_system_relation_to_architecture
+
+Verknüpfung für softwareversion controller muss nun via relation-table mit dem angegebene operating_system + architecture folgen, von code-logik ist das Parent von relationname die interne Beziehungsklasse und die Beziehungsklasse muss von DatabaseTableAttribute OnlyRelation auf true sein, diese herausfinden und die Properties der Klasse setzen und per MySQL.Insert via Generic Query Funktion in MySQL inserten
+
+
+- Delete soll nur Delete-Flag setzen aber nicht die DataRows komplett löschen[DONE] ---> jetzt in allen Tabellen deleted Value = 0 + nach UPDATE NotNull für Column
+
+
+- DatabaseTableAttribute: eine weitere Property soll die Kardinalität beschreiben und diese soll bei GenerateQuery berücksichtigt werden, sprich 1toN oder MtoN oder 1to1, bzw. wäre es besser die Kardinalität an DatabaseColumnPropertyAttribute anzuhängen, da hier die ForeignTable wenn FK angegeben wird und der FK-ColumnName, dazu dann noch die Kardinalität die bei Query-Generierung berücksichtigt werden muss[DONE]
+
+- Pagination [done]

@@ -1,0 +1,14 @@
+Reporting-MTA: DNS; mo4-p00-ob.smtp.rzone.de
+Received-From-MTA: DNS; [localhost] (84.143.255.80)
+Arrival-Date: Sat, 23 Oct 2021 17:46:29 +0200 (CEST)
+
+Final-Recipient: RFC822; mika-roos@web.de
+Action: failed
+Status: 5.0.0
+Remote-MTA: DNS; mx-ha02.web.de [212.227.17.8]
+Diagnostic-Code: SMTP; 554 Transaction failed Reject due to policy restrictions. For 
+                 explanation visit 
+                 https://web.de/email/senderguidelines?ip=81.169.146.161
+                 &c=hi
+Last-Attempt-Date: 
+Final-Log-ID: m0bc10x9NFkTz4X

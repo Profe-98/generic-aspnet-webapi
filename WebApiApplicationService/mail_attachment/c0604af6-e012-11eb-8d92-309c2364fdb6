@@ -1,0 +1,75 @@
+8444 tcp
+Test-NetConnection 80.132.91.229 -Port 8444
+wenn true dann Port frei
+
+IP: 10.0.0.88 (localdmzchia01)
+
+
+
+alle platten aus energy sparmodus
+externe usb platten ausbauen für sata 6gb/s
+
+plots zeitversetzt starten + ssd & hdd auslastung über -t + -d
+https://github.com/Chia-Network/chia-blockchain/wiki/Resolving-Sync-Issues---Port-8444
+
+
+
+
+
+Minimum Specs
+
+The minimum supported specs are that of the Raspberry Pi 4:178,553
+
+    Quad core 1.5Ghz CPU (must be 64 bit)
+    2 GB Ram
+    Python 3.7 and above
+
+
+
+Windows Setup:
+Installer ausführen, System-Properties-Performance auf Leistung stellen + Energiesparmodus für Festplatten aus
++ Windows Firewall disable + AV
++ Teamviewer für Remote
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Linux Setup:
+Energizing Mode disable + enable:
+disable: sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+enable: sudo systemctl unmask sleep.target suspend.target hibernate.target hybrid-sleep.target
+
+
+
+
+sudo apt-get update
+sudo apt-get upgrade -y
+
+# Install Git
+sudo apt install git -y
+
+# Checkout the source and install
+git clone https://github.com/Chia-Network/chia-blockchain.git -b latest --recurse-submodules
+cd chia-blockchain
+
+sh install.sh
+
+. ./activate
+
+
+
+
+
+
+chia plots create -k 34 -e -b 8000 -r 2 -u 64 -t /path/to/temporary/directory -d /path/to/final/directory
