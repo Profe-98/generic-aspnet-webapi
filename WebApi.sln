@@ -10,7 +10,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiGateway", "WebApiGate
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiAuthentificationService", "WebApiAuthentificationService\WebApiAuthentificationService.csproj", "{BC253C72-8D42-4642-9AAF-BB2993C7053A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelixTicket", "WebApiMailParser\HelixTicket.csproj", "{F020846A-2336-4839-B6D2-EF7EDF64D578}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelixTicket", "HelixTicket\HelixTicket.csproj", "{F020846A-2336-4839-B6D2-EF7EDF64D578}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiFunction", "WebApiFunction\WebApiFunction.csproj", "{030F856D-B1F7-4CDE-B1B4-1BCB8DED2DD3}"
 EndProject
