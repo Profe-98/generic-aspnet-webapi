@@ -23,7 +23,7 @@ using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
@@ -57,15 +57,15 @@ using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
 using Microsoft.AspNetCore.Hosting;
 
+
 namespace WebApiFunction.Configuration
 {
 
     public class AppConfig : IAppconfig
     {
         #region Private
-        private readonly IConfiguration _configuration = null;
+        private readonly string _configurationFilePath;
         private readonly ISingletonJsonHandler _jsonHandler = null;
-        private readonly IWebHostEnvironment _env = null;
         private AppServiceConfigurationModel _appServiceConfigurationModel;
         #endregion
         #region Public
@@ -87,13 +87,12 @@ namespace WebApiFunction.Configuration
         #endregion
         #region Ctor & Dtor
 
-        public AppConfig(IConfiguration configuration, ISingletonJsonHandler jsonHandler, Microsoft.AspNetCore.Hosting.IWebHostEnvironment env)
+        public AppConfig(ISingletonJsonHandler jsonHandler, string configFilePath)
         {
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
-            _configuration = configuration;
             _jsonHandler = jsonHandler;
-            _env = env;
-            string basePath = Path.Combine(env.ContentRootPath, "Config");
+            _configurationFilePath = configFilePath;
+            string basePath = Path.Combine(_configurationFilePath, "Config");
             string configPath = Path.Combine(basePath, "appserviceconfiguration.json");
             ConfigPath = configPath;
             /*string antiVirusConfigurationModelStr = _configuration["anti_virus_configuration"];
@@ -103,6 +102,10 @@ namespace WebApiFunction.Configuration
             string logConfigurationModelStr = _configuration["logging_configuration"];
             string mailConfigurationModelStr = _configuration["mail_configuration"];*/
             Load();
+        }
+        public AppConfig(ISingletonJsonHandler jsonHandler, IWebHostEnvironment env):this(jsonHandler, env.ContentRootPath)
+        {
+
         }
 
         private void CurrentDomain_ProcessExit(object sender, EventArgs e)
@@ -122,18 +125,22 @@ namespace WebApiFunction.Configuration
             MailConfigurationModel mailConfigurationModel = appServiceConfigurationModel.MailConfigurationModel;
             AntivirusConfigurationModel antiVirusConfigurationModel = appServiceConfigurationModel.AntivirusConfigurationModel;
             DatabaseConfigurationModel databaseConfigurationModel = appServiceConfigurationModel.DatabaseConfigurationModel;
+            DatabaseConfigurationModel databaseNodeManagerConfigurationModel = appServiceConfigurationModel.NodeManagerDatabaseConfigurationModel;
             CacheConfigurationModel cacheConfigurationModel = appServiceConfigurationModel.CacheConfigurationModel;
             AmpqConfigurationModel ampqConfigurationModel = appServiceConfigurationModel.RabbitMqConfigurationModel;
+            SignalRConfigurationModel signalRConfigurationModel = appServiceConfigurationModel.SignalRHubConfigurationModel;
 
-            AppServiceConfigurationModel tmp = new AppServiceConfigurationModel(_env.ContentRootPath);
+            AppServiceConfigurationModel tmp = new AppServiceConfigurationModel(_configurationFilePath);
             tmp.AntivirusConfigurationModel = antiVirusConfigurationModel;
             tmp.DatabaseConfigurationModel = databaseConfigurationModel;
+            tmp.NodeManagerDatabaseConfigurationModel = databaseNodeManagerConfigurationModel;
             tmp.ApiSecurityConfigurationModel = apiSecurityConfigurationModel;
             tmp.WebApiConfigurationModel = webApiConfigurationModel;
             tmp.LogConfigurationModel = logConfigurationModel;
             tmp.MailConfigurationModel = mailConfigurationModel;
             tmp.CacheConfigurationModel = cacheConfigurationModel;
             tmp.RabbitMqConfigurationModel = ampqConfigurationModel;
+            tmp.SignalRHubConfigurationModel = signalRConfigurationModel;
 
 
             _appServiceConfigurationModel = tmp;

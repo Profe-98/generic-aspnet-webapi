@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using WebApiMailParser.InternalModels;
+using HelixTicket.InternalModels;
 using Microsoft.AspNetCore.HttpOverrides;
 
-namespace WebApiMailParser.Middleware
+namespace HelixTicket.Middleware
 {
     public class CustomReverseProxyMiddleware : Controller
     {

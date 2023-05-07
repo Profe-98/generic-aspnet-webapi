@@ -19,7 +19,7 @@ using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
@@ -54,13 +54,13 @@ using WebApiFunction.Web.Http;
 
 namespace WebApiFunction.Filter
 {
-    public class CustomAuthorizationFilter : CustomControllerBase, IAuthorizationFilter
+    public class AuthorizationFilterC : CustomControllerBase, IAuthorizationFilter
     {
-        private readonly ILogger<CustomAuthorizationFilter> _logger;
+        private readonly ILogger<AuthorizationFilterC> _logger;
         private readonly IAuthHandler _authHandler;
         public readonly bool JsonPropertyCheck = false;
 
-        public CustomAuthorizationFilter(IWebHostEnvironment env, IAuthHandler authHandler, IConfiguration configuration, ILogger<CustomAuthorizationFilter> logger)
+        public AuthorizationFilterC(IWebHostEnvironment env, IAuthHandler authHandler, IConfiguration configuration, ILogger<AuthorizationFilterC> logger)
         {
             _authHandler = authHandler;
             _logger = logger;
@@ -68,11 +68,9 @@ namespace WebApiFunction.Filter
         //Bevor Action ausgeführt wird, pre-request-execution um Content-Type zu prüfen
         public async void OnAuthorization(AuthorizationFilterContext context)
         {
-
-
         }
     }
-    /*[AttributeUsage(AttributeTargets.Class| AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Class| AttributeTargets.Method)]
     public class AuthorizationFilter : TypeFilterAttribute
     {
         public readonly List<CrudRoleDescriptor> CrudRoleDescriptors;
@@ -151,7 +149,7 @@ namespace WebApiFunction.Filter
 
         }
 
-        private AuthorizationFilter(RoleDesc[] crudRoleDescriptors,bool jsonPropertyCheck, Type type = null) : base(type == null?typeof(CustomAuthorizationFilter): type)
+        private AuthorizationFilter(RoleDesc[] crudRoleDescriptors,bool jsonPropertyCheck, Type type = null) : base(type == null?typeof(AuthorizationFilterC) : type)
         {
             CrudRoleDescriptors = new List<CrudRoleDescriptor>();
             crudRoleDescriptors.ToList().ForEach(x => CrudRoleDescriptors.Add(new CrudRoleDescriptor(x.Role, x.Permissions)));
@@ -219,127 +217,5 @@ namespace WebApiFunction.Filter
             this.IsReusable = false;
         }
     }
-    public class CustomAuthorizationFilter : CustomControllerBase, IAuthorizationFilter
-    {
-        private readonly ILogger<CustomAuthorizationFilter> _logger;
-        private readonly ICachingHandler _cache;
-        private readonly IAuthHandler _authHandler;
-        public readonly List<AuthorizationFilter.CrudRoleDescriptor> Roles = null;
-        public readonly bool JsonPropertyCheck = false;
-        
-        public CustomAuthorizationFilter(IWebHostEnvironment env,IAuthHandler authHandler, ICachingHandler cache,IConfiguration configuration, ILogger<CustomAuthorizationFilter> logger, List<AuthorizationFilter.CrudRoleDescriptor> roles,bool jsonPropertyCheck) : base (env,cache,configuration)
-        {
-            _authHandler = authHandler;
-            _cache = cache;
-            _logger = logger;
-            Roles = roles;
-            JsonPropertyCheck = jsonPropertyCheck;
-        }
-        //Bevor Action ausgeführt wird, pre-request-execution um Content-Type zu prüfen
-        public async void OnAuthorization(AuthorizationFilterContext context)
-        {
-            bool auth = false;
-            var filter = context.Filters.OfType<CustomAuthorizationFilter>().Where(x => x.Roles != null && x.Roles.Count > 0).ToList();
-            ControllerActionDescriptor controllerActionDescriptor = ((ControllerActionDescriptor)context.ActionDescriptor);
-            string actionName = controllerActionDescriptor.ActionName;
-            string routeTemplate = context.ActionDescriptor.AttributeRouteInfo?.Template;
-            string controllerName = controllerActionDescriptor.ControllerName.ToLower();
-            string httpMethod = context.HttpContext.Request.Method;
-            string requestUri = context.HttpContext.Request.Path.Value;
 
-            string[] routeTemplateSplit = routeTemplate.Split(new string[] { "/"},StringSplitOptions.None);
-            string apiPartFromRouteTemplate = routeTemplateSplit[0];
-
-            string jwt = context.HttpContext.GetRequestJWTFromHeader();
-            if (!JsonPropertyCheck)
-            {
-
-                ApiModel api = AppManager.Api.Find(x => x.Name == apiPartFromRouteTemplate);
-                ControllerModel controller = api.AvaibleControllers.Find(x => x.Name == controllerName);
-                List<RoleToControllerViewModel> roles = controller.Roles.FindAll(x => x.RouteSegments.Length == routeTemplateSplit.Length);
-                var findFilter = filter.Find(x => x.Roles.Find(x => x.Role == BackendAPIDefinitionsProperties.AnonymousRoleName) != null);
-                if (findFilter == null)
-                {
-                    if (!String.IsNullOrEmpty(jwt))
-                    {
-                        AuthHandler.CheckLoginResponse check = await _authHandler.CheckLogin(jwt, true);
-                        if (check.IsCorrectToken)
-                        {
-                            if (!check.TokenExpired)
-                            {
-                                if (check.IsCorrectUserAgent)
-                                {
-                                    if (check.IsCorrectIp)
-                                    {
-                                        if (Roles.Count != 0)
-                                        {
-                                            bool found = false;
-                                            foreach (AuthorizationFilter.CrudRoleDescriptor crudRoleDescriptor in Roles)
-                                            {
-                                                string roleC = crudRoleDescriptor.Role.ToLower();
-                                                var fM = roles.Find(x => x.Role.ToLower().Equals(roleC) && crudRoleDescriptor.Permissions.HasFlag((AuthorizationFilter.CRUD)(x.Flag)) && x.HttpMethod == httpMethod && x.Controller == controllerName);
-                                                found = fM != null;
-                                                if (found)
-                                                {
-                                                    auth = true;
-                                                    break;
-                                                }
-                                            }
-
-                                        }
-                                        else
-                                        {
-                                            auth = check.IsAuthorizedForPath;
-                                        }
-
-                                    }
-                                }
-                            }
-                            if (!auth)
-                            {
-                                bool logoutResponse = await _authHandler.Logout(jwt);
-                            }
-                        }
-                    }
-
-
-                }
-                else
-                {
-                    auth = true;
-                }
-            }
-            else
-            {
-                if (!String.IsNullOrEmpty(jwt))
-                {
-                    var check = await _authHandler.GetSession(jwt);
-                    
-                    foreach (AuthorizationFilter.CrudRoleDescriptor crudRoleDescriptor in Roles)
-                    {
-                        string roleC = crudRoleDescriptor.Role.ToLower();
-                        var fM = check.UserModel.AvaibleRoles.Find(x => x.Name.ToLower() == roleC);
-                        bool found = fM != null;
-                        if (found)
-                        {
-                            auth = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            if(!auth)
-            {
-                var response = CustomControllerBase.JsonApiErrorResultS(new List<ApiErrorModel>
-                {
-                    new ApiErrorModel{
-                 Code =  ApiErrorModel.ERROR_CODES.HTTP_REQU_FORBIDDEN,
-                 Detail = BackendAPIDefinitionsProperties.HttpRequestNotAuthorized
-                }
-                }, System.Net.HttpStatusCode.Forbidden, "an error occurred", BackendAPIDefinitionsProperties.HttpRequestNotAuthorized, null);
-                context.Result = response;
-            }
-
-        }
-    }*/
 }

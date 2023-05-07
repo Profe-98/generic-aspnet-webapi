@@ -24,7 +24,7 @@ using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
@@ -60,7 +60,7 @@ using WebApiFunction.Web.Http;
 namespace WebApiFunction.Database.MySQL
 {
 
-    public class MySqlDatabaseHandler : IScopedDatabaseHandler, ISingletonDatabaseHandler, ITransientDatabaseHandler
+    public class MySqlDatabaseHandler : IScopedDatabaseHandler, ISingletonDatabaseHandler, ITransientDatabaseHandler, ISingletonNodeDatabaseHandler
     {
         public struct MYSQL_ENV_VARS
         {
@@ -138,9 +138,10 @@ namespace WebApiFunction.Database.MySQL
             AutoCommit = appconfig.AppServiceConfiguration.DatabaseConfigurationModel.AutoCommit;
 
         }
-        public MySqlDatabaseHandler(MySqlConnectionStringBuilder connectionString) : this()
+        public MySqlDatabaseHandler(MySqlConnectionStringBuilder connectionString,bool autoCommit) : this()
         {
             InitODBCHandler(connectionString);
+            AutoCommit = autoCommit;
 
         }
         private void InitODBCHandler(MySqlConnectionStringBuilder connectionString, bool threadSafetyDataReader = true)
@@ -165,7 +166,7 @@ namespace WebApiFunction.Database.MySQL
                 string tmpQuery = "SET " + _instanceStorage[var].Value + " = " + _instanceStorage[var].ResetValue + "; ";
                 queryResponseData = await ExecuteQuery(tmpQuery);
             }
-            return queryResponseData.HasSuccess;
+            return queryResponseData != null && queryResponseData.HasSuccess;
         }
         public async Task<bool> SetEnvironmentVar<T>(string var, T val, T resetVal, bool resetAutoByNextQuery = true, [CallerFilePath] string file = "", [CallerMemberName] string member = "", [CallerLineNumber] int line = 0)
         {

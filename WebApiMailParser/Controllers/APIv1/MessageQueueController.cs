@@ -4,13 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WebApiMailParser.InternalModels;
-using WebApiMailParser.Handler;
+using HelixTicket.InternalModels;
+using HelixTicket.Handler;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Serilog.Core;
-using WebApiFunction.Application.Model.Database.MySql.Table;
-using WebApiFunction.Application.Controller.Modules;
 using WebApiFunction.Controller;
 using WebApiFunction.Antivirus.nClam;
 using WebApiFunction.Database;
@@ -24,8 +22,10 @@ using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Configuration;
 using WebApiFunction.MicroService;
 using WebApiFunction.Security.Encryption;
+using WebApiFunction.Application.Model.Database.MySql.Helix;
+using WebApiFunction.Application.Controller.Modules.Helix;
 
-namespace WebApiMailParser.Controllers.APIv1
+namespace HelixTicket.Controllers.APIv1
 {
 
     public class MessageQueueController : CustomApiV1ControllerBase<MessageQueueModel, MessageQueueModule>

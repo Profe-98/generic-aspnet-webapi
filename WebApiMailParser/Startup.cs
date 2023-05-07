@@ -5,10 +5,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Hosting;
-using WebApiMailParser.Handler;
+using HelixTicket.Handler;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using WebApiMailParser.InternalModels;
-using WebApiMailParser.Middleware;
+using HelixTicket.InternalModels;
+using HelixTicket.Middleware;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using System.Text.Json;
@@ -46,11 +46,13 @@ using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Healthcheck;
 using WebApiFunction.Filter;
 using WebApiFunction.Controller;
+using WebApiFunction.Startup;
 
-namespace WebApiMailParser
+namespace HelixTicket
 {
-    public class Startup
+    public class Startup : IWebApiStartup
     {
+        public static string DatabaseEntityNamespace { get; } = "WebApiFunction.Application.Model.Database.MySql.Helix";
         public Startup(IConfiguration configuration, Microsoft.AspNetCore.Hosting.IWebHostEnvironment env)
         {
             #region Initial Configurations
@@ -94,12 +96,30 @@ namespace WebApiMailParser
             DatabaseConfigurationModel initialDatabaseConfigurationModel = new DatabaseConfigurationModel();
             initialDatabaseConfigurationModel.Host = "localhost";
             initialDatabaseConfigurationModel.Port = 3306;
-            initialDatabaseConfigurationModel.Database = "rest_api";
+            initialDatabaseConfigurationModel.Database = "helix";
             initialDatabaseConfigurationModel.User = "rest";
             initialDatabaseConfigurationModel.Password = "meinDatabasePassword!";
             initialDatabaseConfigurationModel.Timeout = 300;
             initialDatabaseConfigurationModel.ConvertZeroDateTime = true;
             initialDatabaseConfigurationModel.OldGuids = true;
+
+            DatabaseConfigurationModel initialNodeManagerDatabaseConfigurationModel = new DatabaseConfigurationModel();
+            initialNodeManagerDatabaseConfigurationModel.Host = "localhost";
+            initialNodeManagerDatabaseConfigurationModel.Port = 3306;
+            initialNodeManagerDatabaseConfigurationModel.Database = "rest_api";
+            initialNodeManagerDatabaseConfigurationModel.User = "rest";
+            initialNodeManagerDatabaseConfigurationModel.Password = "meinDatabasePassword!";
+            initialNodeManagerDatabaseConfigurationModel.Timeout = 300;
+            initialNodeManagerDatabaseConfigurationModel.ConvertZeroDateTime = true;
+            initialNodeManagerDatabaseConfigurationModel.OldGuids = true;
+
+            AmpqConfigurationModel initialRabbitMqConfigurationModel = new AmpqConfigurationModel();
+            initialRabbitMqConfigurationModel.Host = "localhost";
+            initialRabbitMqConfigurationModel.Port = 5672;
+            initialRabbitMqConfigurationModel.User = "helix";
+            initialRabbitMqConfigurationModel.Password = "admin1234";
+            initialRabbitMqConfigurationModel.VirtualHost = "helix";
+            initialRabbitMqConfigurationModel.HeartBeatMs = 30000;
 
             WebApiConfigurationModel initialWebApiConfigurationModel = new WebApiConfigurationModel();
             initialWebApiConfigurationModel.Encoding = "UTF-8";
@@ -109,8 +129,10 @@ namespace WebApiMailParser
             AppServiceConfigurationModel initialAppServiceConfigurationModel = new AppServiceConfigurationModel();
             initialAppServiceConfigurationModel.AntivirusConfigurationModel = initialAntiVirusConfigurationModel;
             initialAppServiceConfigurationModel.DatabaseConfigurationModel = initialDatabaseConfigurationModel;
+            initialAppServiceConfigurationModel.NodeManagerDatabaseConfigurationModel = initialNodeManagerDatabaseConfigurationModel;
             initialAppServiceConfigurationModel.ApiSecurityConfigurationModel = initialApiSecurityConfigurationModel;
             initialAppServiceConfigurationModel.WebApiConfigurationModel = initialWebApiConfigurationModel;
+            initialAppServiceConfigurationModel.RabbitMqConfigurationModel = initialRabbitMqConfigurationModel;
             initialAppServiceConfigurationModel.LogConfigurationModel = initialLogConfigurationModel;
             initialAppServiceConfigurationModel.MailConfigurationModel = initialMailConfigurationModel;
             #endregion Initial Configurations
@@ -178,8 +200,19 @@ namespace WebApiMailParser
             services.AddScoped<IScopedVulnerablityHandler>(x => new VulnerablityHandler(appConfigService.AppServiceConfiguration.AppPaths[AppConfigDefinitionProperties.PathDictKeys.File.NClamQuarantinePath], appConfigService.AppServiceConfiguration.AntivirusConfigurationModel.Host, appConfigService.AppServiceConfiguration.AntivirusConfigurationModel.Port, true));
             services.AddSingleton<IMailHandler, MailHandler>();
             services.AddScoped<IJWTHandler, JWTHandler>();
+
+
+            serviceProvider = services.BuildServiceProvider();
+            services.AddTransient<ITransientDatabaseHandler, MySqlDatabaseHandler>();
             services.AddScoped<IScopedDatabaseHandler, MySqlDatabaseHandler>();
-            services.AddSingleton<ISingletonDatabaseHandler, MySqlDatabaseHandler>();
+            if (appConfigService.AppServiceConfiguration.NodeManagerDatabaseConfigurationModel != null)
+            {
+                services.AddSingleton<ISingletonNodeDatabaseHandler>(new MySqlDatabaseHandler(appConfigService.AppServiceConfiguration.NodeManagerDatabaseConfigurationModel.MysqlConnectionString, appConfigService.AppServiceConfiguration.NodeManagerDatabaseConfigurationModel.AutoCommit));
+
+            }
+            services.AddSingleton<ISingletonDatabaseHandler>(new MySqlDatabaseHandler(appConfigService.AppServiceConfiguration.DatabaseConfigurationModel.MysqlConnectionString, appConfigService.AppServiceConfiguration.DatabaseConfigurationModel.AutoCommit));
+
+
             services.AddSingleton<INodeManagerHandler, NodeManagerHandler>();
             services.AddScoped<IAuthHandler, AuthHandler>();//dependent on IHttpContextHandler & IScopedDatabaseHandler this is why these both are instancing first by a request
             services.AddScoped<IJsonApiDataHandler, JsonApiDataHandler>();
@@ -188,6 +221,13 @@ namespace WebApiMailParser
             services.AddSingleton<ISingletonTicketHandler, TicketHandler>();
             services.AddSingleton<ISingletonEncryptionHandler, EncryptionHandler>();
             services.AddScoped<IScopedEncryptionHandler, EncryptionHandler>();
+
+
+            serviceProvider = services.BuildServiceProvider();
+            ISingletonNodeDatabaseHandler databaseHandler = serviceProvider.GetService<ISingletonNodeDatabaseHandler>();
+            CustomControllerBaseExtensions.RegisterNetClasses(databaseHandler, DatabaseEntityNamespace);
+            INodeManagerHandler nodeManager = serviceProvider.GetService<INodeManagerHandler>();
+            nodeManager.Register();
             services.AddRabbitMq();
 
             serviceProvider = services.BuildServiceProvider();
@@ -310,13 +350,11 @@ namespace WebApiMailParser
                 AllowCachingResponses = false
 
             });
-            ISingletonDatabaseHandler databaseHandler = serviceProvider.GetService<ISingletonDatabaseHandler>();
-            CustomControllerBaseExtensions.RegisterNetClasses(databaseHandler);
+            ISingletonNodeDatabaseHandler databaseHandler = serviceProvider.GetService<ISingletonNodeDatabaseHandler>();
             INodeManagerHandler nodeManager = serviceProvider.GetService<INodeManagerHandler>();
-            nodeManager.Register(BackendAPIDefinitionsProperties.NodeTypes.MailParser);
             app.UseEndpoints(endpoints =>
             {
-                endpoints.RegisterBackend(nodeManager, serviceProvider,env, databaseHandler, actionDescriptorCollectionProvider, Configuration);
+                endpoints.RegisterBackend(nodeManager, serviceProvider,env, databaseHandler, actionDescriptorCollectionProvider, Configuration, DatabaseEntityNamespace);
 
             });
 

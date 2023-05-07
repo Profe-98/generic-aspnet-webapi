@@ -95,6 +95,8 @@ namespace WebApiFunction.Mail
         {
             _logger = new LoggerFactory().CreateLogger<MailHandler>();
 
+            UserImap = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.User;
+            PasswordImap = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.Password;
             ServerImap = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.Server;
             PortImap = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.Port;
             SecureSocketOptionsImap = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.SecureSocketOptions;
@@ -102,6 +104,8 @@ namespace WebApiFunction.Mail
             TimeoutImap = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.Timeout;
             LoggerFileImap = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.LoggerFile;
 
+            UserSmtp = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.User;
+            PasswordSmtp = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.Password;
             ServerSmtp = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.Server;
             PortSmtp = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.Port;
             SecureSocketOptionsSmtp = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.SecureSocketOptions;
@@ -478,8 +482,8 @@ namespace WebApiFunction.Mail
                 }
 
                 imapClient.Timeout = TimeoutImap;
-                UserImap = user;
-                PasswordImap = password;
+                UserImap = UserImap??user;
+                PasswordImap = PasswordImap??password;
                 await imapClient.ConnectAsync(ServerImap, PortImap, SecureSocketOptionsImap);
                 await imapClient.AuthenticateAsync(user, password);
                 return imapClient;
@@ -507,8 +511,8 @@ namespace WebApiFunction.Mail
                 smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
                 smtpClient.Timeout = TimeoutSmtp;
 
-                UserSmtp = user;
-                PasswordSmtp = password;
+                UserSmtp = UserSmtp ??user;
+                PasswordSmtp = PasswordSmtp ??password;
                 await smtpClient.ConnectAsync(ServerSmtp, PortSmtp, SecureSocketOptionsSmtp);
                 await smtpClient.AuthenticateAsync(user, password);
                 return smtpClient;

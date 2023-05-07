@@ -6,12 +6,12 @@ using System.Threading;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
-using WebApiMailParser.Handler;
+using HelixTicket.Handler;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using WebApiMailParser.InternalModels;
+using HelixTicket.InternalModels;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Routing;
@@ -25,7 +25,7 @@ using WebApiFunction.Configuration;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Cache.Distributed.RedisCache;
 
-namespace WebApiMailParser.Middleware
+namespace HelixTicket.Middleware
 {
     public class CustomResponseBodyMiddleware : CustomControllerBase
     {

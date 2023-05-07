@@ -9,7 +9,7 @@ namespace WebApiFunction.MicroService
     public interface INodeManagerHandler
     {
         NodeModel NodeModel { get; }
-        public void Register(Guid typeUuid);
+        public void Register();
         public void KeepAlive();
         public void Unregister();
         public NodeModel GetCurrentNodeData();

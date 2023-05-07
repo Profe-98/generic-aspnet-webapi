@@ -10,7 +10,7 @@ using System.Text.Json;
 using System.Linq.Expressions;
 using System.Windows;
 
-namespace WebApiMailParser
+namespace HelixTicket
 {
     public class Program
     {

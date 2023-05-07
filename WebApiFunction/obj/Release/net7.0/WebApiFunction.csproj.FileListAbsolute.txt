@@ -1,0 +1,14 @@
+F:\Helix\RDBS\webapi\WebApiFunction\bin\Release\net7.0\WebApiFunction.deps.json
+F:\Helix\RDBS\webapi\WebApiFunction\bin\Release\net7.0\WebApiFunction.runtimeconfig.json
+F:\Helix\RDBS\webapi\WebApiFunction\bin\Release\net7.0\WebApiFunction.dll
+F:\Helix\RDBS\webapi\WebApiFunction\bin\Release\net7.0\WebApiFunction.pdb
+F:\Helix\RDBS\webapi\WebApiFunction\obj\Release\net7.0\WebApiFunction.csproj.AssemblyReference.cache
+F:\Helix\RDBS\webapi\WebApiFunction\obj\Release\net7.0\WebApiFunction.GeneratedMSBuildEditorConfig.editorconfig
+F:\Helix\RDBS\webapi\WebApiFunction\obj\Release\net7.0\WebApiFunction.AssemblyInfoInputs.cache
+F:\Helix\RDBS\webapi\WebApiFunction\obj\Release\net7.0\WebApiFunction.AssemblyInfo.cs
+F:\Helix\RDBS\webapi\WebApiFunction\obj\Release\net7.0\WebApiFunction.csproj.CoreCompileInputs.cache
+F:\Helix\RDBS\webapi\WebApiFunction\obj\Release\net7.0\WebApiFunction.dll
+F:\Helix\RDBS\webapi\WebApiFunction\obj\Release\net7.0\refint\WebApiFunction.dll
+F:\Helix\RDBS\webapi\WebApiFunction\obj\Release\net7.0\WebApiFunction.pdb
+F:\Helix\RDBS\webapi\WebApiFunction\obj\Release\net7.0\WebApiFunction.genruntimeconfig.cache
+F:\Helix\RDBS\webapi\WebApiFunction\obj\Release\net7.0\ref\WebApiFunction.dll

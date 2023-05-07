@@ -71,11 +71,15 @@ using WebApiFunction.Threading.Task;
 using WebApiFunction.Application.Model.Database.MySql.Entity;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Ampq.Rabbitmq;
+using WebApiFunction.Ampq.Rabbitmq.Data;
+using WebApiFunction.Startup;
 
 namespace WebApiGateway
 {
-    public class Startup
+    public class Startup : IWebApiStartup
     {
+        public static string[] DatabaseEntityNamespaces { get; } =new string[] { "WebApiFunction.Application.Model.Database.MySql.Entity" };
+        private object FileAccessLockObject = new object();
         public Startup(IConfiguration configuration, Microsoft.AspNetCore.Hosting.IWebHostEnvironment env)
         {
             #region Initial Configurations
@@ -106,12 +110,32 @@ namespace WebApiGateway
             initialDatabaseConfigurationModel.ConvertZeroDateTime = true;
             initialDatabaseConfigurationModel.OldGuids = true;
 
+            DatabaseConfigurationModel initialNodeManagerDatabaseConfigurationModel = new DatabaseConfigurationModel();
+            initialNodeManagerDatabaseConfigurationModel.Host = "localhost";
+            initialNodeManagerDatabaseConfigurationModel.Port = 3306;
+            initialNodeManagerDatabaseConfigurationModel.Database = "rest_api";
+            initialNodeManagerDatabaseConfigurationModel.User = "rest";
+            initialNodeManagerDatabaseConfigurationModel.Password = "meinDatabasePassword!";
+            initialNodeManagerDatabaseConfigurationModel.Timeout = 300;
+            initialNodeManagerDatabaseConfigurationModel.ConvertZeroDateTime = true;
+            initialNodeManagerDatabaseConfigurationModel.OldGuids = true;
+
+            AmpqConfigurationModel initialRabbitMqConfigurationModel = new AmpqConfigurationModel();
+            initialRabbitMqConfigurationModel.Host = "localhost";
+            initialRabbitMqConfigurationModel.Port = 5672;
+            initialRabbitMqConfigurationModel.User = "webapi";
+            initialRabbitMqConfigurationModel.Password = "admin1234";
+            initialRabbitMqConfigurationModel.VirtualHost = "webapi";
+            initialRabbitMqConfigurationModel.HeartBeatMs = 30000;
+
             WebApiConfigurationModel initialWebApiConfigurationModel = new WebApiConfigurationModel();
             initialWebApiConfigurationModel.Encoding = "UTF-8";
 
             //merged alle config in eine json namens: appservice.json
             AppServiceConfigurationModel initialAppServiceConfigurationModel = new AppServiceConfigurationModel();
             initialAppServiceConfigurationModel.DatabaseConfigurationModel = initialDatabaseConfigurationModel;
+            initialAppServiceConfigurationModel.NodeManagerDatabaseConfigurationModel = initialNodeManagerDatabaseConfigurationModel;
+            initialAppServiceConfigurationModel.RabbitMqConfigurationModel = initialRabbitMqConfigurationModel;
             initialAppServiceConfigurationModel.ApiSecurityConfigurationModel = initialApiSecurityConfigurationModel;
             initialAppServiceConfigurationModel.WebApiConfigurationModel = initialWebApiConfigurationModel;
             initialAppServiceConfigurationModel.LogConfigurationModel = initialLogConfigurationModel;
@@ -181,8 +205,17 @@ namespace WebApiGateway
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddSingleton<IInfluxDbHandlerInterface, InfluxDbHandler>();
 
+            services.AddTransient<ITransientDatabaseHandler, MySqlDatabaseHandler>();
             services.AddScoped<IScopedDatabaseHandler, MySqlDatabaseHandler>();
-            services.AddSingleton<ISingletonDatabaseHandler, MySqlDatabaseHandler>();
+            ServiceProvider serviceProvider = services.BuildServiceProvider();
+            var appConfigService = serviceProvider.GetService<IAppconfig>();
+            if (appConfigService.AppServiceConfiguration.NodeManagerDatabaseConfigurationModel != null)
+            {
+                services.AddSingleton<ISingletonNodeDatabaseHandler>(new MySqlDatabaseHandler(appConfigService.AppServiceConfiguration.NodeManagerDatabaseConfigurationModel.MysqlConnectionString, appConfigService.AppServiceConfiguration.NodeManagerDatabaseConfigurationModel.AutoCommit));
+
+            }
+            services.AddSingleton<ISingletonDatabaseHandler>(new MySqlDatabaseHandler(appConfigService.AppServiceConfiguration.DatabaseConfigurationModel.MysqlConnectionString, appConfigService.AppServiceConfiguration.DatabaseConfigurationModel.AutoCommit));
+           
             services.AddSingleton<INodeManagerHandler, NodeManagerHandler>();
             services.AddSingleton<ISingletonEncryptionHandler, EncryptionHandler>();
             services.AddScoped<IScopedEncryptionHandler, EncryptionHandler>();
@@ -190,15 +223,21 @@ namespace WebApiGateway
             services.AddScoped<IAuthHandler, AuthHandler>();//dependent on IHttpContextHandler & IScopedDatabaseHandler this is why these both are instancing first by a request
 
             services.AddScoped<IJsonApiDataHandler, JsonApiDataHandler>();
-            services.AddRabbitMq();
 
+            serviceProvider = services.BuildServiceProvider();
+
+            ISingletonNodeDatabaseHandler databaseHandler = serviceProvider.GetService<ISingletonNodeDatabaseHandler>();
+            CustomControllerBaseExtensions.RegisterNetClasses(databaseHandler, DatabaseEntityNamespaces);
+            INodeManagerHandler nodeManager = serviceProvider.GetService<INodeManagerHandler>();
+            nodeManager.Register();
+            services.AddRabbitMq();
 
 
             services.AddControllers(options =>
             {
                 int minVal = int.MinValue;
                 options.Filters.Add(typeof(HttpFlowFilter), minVal);//wird immer als erster Filter(Global-Filter, pre-executed vor allen Controllern) ausgeführt, danach kommt wenn als Attribute an Controller-Action 'CustomConsumesFilter' mit Order=int.MinValue+1
-                options.Filters.Add(typeof(CustomAuthorizationFilter), minVal + 1);//wird immer als erster Filter(Global-Filter, pre-executed vor allen Controllern) ausgeführt, danach kommt wenn als Attribute an Controller-Action 'CustomConsumesFilter' mit Order=int.MinValue+1
+                options.Filters.Add(typeof(AuthorizationFilterC), minVal + 1);//wird immer als erster Filter(Global-Filter, pre-executed vor allen Controllern) ausgeführt, danach kommt wenn als Attribute an Controller-Action 'CustomConsumesFilter' mit Order=int.MinValue+1
             }).AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
@@ -252,7 +291,7 @@ namespace WebApiGateway
             services.AddHttpClient("RemoteAuthentificationServiceClient", c => 
             {
                 
-                c.BaseAddress = new Uri("http://"+ authHost + ":5009/apiv1/authentification/validate");
+                c.BaseAddress = new Uri("http://"+ authHost + ":5009/helix-api-1/authentification/validate");
 
                 c.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
             });
@@ -309,189 +348,9 @@ namespace WebApiGateway
             services.AddOcelot(Configuration)
                 .AddDelegatingHandler<GeneralMiddlewareDelegate>(true);
         }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, IWebHostEnvironment env,IServiceProvider serviceProvider, IActionDescriptorCollectionProvider actionDescriptorCollectionProvider)
+        public async void WriteRouteToFile(string contentRootPath,RoutesConfigurationModel routesConfigurationModel,JsonHandler jsonHandler)
         {
-
-            IAppconfig appconfig = serviceProvider.GetService<IAppconfig>();
-            string contentRootPath = env.ContentRootPath;
-            var writeRouteJsonAction = async() => {
-                try
-                {
-                    using(JsonHandler jsonHandler = new JsonHandler())
-                    {
-                        RoutesConfigurationModel routesConfigurationModel = new RoutesConfigurationModel();
-                        routesConfigurationModel.Routes = new List<RoutesConfigurationModel.RouteModel>();
-                        routesConfigurationModel.GlobalConfiguration = new RoutesConfigurationModel.GlobalConfigurationModel();
-                        routesConfigurationModel.GlobalConfiguration.BaseUrl = "http://localhost:5000/";
-                        routesConfigurationModel.GlobalConfiguration.DelegatingHandlers = new List<string>() { "GeneralMiddlewareDelegate" };
-                        using (MySqlDatabaseHandler databaseHandler = new MySqlDatabaseHandler(appconfig.AppServiceConfiguration.DatabaseConfigurationModel.MysqlConnectionString))
-                        {
-                            QueryResponseData<ControllerRelationToRoleView> routesQueryData = await databaseHandler.ExecuteQuery<ControllerRelationToRoleView>("SELECT * FROM controller_relation_to_role_view;");
-                            if (routesQueryData.HasData)
-                            {
-
-                                foreach (var row in routesQueryData.DataStorage)
-                                {
-                                    bool isAnonEndpoint = row.Roles != null ? row.Roles.Contains(BackendAPIDefinitionsProperties.AnonymousRoleName) : false;
-                                    //optionale Routeparameter können von Ocelot nicht verarbeitet werden, diese rufe eine Exception in der UseRouting Methode von Ocelot aus und da die Mainroute eh besteht passt es auch so
-                                    //Bsp.:
-                                    // Route 1: /account
-                                    // Route 2: /account/{id}
-                                    // Route 3: /account/{id?} <----------- Exception und doppelt da Route 2 ja schon existiert
-                                    if (row.ActionRoute == null)//||row.ActionRoute.Contains("?}"))
-                                        continue;
-
-                                    if (row.ActionRoute == "'apiv1/authentification/login'")
-                                    {
-
-                                    }
-
-                                    var route = new RoutesConfigurationModel.RouteModel();
-                                    if (!isAnonEndpoint)
-                                    {
-                                        route.AuthenticationOptions = new RoutesConfigurationModel.AuthenticationOptionsModel
-                                        {
-                                            AuthenticationProviderKey = "Base"
-                                        };
-                                    }
-                                    else
-                                    {
-
-                                    }
-                                    route.DownstreamHostAndPorts = new List<RoutesConfigurationModel.DownstreamHostAndPortModel>();
-                                    foreach (var item in row.AvailableNodes)
-                                    {
-                                        var endPoint = item.Key;
-                                        using (System.Net.NetworkInformation.Ping ping = new System.Net.NetworkInformation.Ping())
-                                        {
-                                            string ipStr = endPoint.Address.ToString();
-                                            var reply = await ping.SendPingAsync(ipStr);
-                                            if (reply.Status == System.Net.NetworkInformation.IPStatus.Success)
-                                            {
-                                                bool available = (DateTime.Now - new TimeSpan(0, 0, 60) < item.Value);
-                                                if (available)
-                                                    route.DownstreamHostAndPorts.Add(new RoutesConfigurationModel.DownstreamHostAndPortModel() { Host = ipStr, Port = endPoint.Port });
-                                            }
-                                        }
-
-                                    }
-
-                                    List<string> methodData = row.HttpMethods != null ? row.HttpMethods.Split(',').ToList() : new List<string>();
-                                    for (int i = 0; i < methodData.Count; i++)
-                                    {
-                                        string firstLetter = methodData[i].Substring(0, 1);
-                                        string commonString = methodData[i].Substring(1, methodData[i].Length - 1);
-                                        methodData[i] = ((firstLetter.ToUpper()) + (commonString.ToLower()));
-                                    }
-                                    string pathTemplate = row.ActionRoute != null ? ("/" + row.ActionRoute) : null;
-                                    route.DownstreamPathTemplate = pathTemplate;
-                                    route.DownstreamScheme = "http";
-                                    route.UpstreamHttpMethod = methodData;
-                                    route.UpstreamPathTemplate = pathTemplate;
-                                    route.LoadBalancerOptions = new RoutesConfigurationModel.LoadBalancerOptionsModel
-                                    {
-                                        Type = "RoundRobin"
-                                    };
-                                    if (row.ActionRoute == null || row.HttpMethods == null || row.Roles == null || route.DownstreamHostAndPorts.Count == 0)
-                                    {
-                                        continue;
-                                    }
-                                    var claims = new Dictionary<string, bool>();
-                                    if (row.Roles != null && !isAnonEndpoint)
-                                    {
-                                        foreach (string role in row.Roles.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
-                                        {
-                                            if (!claims.ContainsKey(role))
-                                            {
-                                                claims.Add(role + "Role", true);
-                                            }
-                                        }
-                                    }
-                                    route.RouteClaimsRequirement = !isAnonEndpoint ? claims : null;
-
-                                    bool hasOptionalIdParameter = route.UpstreamPathTemplate.Contains(BackendAPIDefinitionsProperties.ActionParameterOptionalIdWildcard);
-
-                                    string compareValue = route.UpstreamPathTemplate.Replace("?", "");
-                                    var findItem = routesConfigurationModel.Routes.Find(x => x.UpstreamPathTemplate == compareValue);
-                                    if (findItem == null)
-                                    {
-                                        route.UpstreamPathTemplate = compareValue;
-                                        route.DownstreamPathTemplate = compareValue;
-                                        routesConfigurationModel.Routes.Add(route);
-
-                                    }
-                                    else
-                                    {
-                                        int index = routesConfigurationModel.Routes.IndexOf(findItem);
-                                        foreach (string methodDataItem in route.UpstreamHttpMethod)
-                                        {
-                                            var existHttpMethodAlready = routesConfigurationModel.Routes[index].UpstreamHttpMethod.Find(x => x == methodDataItem);
-                                            if (existHttpMethodAlready == null)
-                                            {
-                                                routesConfigurationModel.Routes[index].UpstreamHttpMethod.Add(methodDataItem);
-                                            }
-                                        }
-                                    }
-
-                                    if (hasOptionalIdParameter)
-                                    {
-
-                                        string foundPath = route.UpstreamPathTemplate.Replace(BackendAPIDefinitionsProperties.ActionParameterOptionalIdWildcard, "").Replace(BackendAPIDefinitionsProperties.ActionParameterIdWildcard, "");
-                                        var findItemWithoutId = routesConfigurationModel.Routes.Find(x => x.UpstreamPathTemplate == foundPath);
-                                        if (findItemWithoutId == null)
-                                        {
-                                            var newRouteItem = route;
-                                            newRouteItem.DownstreamPathTemplate = foundPath;
-                                            newRouteItem.UpstreamPathTemplate = foundPath;
-
-                                            routesConfigurationModel.Routes.Add(newRouteItem);
-                                        }
-                                        else
-                                        {
-                                            int indexOfRouteItem = routesConfigurationModel.Routes.IndexOf(findItemWithoutId);
-                                            foreach (string methodDataItem in route.UpstreamHttpMethod)
-                                            {
-                                                var existHttpMethodAlready = routesConfigurationModel.Routes[indexOfRouteItem].UpstreamHttpMethod.Find(x => x == methodDataItem);
-                                                if (existHttpMethodAlready == null)
-                                                {
-                                                    routesConfigurationModel.Routes[indexOfRouteItem].UpstreamHttpMethod.Add(methodDataItem);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            QueryResponseData<NodeHealthEndpointViewModel> routesHealthQueryData = await databaseHandler.ExecuteQuery<NodeHealthEndpointViewModel>("SELECT * FROM node_health_endpoint_view;");
-                            if (routesHealthQueryData.HasData)
-                            {
-                                foreach (var item in routesHealthQueryData.DataStorage)
-                                {
-                                    var claims = new Dictionary<string, bool>() { { "rootRole", true } };
-                                    var route = new RoutesConfigurationModel.RouteModel();
-                                    route.AuthenticationOptions = new RoutesConfigurationModel.AuthenticationOptionsModel
-                                    {
-                                        AuthenticationProviderKey = "Base"
-                                    };
-                                    string pathTemplateDownStream = "/health";
-                                    string pathTemplateUpStream = "/" + item.Uuid + "/health";
-                                    route.DownstreamPathTemplate = pathTemplateDownStream;
-                                    route.DownstreamScheme = "http";
-
-                                    route.UpstreamHttpMethod = new List<string>() { "Get" };
-                                    route.UpstreamPathTemplate = pathTemplateUpStream;
-                                    route.RouteClaimsRequirement = claims;
-                                    route.LoadBalancerOptions = new RoutesConfigurationModel.LoadBalancerOptionsModel
-                                    {
-                                        Type = "RoundRobin"
-                                    };
-                                    route.DownstreamHostAndPorts = new List<RoutesConfigurationModel.DownstreamHostAndPortModel>() { new RoutesConfigurationModel.DownstreamHostAndPortModel() { Host = item.IPAddr, Port = item.Port } };
-                                    routesConfigurationModel.Routes.Add(route);
-                                }
-                            }
-                        }
-                        string json = jsonHandler.JsonSerialize<RoutesConfigurationModel>(routesConfigurationModel,
+            string json = jsonHandler.JsonSerialize<RoutesConfigurationModel>(routesConfigurationModel,
                             new System.Text.Json.JsonSerializerOptions
                             {
                                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
@@ -499,21 +358,281 @@ namespace WebApiGateway
 
                             });
 
-                        string basePath = Path.Combine(contentRootPath, "Config");
-                        string routesFile = Path.Combine(basePath, "routes.json");
+            string basePath = Path.Combine(contentRootPath, "Config");
+            string routesFile = Path.Combine(basePath, "routes.json");
+            await System.IO.File.WriteAllTextAsync(routesFile, json);
+        }
+        public static async Task<RoutesConfigurationModel> CreateRoutes(ITransientDatabaseHandler databaseHandler)
+        {
+            RoutesConfigurationModel routesConfigurationModel = new RoutesConfigurationModel();
+            routesConfigurationModel.Routes = new List<RoutesConfigurationModel.RouteModel>();
+            routesConfigurationModel.GlobalConfiguration = new RoutesConfigurationModel.GlobalConfigurationModel();
+            routesConfigurationModel.GlobalConfiguration.BaseUrl = "http://localhost:5000/";
+            routesConfigurationModel.GlobalConfiguration.DelegatingHandlers = new List<string>() { "GeneralMiddlewareDelegate" };
 
-                        System.IO.File.WriteAllText(routesFile, json);
-                    }
-                    
-                }
-                catch (Exception ex)
+            QueryResponseData<NodeHealthEndpointViewModel> routesHealthQueryData = await databaseHandler.ExecuteQuery<NodeHealthEndpointViewModel>("SELECT * FROM node_health_endpoint_view;");
+            if (routesHealthQueryData.HasData)
+            {
+                foreach (var item in routesHealthQueryData.DataStorage)
                 {
-                
+                    var claims = new Dictionary<string, bool>() { { "rootRole", true } };
+                    var route = new RoutesConfigurationModel.RouteModel();
+                    route.AuthenticationOptions = new RoutesConfigurationModel.AuthenticationOptionsModel
+                    {
+                        AuthenticationProviderKey = "Base"
+                    };
+                    string pathTemplateDownStream = "/health";
+                    string pathTemplateUpStream = "/" + item.Uuid + "/health";
+                    route.DownstreamPathTemplate = pathTemplateDownStream;
+                    route.DownstreamScheme = "http";
+
+                    route.UpstreamHttpMethod = new List<string>() { "Get" };
+                    route.UpstreamPathTemplate = pathTemplateUpStream;
+                    route.RouteClaimsRequirement = claims;
+                    route.LoadBalancerOptions = new RoutesConfigurationModel.LoadBalancerOptionsModel
+                    {
+                        Type = "RoundRobin"
+                    };
+                    route.DownstreamHostAndPorts = new List<RoutesConfigurationModel.DownstreamHostAndPortModel>() { new RoutesConfigurationModel.DownstreamHostAndPortModel() { Host = item.IPAddr, Port = item.Port } };
+                    routesConfigurationModel.Routes.Add(route);
+                    System.Diagnostics.Debug.WriteLine("register+" + route.UpstreamPathTemplate);
                 }
-            };
-            var taskQueuer = serviceProvider.GetService<ITaskSchedulerBackgroundServiceQueuer>();
-            taskQueuer.Enqueue(new TaskObject(writeRouteJsonAction,new TimeSpan(0,0,60),null));
+            }
+            QueryResponseData<SignalrHubsViewModel> routesSignalRHubsQueryData = await databaseHandler.ExecuteQuery<SignalrHubsViewModel>("SELECT * FROM signalr_hubs group by route;");
+            if (routesSignalRHubsQueryData.HasData)
+            {
+                foreach (var item in routesSignalRHubsQueryData.DataStorage)
+                {
+                    bool isAnonEndpoint = item.Roles != null ? item.Roles.Contains(BackendAPIDefinitionsProperties.AnonymousRoleName) : false;
+                    var route = new RoutesConfigurationModel.RouteModel();
+                    route.AuthenticationOptions = new RoutesConfigurationModel.AuthenticationOptionsModel
+                    {
+                        AuthenticationProviderKey = "Base"
+                    };
+
+                    Dictionary<string, bool> claims = new Dictionary<string, bool>();
+                    if (item.Roles != null && !isAnonEndpoint)
+                    {
+                        foreach (string role in item.Roles.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            if (!claims.ContainsKey(role))
+                            {
+                                claims.Add(role + "Role", true);
+                            }
+                        }
+                    }
+                    string pathTemplateDownStream = item.Route;
+                    string pathTemplateUpStream = item.Route;
+                    route.DownstreamPathTemplate = pathTemplateDownStream;
+                    route.DownstreamScheme = "http";
+
+
+                    List<string> methodData = item.HttpMethods != null ? item.HttpMethods.Split(',').ToList() : new List<string>();
+                    for (int i = 0; i < methodData.Count; i++)
+                    {
+                        string firstLetter = methodData[i].Substring(0, 1);
+                        string commonString = methodData[i].Substring(1, methodData[i].Length - 1);
+                        methodData[i] = ((firstLetter.ToUpper()) + (commonString.ToLower()));
+                    }
+                    route.UpstreamHttpMethod = methodData;
+                    route.UpstreamPathTemplate = pathTemplateUpStream;
+                    route.RouteClaimsRequirement = claims;
+                    route.LoadBalancerOptions = new RoutesConfigurationModel.LoadBalancerOptionsModel
+                    {
+                        Type = "RoundRobin"
+                    };
+                    route.DownstreamHostAndPorts = new List<RoutesConfigurationModel.DownstreamHostAndPortModel>();
+                    foreach (var socket in item.AvailableNodes)
+                    {
+                        route.DownstreamHostAndPorts.Add(new RoutesConfigurationModel.DownstreamHostAndPortModel
+                        {
+                            Host = socket.Key.Address.ToString(),
+                            Port = socket.Key.Port
+                        });
+                    }
+                    routesConfigurationModel.Routes.Add(route);
+                    //negotiation route
+                    RoutesConfigurationModel.RouteModel negotiationRoute = new RoutesConfigurationModel.RouteModel();
+                    negotiationRoute.AuthenticationOptions = route.AuthenticationOptions;
+                    negotiationRoute.UpstreamPathTemplate = pathTemplateUpStream + "/negotiate";
+                    negotiationRoute.DownstreamPathTemplate = pathTemplateUpStream + "/negotiate";
+                    negotiationRoute.DownstreamScheme = route.DownstreamScheme;
+                    negotiationRoute.UpstreamHttpMethod = route.UpstreamHttpMethod;
+                    negotiationRoute.RouteClaimsRequirement = route.RouteClaimsRequirement;
+                    negotiationRoute.LoadBalancerOptions = route.LoadBalancerOptions;
+                    negotiationRoute.DownstreamHostAndPorts = route.DownstreamHostAndPorts;
+                    routesConfigurationModel.Routes.Add(negotiationRoute);
+                    System.Diagnostics.Debug.WriteLine("register+" + negotiationRoute.UpstreamPathTemplate);
+                }
+            }
+            QueryResponseData<ControllerRelationToRoleView> routesQueryData = await databaseHandler.ExecuteQuery<ControllerRelationToRoleView>("SELECT * FROM controller_relation_to_role_view;");
+            if (routesQueryData.HasData)
+            {
+
+                foreach (var row in routesQueryData.DataStorage)
+                {
+                    bool isAnonEndpoint = row.Roles != null ? row.Roles.Contains(BackendAPIDefinitionsProperties.AnonymousRoleName) : false;
+                    //optionale Routeparameter können von Ocelot nicht verarbeitet werden, diese rufe eine Exception in der UseRouting Methode von Ocelot aus und da die Mainroute eh besteht passt es auch so
+                    //Bsp.:
+                    // Route 1: /account
+                    // Route 2: /account/{id}
+                    // Route 3: /account/{id?} <----------- Exception und doppelt da Route 2 ja schon existiert
+                    if (row.ActionRoute == null)//||row.ActionRoute.Contains("?}"))
+                        continue;
+
+                    if (row.ActionRoute == "'apiv1/authentification/login'")
+                    {
+
+                    }
+
+                    var route = new RoutesConfigurationModel.RouteModel();
+                    if (!isAnonEndpoint)
+                    {
+                        route.AuthenticationOptions = new RoutesConfigurationModel.AuthenticationOptionsModel
+                        {
+                            AuthenticationProviderKey = "Base"
+                        };
+                    }
+                    else
+                    {
+
+                    }
+                    route.DownstreamHostAndPorts = new List<RoutesConfigurationModel.DownstreamHostAndPortModel>();
+                    foreach (var item in row.AvailableNodes)
+                    {
+                        var endPoint = item.Key;
+                        string ipStr = endPoint.Address.ToString();
+                        /*using (System.Net.NetworkInformation.Ping ping = new System.Net.NetworkInformation.Ping())
+                        {
+                            var reply = await ping.SendPingAsync(ipStr);
+                            if (reply.Status == System.Net.NetworkInformation.IPStatus.Success)
+                            {
+                            }
+                        }*/
+                        bool available = (DateTime.Now - new TimeSpan(0, 0, 60) < item.Value);
+                        if (available)
+                            route.DownstreamHostAndPorts.Add(new RoutesConfigurationModel.DownstreamHostAndPortModel() { Host = ipStr, Port = endPoint.Port });
+
+
+                    }
+
+                    List<string> methodData = row.HttpMethods != null ? row.HttpMethods.Split(',').ToList() : new List<string>();
+                    for (int i = 0; i < methodData.Count; i++)
+                    {
+                        string firstLetter = methodData[i].Substring(0, 1);
+                        string commonString = methodData[i].Substring(1, methodData[i].Length - 1);
+                        methodData[i] = ((firstLetter.ToUpper()) + (commonString.ToLower()));
+                    }
+                    string pathTemplate = row.ActionRoute != null ? ("/" + row.ActionRoute) : null;
+                    route.DownstreamPathTemplate = pathTemplate;
+                    route.DownstreamScheme = "http";
+                    route.UpstreamHttpMethod = methodData;
+                    route.UpstreamPathTemplate = pathTemplate;
+                    route.LoadBalancerOptions = new RoutesConfigurationModel.LoadBalancerOptionsModel
+                    {
+                        Type = "RoundRobin"
+                    };
+                    if (row.ActionRoute == null || row.HttpMethods == null || row.Roles == null || route.DownstreamHostAndPorts.Count == 0)
+                    {
+                        continue;
+                    }
+                    Dictionary<string, bool> claims = new Dictionary<string, bool>();
+                    if (row.Roles != null && !isAnonEndpoint)
+                    {
+                        foreach (string role in row.Roles.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            if (!claims.ContainsKey(role))
+                            {
+                                claims.Add(role + "Role", true);
+                            }
+                        }
+                    }
+                    route.RouteClaimsRequirement = !isAnonEndpoint ? claims : null;
+
+                    bool hasOptionalIdParameter = route.UpstreamPathTemplate.Contains(BackendAPIDefinitionsProperties.ActionParameterOptionalIdWildcard);
+
+                    string compareValue = route.UpstreamPathTemplate.Replace("?", "");
+                    var findItem = routesConfigurationModel.Routes.Find(x => x.UpstreamPathTemplate == compareValue);
+                    if (findItem == null)
+                    {
+                        route.UpstreamPathTemplate = compareValue;
+                        route.DownstreamPathTemplate = compareValue;
+                        routesConfigurationModel.Routes.Add(route);
+                        System.Diagnostics.Debug.WriteLine("register+" + route.UpstreamPathTemplate);
+
+                    }
+                    else
+                    {
+                        int index = routesConfigurationModel.Routes.IndexOf(findItem);
+                        foreach (string methodDataItem in route.UpstreamHttpMethod)
+                        {
+                            var existHttpMethodAlready = routesConfigurationModel.Routes[index].UpstreamHttpMethod.Find(x => x == methodDataItem);
+                            if (existHttpMethodAlready == null)
+                            {
+                                routesConfigurationModel.Routes[index].UpstreamHttpMethod.Add(methodDataItem);
+                            }
+                        }
+                    }
+
+                    if (hasOptionalIdParameter)
+                    {
+
+                        string foundPath = route.UpstreamPathTemplate.Replace(BackendAPIDefinitionsProperties.ActionParameterOptionalIdWildcard, "").Replace(BackendAPIDefinitionsProperties.ActionParameterIdWildcard, "");
+                        var findItemWithoutId = routesConfigurationModel.Routes.Find(x => x.UpstreamPathTemplate == foundPath);
+                        if (findItemWithoutId == null)
+                        {
+                            var newRouteItem = route;
+                            newRouteItem.DownstreamPathTemplate = foundPath;
+                            newRouteItem.UpstreamPathTemplate = foundPath;
+
+                            routesConfigurationModel.Routes.Add(newRouteItem);
+                        }
+                        else
+                        {
+                            int indexOfRouteItem = routesConfigurationModel.Routes.IndexOf(findItemWithoutId);
+                            foreach (string methodDataItem in route.UpstreamHttpMethod)
+                            {
+                                var existHttpMethodAlready = routesConfigurationModel.Routes[indexOfRouteItem].UpstreamHttpMethod.Find(x => x == methodDataItem);
+                                if (existHttpMethodAlready == null)
+                                {
+                                    routesConfigurationModel.Routes[indexOfRouteItem].UpstreamHttpMethod.Add(methodDataItem);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return routesConfigurationModel;
+        }
+        Func<MessageModel, MessageModelResponse> Func = new Func<MessageModel, MessageModelResponse>((x) => {
+            MessageModelResponse messageModelResponse = new MessageOK();
+            Console.WriteLine("route-management: node exposed some routes (" + x.Message + ", uuid: " + x.NodeId + ")");
+            return messageModelResponse;
+        });
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,IServiceProvider serviceProvider, IActionDescriptorCollectionProvider actionDescriptorCollectionProvider)
+        {
+
+            ITransientDatabaseHandler databaseHandler = serviceProvider.GetService<ITransientDatabaseHandler>();
+            IAppconfig appconfig = serviceProvider.GetService<IAppconfig>();
+            IRabbitMqHandler rabbitMqHandler = serviceProvider.GetService<IRabbitMqHandler>();
+
+            string contentRootPath = env.ContentRootPath;
+
+            rabbitMqHandler.SubscibeExchange("route-management", x=>Func(x),new Action(async() => {
+
+                var connStr = new MySqlConnectionStringBuilder();
+                connStr.Server = "localhost";
+                connStr.Port = 3306;
+                connStr.UserID = "rest";
+                connStr.Database = "rest_api";
+                connStr.Password = "meinDatabasePassword!";
+                MySqlDatabaseHandler mySqlDatabaseHandler = new MySqlDatabaseHandler(connStr,true);
+                var r = await CreateRoutes(mySqlDatabaseHandler);
+                WriteRouteToFile(contentRootPath,r,new JsonHandler());
+            }), "register-notification");
             app.UseCors(AllowOrigin);
+            app.UseWebSockets();
             app.UseOcelot((builder, ocelotPipelineConfiguration) =>
             {
 
@@ -526,7 +645,7 @@ namespace WebApiGateway
                 // It also sets the Request Id if anything is set globally
                 builder.UseMiddleware<CustomExceptionHandlerMiddleware>();
                 // If the request is for websockets upgrade we fork into a different pipeline
-                /*builder.MapWhen(httpContext => httpContext.WebSockets.IsWebSocketRequest,
+                builder.MapWhen(httpContext => httpContext.WebSockets.IsWebSocketRequest,
                     wenSocketsApp =>
                     {
                         wenSocketsApp.UseDownstreamRouteFinderMiddleware();
@@ -535,7 +654,7 @@ namespace WebApiGateway
                         wenSocketsApp.UseLoadBalancingMiddleware();
                         wenSocketsApp.UseDownstreamUrlCreatorMiddleware();
                         wenSocketsApp.UseWebSocketsProxyMiddleware();
-                    });*/
+                    });
 
                 // Allow the user to respond with absolutely anything they want.
                 //app.UseIfNotNull(pipelineConfiguration.PreErrorResponderMiddleware);
@@ -631,15 +750,15 @@ namespace WebApiGateway
                 // Get the load balancer for this request
                 builder.UseLoadBalancingMiddleware();
 
-                ISingletonDatabaseHandler databaseHandler = serviceProvider.GetService<ISingletonDatabaseHandler>();
-                CustomControllerBaseExtensions.RegisterNetClasses(databaseHandler);
+                ISingletonNodeDatabaseHandler databaseHandler = serviceProvider.GetService<ISingletonNodeDatabaseHandler>();
+                
                 INodeManagerHandler nodeManager = serviceProvider.GetService<INodeManagerHandler>();
-                nodeManager.Register(BackendAPIDefinitionsProperties.NodeTypes.Gateway);
                 app.UseEndpoints(endpoints =>
                 {
-                    endpoints.RegisterBackend(nodeManager,serviceProvider, env, databaseHandler, actionDescriptorCollectionProvider, Configuration);
+                    endpoints.RegisterBackend(nodeManager,serviceProvider, env, databaseHandler, actionDescriptorCollectionProvider, Configuration, DatabaseEntityNamespaces);
 
                 });
+
 
                 // This takes the downstream route we retrieved earlier and replaces any placeholders with the variables that should be used
                 builder.UseDownstreamUrlCreatorMiddleware();

@@ -1,0 +1,402 @@
+{
+	"info": {
+		"_postman_id": "1db69aa8-64b6-470e-aff7-aacbf2a9251b",
+		"name": "Jelly-Api-1",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "General API Functions",
+			"item": [
+				{
+					"name": "User/Get",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "api_token",
+								"type": "text",
+								"value": "3c66e67e-79c3-11eb-b9d1-309c2364fdb6",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{rest_jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{rest_api_url}}/user",
+							"host": [
+								"{{rest_api_url}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth/Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"HTTP: 200\",function() {\r",
+							"    let status = pm.response.status;\r",
+							"    if(status === \"OK\") {\r",
+							"        \r",
+							"        let responseJson = pm.response.json();\r",
+							"        let token = responseJson.token;\r",
+							"        let rtoken = responseJson.refresh_token;\r",
+							"        pm.environment.set(\"rest_jwt_token\",token);\r",
+							"        pm.environment.set(\"rest_jwt_refresh_token\",rtoken);\r",
+							"    }\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "api_user",
+						"value": "test",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "api_password",
+						"value": "test",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoidGVzdCIsInBhc3N3b3JkIjoidGVzdCJ9.EZebyve1DUVEh1Ni83rmQA-GCWt81SuRgXxCUbzpsKOV1vHUlOL4PuxaO0QPW16PQze5FwSbGUewqQRvLTqdLQ",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"user\":\"root\",\r\n    \"password\":\"root\"\r\n}"
+				},
+				"url": {
+					"raw": "{{auth_endpoint}}/authentification/login/",
+					"host": [
+						"{{auth_endpoint}}"
+					],
+					"path": [
+						"authentification",
+						"login",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ErrorController Test",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "api_user",
+						"value": "test",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "api_password",
+						"value": "test",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{rest_jwt_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"user\":\"test\",\r\n    \"password\":\"test\"\r\n}"
+				},
+				"url": {
+					"raw": "{{rest_api_url}}/error/",
+					"host": [
+						"{{rest_api_url}}"
+					],
+					"path": [
+						"error",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Auth/Login /w AuthUserModel",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "api_user",
+						"value": "test",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "api_password",
+						"value": "test",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoidGVzdCIsInBhc3N3b3JkIjoidGVzdCJ9.EZebyve1DUVEh1Ni83rmQA-GCWt81SuRgXxCUbzpsKOV1vHUlOL4PuxaO0QPW16PQze5FwSbGUewqQRvLTqdLQ",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{rest_api_url}}/authentification/login",
+					"host": [
+						"{{rest_api_url}}"
+					],
+					"path": [
+						"authentification",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Auth/Session",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "api_user",
+						"type": "text",
+						"value": "test",
+						"disabled": true
+					},
+					{
+						"key": "api_password",
+						"type": "text",
+						"value": "test",
+						"disabled": true
+					},
+					{
+						"key": "api_token",
+						"value": "f5755f47-600d-11eb-8403-309c2364fdb6",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{auth_endpoint}}/authentification/session/f5755f47-600d-11eb-8403-309c2364fdb6",
+					"host": [
+						"{{auth_endpoint}}"
+					],
+					"path": [
+						"authentification",
+						"session",
+						"f5755f47-600d-11eb-8403-309c2364fdb6"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Auth/Logout",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "api_user",
+						"type": "text",
+						"value": "test",
+						"disabled": true
+					},
+					{
+						"key": "api_password",
+						"type": "text",
+						"value": "test",
+						"disabled": true
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{rest_jwt_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{auth_endpoint}}/authentification/logout/{{rest_jwt_token}}",
+					"host": [
+						"{{auth_endpoint}}"
+					],
+					"path": [
+						"authentification",
+						"logout",
+						"{{rest_jwt_token}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Auth/Test Authorization Attribute",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "api_user",
+						"type": "text",
+						"value": "test",
+						"disabled": true
+					},
+					{
+						"key": "api_password",
+						"type": "text",
+						"value": "test",
+						"disabled": true
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{rest_jwt_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{auth_endpoint}}/authentification/test",
+					"host": [
+						"{{auth_endpoint}}"
+					],
+					"path": [
+						"authentification",
+						"test"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Auth/Refresh",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Bearer {{rest_jwt_token}}"
+					},
+					{
+						"key": "api_password",
+						"type": "text",
+						"value": "test",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{auth_endpoint}}/authentification/refresh/{{rest_jwt_refresh_token}}",
+					"host": [
+						"{{auth_endpoint}}"
+					],
+					"path": [
+						"authentification",
+						"refresh",
+						"{{rest_jwt_refresh_token}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ApplicationService HealthEndpoint | http://localhost:5010/health",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{rest_jwt_token}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/49bf8a55-e8e3-11ed-bdf1-7085c294413b/health",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"49bf8a55-e8e3-11ed-bdf1-7085c294413b",
+						"health"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "HELIX_API_TOKEN",
+			"value": "9655c122-67c0-11eb-8403-309c2364fdb6"
+		}
+	]
+}

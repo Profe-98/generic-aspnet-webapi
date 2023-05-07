@@ -1,96 +1,11 @@
 {
   "Routes": [
     {
-      "DownstreamPathTemplate": "/apiv1/authentification/login/",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "11.0.0.200",
-          "Port": 5009
-        }
-      ],
-      "UpstreamPathTemplate": "/apiv1/authentification/login/",
-      "UpstreamHttpMethod": [
-        "Post"
-      ],
-      "LoadBalancerOptions": {
-        "Type": "RoundRobin"
-      }
-    },
-    {
-      "DownstreamPathTemplate": "/apiv1/authentification/logout/{token}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "11.0.0.200",
-          "Port": 5009
-        }
-      ],
-      "UpstreamPathTemplate": "/apiv1/authentification/logout/{token}",
-      "UpstreamHttpMethod": [
-        "Post"
-      ],
-      "LoadBalancerOptions": {
-        "Type": "RoundRobin"
-      }
-    },
-    {
-      "DownstreamPathTemplate": "/apiv1/authentification/refresh/{refresh_token}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "11.0.0.200",
-          "Port": 5009
-        }
-      ],
-      "UpstreamPathTemplate": "/apiv1/authentification/refresh/{refresh_token}",
-      "UpstreamHttpMethod": [
-        "Post"
-      ],
-      "LoadBalancerOptions": {
-        "Type": "RoundRobin"
-      }
-    },
-    {
-      "DownstreamPathTemplate": "/apiv1/authentification/session/{token}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "11.0.0.200",
-          "Port": 5009
-        }
-      ],
-      "UpstreamPathTemplate": "/apiv1/authentification/session/{token}",
-      "UpstreamHttpMethod": [
-        "Get"
-      ],
-      "LoadBalancerOptions": {
-        "Type": "RoundRobin"
-      }
-    },
-    {
-      "DownstreamPathTemplate": "/apiv1/authentification/validate/",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "11.0.0.200",
-          "Port": 5009
-        }
-      ],
-      "UpstreamPathTemplate": "/apiv1/authentification/validate/",
-      "UpstreamHttpMethod": [
-        "Post"
-      ],
-      "LoadBalancerOptions": {
-        "Type": "RoundRobin"
-      }
-    },
-    {
       "DownstreamPathTemplate": "/health",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "11.0.0.200",
+          "Host": "10.100.0.200",
           "Port": 5000
         }
       ],
@@ -113,30 +28,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "11.0.0.200",
-          "Port": 5015
-        }
-      ],
-      "UpstreamPathTemplate": "/9ae7a219-a422-4cb2-80d0-db75911500dd/health",
-      "UpstreamHttpMethod": [
-        "Get"
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Base"
-      },
-      "RouteClaimsRequirement": {
-        "rootRole": true
-      },
-      "LoadBalancerOptions": {
-        "Type": "RoundRobin"
-      }
-    },
-    {
-      "DownstreamPathTemplate": "/health",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "11.0.0.200",
+          "Host": "10.100.0.200",
           "Port": 5009
         }
       ],
@@ -159,8 +51,31 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "11.0.0.200",
-          "Port": 5010
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/49bf8a55-e8e3-11ed-bdf1-7085c294413b/health",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/health",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5020
         }
       ],
       "UpstreamPathTemplate": "/c0682f6d-62a7-465e-8567-0f685b4d8262/health",
@@ -173,6 +88,162 @@
       "RouteClaimsRequirement": {
         "rootRole": true
       },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/health",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/9ae7a219-a422-4cb2-80d0-db75911500dd/health",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/messenger",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/messenger",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/messenger/negotiate",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/messenger/negotiate",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "rootRole": true
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/helix-api-1/authentification/login/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5009
+        }
+      ],
+      "UpstreamPathTemplate": "/helix-api-1/authentification/login/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/helix-api-1/authentification/logout/{token}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5009
+        }
+      ],
+      "UpstreamPathTemplate": "/helix-api-1/authentification/logout/{token}",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/helix-api-1/authentification/refresh/{refresh_token}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5009
+        }
+      ],
+      "UpstreamPathTemplate": "/helix-api-1/authentification/refresh/{refresh_token}",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/helix-api-1/authentification/session/{token}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5009
+        }
+      ],
+      "UpstreamPathTemplate": "/helix-api-1/authentification/session/{token}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/helix-api-1/authentification/validate/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5009
+        }
+      ],
+      "UpstreamPathTemplate": "/helix-api-1/authentification/validate/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
       }

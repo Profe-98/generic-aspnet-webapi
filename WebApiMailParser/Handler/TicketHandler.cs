@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WebApiMailParser.InternalModels;
-using WebApiFunction.Application.Model.Database.MySql.Table;
+using HelixTicket.InternalModels;
 using WebApiFunction.Database;
 using WebApiFunction.Security.Encryption;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
+using WebApiFunction.Application.Model.Database.MySql.Helix;
+using WebApiFunction.Application.Model.Database.MySql.Table;
 
-namespace WebApiMailParser.Handler
+namespace HelixTicket.Handler
 {
     public class TicketHandler : IScopedTicketHandler, ISingletonTicketHandler
     {

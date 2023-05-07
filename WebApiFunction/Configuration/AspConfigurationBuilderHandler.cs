@@ -24,7 +24,7 @@ using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
@@ -106,12 +106,16 @@ namespace WebApiFunction.Configuration
         public AntivirusConfigurationModel AntivirusConfigurationModel { get; set; }
         [JsonPropertyName("database_configuration")]
         public DatabaseConfigurationModel DatabaseConfigurationModel { get; set; }
+        [JsonPropertyName("nodemanager_database_configuration")]
+        public DatabaseConfigurationModel NodeManagerDatabaseConfigurationModel { get; set; }
         [JsonPropertyName("gateway_routes_configuration")]
         public RoutesConfigurationModel RoutesConfigurationModel { get; set; }
         [JsonPropertyName("cache_configuration")]
         public CacheConfigurationModel CacheConfigurationModel { get; set; }
         [JsonPropertyName("ampq_rabbitmq_configuration")]
         public AmpqConfigurationModel RabbitMqConfigurationModel { get; set; }
+        [JsonPropertyName("signalr_hub_configuration")]
+        public SignalRConfigurationModel SignalRHubConfigurationModel { get; set; }
         [JsonPropertyName("app_paths")]
         public Dictionary<string, string> AppPaths { get; set; } = new Dictionary<string, string>();
 
@@ -144,6 +148,26 @@ namespace WebApiFunction.Configuration
         public string Encoding { get; set; } = System.Text.Encoding.UTF8.EncodingName;
         [JsonPropertyName("node_uuid")]
         public Guid NodeUuid { get; set; } = Guid.Empty;
+
+    }
+    public class SignalRConfigurationModel : AbstractConfigurationModel
+    {
+        [JsonPropertyName("use_local_hub")]
+        public bool UseLocalHub { get; set; } = false;
+        [JsonPropertyName("debug_errors_detailed_clientside")]
+        public bool DebugErrorsDetailedClientside { get; set; } = false;
+        [JsonPropertyName("timeout_sec")]
+        public int TimoutTimeSec { get; set; } = 15;
+        [JsonPropertyName("keepalive_timemout")]
+        public int KeepaliveTimeout { get; set; } = 15;
+        [JsonPropertyName("client_timeout_sec")]
+        public int ClientTimeoutSec { get; set; } = 30;
+        [JsonPropertyName("handshake_timeout")]
+        public int HandshakeTimeout { get; set; } = 5;
+        [JsonPropertyName("maximum_parallel_invocations_per_per_client")]
+        public int MaximumParallelInvocationsPerClient { get; set; } = 1;
+
+
 
     }
     public class ApiSecurityConfigurationModel : AbstractConfigurationModel
@@ -198,6 +222,10 @@ namespace WebApiFunction.Configuration
         public class MailSettingsModel
         {
 
+            [JsonPropertyName("user")]
+            public string User { get; set; }
+            [JsonPropertyName("password")]
+            public string Password { get; set; }
             [JsonPropertyName("server")]
             public string Server { get; set; } = null;
             [JsonPropertyName("port")]
@@ -212,6 +240,7 @@ namespace WebApiFunction.Configuration
         [JsonPropertyName("imap_settings")]
         public MailSettingsModel ImapSettings { get; set; } = new MailSettingsModel
         {
+            
             Server = "imap.strato.de",
             Port = 993,
             SecureSocketOptions = SecureSocketOptions.Auto,

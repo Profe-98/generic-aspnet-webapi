@@ -62,6 +62,8 @@ namespace WebApiGateway.Middleware
 
         private void TrySetGlobalRequestId(HttpContext httpContext, IInternalConfiguration configuration)
         {
+            if (configuration == null)
+                return;
             var key = configuration.RequestId;
 
             if (!string.IsNullOrEmpty(key) && httpContext.Request.Headers.TryGetValue(key, out var upstreamRequestIds))

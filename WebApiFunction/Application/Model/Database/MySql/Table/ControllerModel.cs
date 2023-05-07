@@ -16,7 +16,7 @@ using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
@@ -84,8 +84,8 @@ namespace WebApiFunction.Application.Model.Database.MySql.Entity
         public bool IsRegistered { get; set; }
 
         [JsonIgnore]
-        [DatabaseColumnPropertyAttribute("node_type_uuid", MySqlDbType.String)]
-        public Guid NodeTypeUuid { get; set; } = Guid.Empty;
+        [DatabaseColumnPropertyAttribute("node_uuid", MySqlDbType.String)]
+        public Guid NodeUuid { get; set; } = Guid.Empty;
 
         [JsonIgnore]
         public List<RoleToControllerViewModel> Roles = new List<RoleToControllerViewModel>();

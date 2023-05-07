@@ -4,11 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WebApiMailParser.InternalModels;
+using HelixTicket.InternalModels;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
-using WebApiFunction.Application.Model.Database.MySql.Table;
-using WebApiFunction.Application.Controller.Modules;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.MicroService;
 using WebApiFunction.Antivirus.nClam;
@@ -23,8 +21,10 @@ using WebApiFunction.Controller;
 using WebApiFunction.Database;
 using WebApiFunction.Web.Authentification;
 using WebApiFunction.Mail;
+using WebApiFunction.Application.Model.Database.MySql.Helix;
+using WebApiFunction.Application.Controller.Modules.Helix;
 
-namespace WebApiMailParser.Controllers.APIv1
+namespace HelixTicket.Controllers.APIv1
 {
 
     public class MessageRelationToAttachmentController : CustomApiV1ControllerBase<MessageRelationToAttachmentModel, MessageRelationToAttachmentModule>

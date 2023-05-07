@@ -16,9 +16,9 @@ namespace WebApiFunction.Ampq.Rabbitmq
             EventHandler<EventArgs> connectionUnblockedEventHandler = null,
             EventHandler<ShutdownEventArgs> shutDownEventHandler = null);
 
-        public void PublishObject(string exchangeName, object entity, string routingKey, string message);
-        public void Publish(string exchangeName, MessageModel msg, Func<MessageModel, MessageModelResponse> consumeAction = null, string routingKey = "");
-        public void SubscibeExchange(string exchangeName, Func<MessageModel, MessageModelResponse> consumeAction, string routingKey = "");
+        public void PublishObject(string exchangeName, object entity, string routingKey, string message, Func<MessageModel, MessageModelResponse> consumeAction, Action okAct);
+        public void Publish(string exchangeName, MessageModel msg, Func<MessageModel, MessageModelResponse> consumeAction, Action okAct, string routingKey = "");
+        public void SubscibeExchange(string exchangeName, Func<MessageModel, MessageModelResponse> consumeAction, Action okAct, string routingKey = "");
 
 
     }

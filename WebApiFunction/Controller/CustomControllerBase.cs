@@ -30,7 +30,6 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.AspNetCore.Routing.Template;
 using Microsoft.AspNetCore.Cors;
 using System.Runtime.CompilerServices;
-using WebApiFunction.Application.Controller.Modules;
 using WebApiFunction.Application.Model.Internal;
 using WebApiFunction.Application.Model.Database.MySql;
 using WebApiFunction.Application.Model.Database.MySql.Entity;
@@ -40,7 +39,7 @@ using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
@@ -75,6 +74,11 @@ using WebApiFunction.Web.Http;
 using WebApiFunction.Web.AspNet.ActionResult;
 using WebApiFunction.Application;
 using InfluxDB.Client.Api.Domain;
+using Microsoft.AspNetCore.Identity;
+using WebApiFunction.Web.Websocket.SignalR.HubService;
+using WebApiFunction.Application.Model.Database.MySql.Entity;
+using WebApiFunction.Application.Model.Database.MySql.Helix;
+using WebApiFunction.Application.Controller.Modules;
 
 namespace WebApiFunction.Controller
 {
@@ -153,7 +157,6 @@ namespace WebApiFunction.Controller
         public ActionDescriptor GetMatchingAction(string path, string httpMethod)
         {
             var actionDescriptors = _actionDescriptorCollectionProvider.ActionDescriptors.Items;
-
             // match by route template
             var matchingDescriptors = new List<ActionDescriptor>();
             foreach (var actionDescriptor in actionDescriptors)
@@ -244,10 +247,10 @@ namespace WebApiFunction.Controller
             Type classType = GetType();
             if (classType != null)
             {
-                Attribute attribute = Attribute.GetCustomAttribute(classType, typeof(RouteAttribute));
-                if (attribute != null)
+                var attributes = Attribute.GetCustomAttributes(classType, typeof(RouteAttribute));
+                if (attributes != null)
                 {
-                    routeAttributes.Add((RouteAttribute)attribute);
+                    attributes.ToList().ForEach(x => routeAttributes.Add((RouteAttribute)x));
                 }
             }
             List<RouteAttribute> tmp = GetMethodAttributesGeneric<RouteAttribute>(GetType());
@@ -529,28 +532,60 @@ namespace WebApiFunction.Controller
             }
             return null;
         }
+
         public static ILogger TraceHttpTraffic(this ILogger logger, MethodBase executedMethod, HttpContext httpContext, string caller)
         {
             string traceId = httpContext.TraceIdentifier;
-            if (httpContext.Response.HasStarted)
+            try
             {
-                string tmp = string.Format("Flow(Trade-Id: {1})= <-- HTTP-Response: {2}={3}, {4} [{5}:{6}], Uri={7}",
-                DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:FFFF"), traceId, httpContext.Request.Method, httpContext.Response.StatusCode, httpContext.HeaderValueGet("user-agent"),
-                httpContext.Connection.RemoteIpAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork ?
-                httpContext.Connection.RemoteIpAddress.ToString() : "[" + httpContext.Connection.RemoteIpAddress.ToString() + "]",
-                httpContext.Connection.RemotePort,
-                httpContext.Request.Path.Value ?? "/");
-                logger?.Logging(LogLevel.Information, tmp, executedMethod, caller,CustomLogEvents.HttpResponse);
+
+                string remoteIp = null;
+                int remotePort = 0;
+                string httpMethod = null;
+                string httpPath = null;
+                string userAgent = httpContext.HeaderValueGet("user-agent");
+                if(httpContext.Connection != null)
+                {
+                    if(httpContext.Connection.RemoteIpAddress != null)
+                    {
+                        remoteIp = httpContext.Connection.RemoteIpAddress.ToString();
+                        remotePort = httpContext.Connection.RemotePort;
+                    }
+                }
+                if(httpContext.Request!=null)
+                {
+                    if (httpContext.Request.Path != null)
+                    {
+                        httpPath = httpContext.Request.Path.Value ?? "/";
+                    }
+                    if (httpContext.Request.Method != null)
+                    {
+                        httpMethod = httpContext.Request.Method;
+                    }
+                }
+
+
+                if (httpContext.Response.HasStarted)
+                {
+                    string tmp = string.Format("Flow(Trade-Id: {1})= <-- HTTP-Response: {2}={3}, {4} [{5}:{6}], Uri={7}",
+                    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:FFFF"), traceId, httpMethod, httpContext.Response.StatusCode, userAgent,
+                    remoteIp, remotePort,
+                    httpPath);
+                    logger?.Logging(LogLevel.Information, tmp, executedMethod, caller, CustomLogEvents.HttpResponse);
+                }
+                else
+                {
+                    string tmp = string.Format("Flow(Trade-Id: {1})= --> HTTP-Reqest-Pre-Execution: {2}, {3} [{4}:{5}], Uri={6}, Caller: {7}",
+                        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:FFFF"), traceId, httpMethod,userAgent,
+                        remoteIp,
+                        remotePort,
+                        httpPath, caller ?? "N/A");
+                    logger?.Logging(LogLevel.Information, tmp, executedMethod, caller, CustomLogEvents.HttpRequest);
+                }
             }
-            else
+            catch(Exception ex)
             {
-                string tmp = string.Format("Flow(Trade-Id: {1})= --> HTTP-Reqest-Pre-Execution: {2}, {3} [{4}:{5}], Uri={6}, Caller: {7}",
-                    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:FFFF"), traceId, httpContext.Request.Method, httpContext.HeaderValueGet("user-agent"),
-                    httpContext.Connection.RemoteIpAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork ?
-                    httpContext.Connection.RemoteIpAddress.ToString() : "[" + httpContext.Connection.RemoteIpAddress.ToString() + "]",
-                    httpContext.Connection.RemotePort,
-                    httpContext.Request.Path.Value ?? "/", caller ?? "N/A");
-                logger?.Logging(LogLevel.Information, tmp, executedMethod, caller, CustomLogEvents.HttpRequest);
+
             }
             return logger;
         }
@@ -564,16 +599,26 @@ namespace WebApiFunction.Controller
             return logger;
         }
 
-        public static async void RegisterNetClasses(ISingletonDatabaseHandler databaseHandler)
+        public static async void RegisterNetClasses(ISingletonNodeDatabaseHandler databaseHandler,string[] databaseEntiyNamespaces)
         {
 
             string query = null;
 
+            string namespaceValConcat = null;
+            for (int i = 0; i < databaseEntiyNamespaces.Length; i++)
+            {
+                namespaceValConcat += "'" + databaseEntiyNamespaces[i] + "'";
+                if (i != databaseEntiyNamespaces.Length - 1)
+                {
+                    namespaceValConcat += ",";
+                }
+            }
             QueryResponseData<ClassModel> c = null;
-            var classesFromNameSpace = AppDomain.CurrentDomain.GetAssemblies().SelectMany(t => t.GetTypes()).Where(t => t.IsClass && t.Namespace == BackendAPIDefinitionsProperties.DatabaseModelNamespace).ToList();
+
+            List<Type> classesFromNameSpace = AppDomain.CurrentDomain.GetAssemblies().SelectMany(t => t.GetTypes()).Where(t => t.IsClass && databaseEntiyNamespaces.ToList().IndexOf(t.Namespace) != -1).ToList();
             if (classesFromNameSpace.Count == 0)
             {
-                throw new NotSupportedException("no classes found in namespace '" + BackendAPIDefinitionsProperties.DatabaseModelNamespace + "'");
+                throw new NotSupportedException("no classes found in namespace '" + namespaceValConcat + "'");
             }
 
             Func<Type, List<ClassModel>, Task<bool>> fAddClassToDb = new Func<Type, List<ClassModel>, Task<bool>>(async (item, c) =>
@@ -607,7 +652,7 @@ namespace WebApiFunction.Controller
                 }
                 return true;
             });
-            query = "SELECT * FROM class WHERE namespace = '" + BackendAPIDefinitionsProperties.DatabaseModelNamespace + "';";
+            query = "SELECT * FROM class WHERE namespace in ("+ namespaceValConcat + ");";
             c = await databaseHandler.ExecuteQuery<ClassModel>(query);
             if (classesFromNameSpace.Count != 0)
             {
@@ -636,7 +681,7 @@ namespace WebApiFunction.Controller
                 }
             }
 
-            query = "SELECT * FROM class WHERE namespace = '" + BackendAPIDefinitionsProperties.DatabaseModelNamespace + "';";
+            query = "SELECT * FROM class WHERE namespace in ("+ namespaceValConcat + ");";
             c = await databaseHandler.ExecuteQuery<ClassModel>(query);
             if (c.HasData)
             {
@@ -658,7 +703,7 @@ namespace WebApiFunction.Controller
                             if (two == null)
                             {
 
-                                System.Diagnostics.Debug.WriteLine("warning: classmodel '" + refTable + "' cant found in namespace: " + BackendAPIDefinitionsProperties.DatabaseModelNamespace + "");
+                                System.Diagnostics.Debug.WriteLine("warning: classmodel '" + refTable + "' cant found in namespace: " + namespaceValConcat + "");
                                 continue;
                             }
                             List<ClassRelationModel> executionList = new List<ClassRelationModel>();
@@ -724,7 +769,7 @@ namespace WebApiFunction.Controller
                     }
                 }
             }
-            var data = await databaseHandler.ExecuteQuery<ClassRelationToClassViewModel>("SELECT * FROM class_relation_to_class_view WHERE namespace = '" + BackendAPIDefinitionsProperties.DatabaseModelNamespace + "';");
+            var data = await databaseHandler.ExecuteQuery<ClassRelationToClassViewModel>("SELECT * FROM class_relation_to_class_view WHERE namespace in ("+ namespaceValConcat + ");");
             if (data.HasData)
             {
                 foreach (var item in data.DataStorage)
@@ -767,7 +812,7 @@ namespace WebApiFunction.Controller
             }
         }
 
-        public static async void RegisterBackend(this IEndpointRouteBuilder endpoints,INodeManagerHandler nodeManagerHandler, IServiceProvider services, IWebHostEnvironment env, ISingletonDatabaseHandler databaseHandler, IActionDescriptorCollectionProvider actionDescriptorCollectionProvider, IConfiguration configuration)
+        public static async void RegisterBackend(this IEndpointRouteBuilder endpoints,INodeManagerHandler nodeManagerHandler, IServiceProvider services, IWebHostEnvironment env, ISingletonNodeDatabaseHandler databaseHandler, IActionDescriptorCollectionProvider actionDescriptorCollectionProvider, IConfiguration configuration,string[] databaseEntiyNamespace, Dictionary<string,HubService> hubServiceRoutes = null)
         {
             ApiModule apiModule = new ApiModule(databaseHandler, nodeManagerHandler);
             apiModule.ResetRegister();
@@ -963,7 +1008,7 @@ namespace WebApiFunction.Controller
                             {
                                 foreach (var item in controllerType.BaseType.GenericTypeArguments)
                                 {
-                                    if (item.Namespace == BackendAPIDefinitionsProperties.DatabaseModelNamespace)
+                                    if (databaseEntiyNamespace.ToList().IndexOf(item.Namespace)!= -1)
                                     {
                                         ConstructorInfo[] ctorInfo2 = item.GetConstructors();
                                         ParameterInfo[] ctorParams2 = ctorInfo2[0].GetParameters();
@@ -991,6 +1036,13 @@ namespace WebApiFunction.Controller
 
 
             }
+            if(hubServiceRoutes != null)
+            {
+                foreach(var hubRoute in hubServiceRoutes)
+                {
+                    apiModule.RegisterHub(hubRoute.Value,roleModelRoot,roleModelAnonymous);
+                }
+            }
 
             if (appSettingsVarRegisterEndpointBehaviourEnvVar)
             {
@@ -1000,6 +1052,9 @@ namespace WebApiFunction.Controller
             List<ApiModel> registeredApis = await apiModule.GetApis();
             endpoints.MapControllers().RequireCors("api-gateway");
             AppManager.InitRegisterApi(registeredApis);
+            IRabbitMqHandler rabbitMqHandler = services.GetService<IRabbitMqHandler>();
+            rabbitMqHandler.PublishObject("route-management", nodeManagerHandler.NodeModel, "register-notification", "node registered: " + nodeManagerHandler.NodeModel.Name + "", null, null);
+
         }
     }
 }

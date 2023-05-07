@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HelixTicket.InternalModels;
 using WebApiFunction.Application.Model.Database.MySql.Entity;
-using WebApiFunction.Application.Model.Database.MySql.Table;
-using WebApiMailParser.InternalModels;
+using WebApiFunction.Application.Model.Database.MySql.Helix;
 
-namespace WebApiMailParser
+namespace HelixTicket
 {
     public interface ITicketHandler
     {

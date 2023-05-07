@@ -12,7 +12,7 @@ using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
@@ -48,7 +48,7 @@ using WebApiFunction.Web.Http;
 namespace WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1
 {
     [Serializable]
-    public class ApiErrorSourceModel
+    public class ApiErrorSourceModel : BaseModel
     {
 
         [JsonPropertyName("pointer")]

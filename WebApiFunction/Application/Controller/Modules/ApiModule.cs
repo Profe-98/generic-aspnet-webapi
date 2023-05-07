@@ -17,7 +17,7 @@ using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
@@ -49,19 +49,22 @@ using WebApiFunction.Web.AspNet;
 using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
+using WebApiFunction.Web.Websocket.SignalR.HubService;
+using InfluxDB.Client.Api.Domain;
+using Google.Protobuf.Reflection;
 
 namespace WebApiFunction.Application.Controller.Modules
 {
     public class ApiModule
     {
         #region Private
-        private readonly ISingletonDatabaseHandler Db = null;
+        private readonly ISingletonNodeDatabaseHandler Db = null;
         private readonly INodeManagerHandler _nodeManagerHandler = null;
         #endregion
         #region Public 
         #endregion
         #region Ctor
-        public ApiModule(ISingletonDatabaseHandler databaseHandler, INodeManagerHandler nodeManagerHandler)
+        public ApiModule(ISingletonNodeDatabaseHandler databaseHandler, INodeManagerHandler nodeManagerHandler)
         {
             Db = databaseHandler;
             _nodeManagerHandler = nodeManagerHandler;
@@ -73,7 +76,7 @@ namespace WebApiFunction.Application.Controller.Modules
             QueryResponseData response = await Db.ExecuteQuery<ControllerModel>("UPDATE controller SET is_registered = @is_registered;", new ControllerModel { IsRegistered = false });
             if (response.HasErrors)
             {
-                throw new HttpStatusException(System.Net.HttpStatusCode.InternalServerError, WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1.ApiErrorModel.ERROR_CODES.INTERNAL, "Cant reset controller register");
+                throw new HttpStatusException(System.Net.HttpStatusCode.InternalServerError, ApiErrorModel.ERROR_CODES.INTERNAL, "Cant reset controller register");
             }
         }
 
@@ -99,6 +102,131 @@ namespace WebApiFunction.Application.Controller.Modules
             {
                 return UniqueIdentifiers;
             }
+        }
+        public async void RegisterHub(HubService hubService, RoleModel rootModel, RoleModel anonymousRole)
+        {
+            string query = null;
+            SignalrHubModel hubModel = new SignalrHubModel();
+            hubModel.Route = hubService.RouteAttribute.Route;
+            hubModel.Active = true;
+
+
+            query = hubModel.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.SELECT, hubModel).ToString();
+            QueryResponseData<SignalrHubModel> queryResponseDataHub = await Db.ExecuteQueryWithMap<SignalrHubModel>(query, hubModel);
+
+            hubModel.Name = hubService.GetType().Name.ToLower();
+            hubModel.NodeUuid = _nodeManagerHandler.NodeModel.Uuid;
+            hubModel.IsRegistered = true;
+            if (!queryResponseDataHub.HasData)
+            {
+                query = hubModel.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.INSERT).ToString();
+                queryResponseDataHub = await Db.ExecuteQueryWithMap<SignalrHubModel>(query, hubModel);
+            }
+            else
+            {
+                hubModel.IsRegistered = true;
+                query = hubModel.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.UPDATE,
+                    new SignalrHubModel
+                    {
+                        Route = hubService.RouteAttribute.Route,
+                        Active = true
+                    }
+                    ).ToString();
+                await Db.ExecuteQueryWithMap<SignalrHubModel>(query, hubModel);
+            }
+            hubModel = queryResponseDataHub.FirstRow;
+            foreach (var method in hubService.HubMethods)
+            {
+                //1. Register von Hubs+Methoden+Methoden Args fertigstellen
+                //2.1. Authorization via Claim für SignalR Hubs+Methods
+                //2.2. MySQL View mit Hub Routes+Methods+Authorization
+                //2.3. MySQL View fuer Hubs mit Controller Route View Result Union
+                //3. Routes ApiGateway providen / kann Ocelot Websocket durchschleifen?
+
+                SignalrHubMethodModel methodModel = new SignalrHubMethodModel();
+                methodModel.Name = method.Name.ToLower();
+                methodModel.ClassLocation = method.DeclaringType.FullName;
+                string accessModifiyer = null;
+                if (method.IsPublic)
+                {
+                    accessModifiyer = "public";
+                }
+                else if (method.IsPrivate)
+                {
+                    accessModifiyer = "private";
+                }
+                methodModel.AccessModifiyer = accessModifiyer;
+
+                methodModel.SignalrHubUuid = hubModel.Uuid;
+                query = methodModel.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.SELECT, methodModel).ToString();
+                QueryResponseData<SignalrHubMethodModel> queryResponseDataHubMethod = await Db.ExecuteQueryWithMap<SignalrHubMethodModel>(query, methodModel);
+
+                if (!queryResponseDataHubMethod.HasData)
+                {
+
+                    query = methodModel.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.INSERT).ToString();
+                    queryResponseDataHubMethod = await Db.ExecuteQueryWithMap<SignalrHubMethodModel>(query, methodModel);
+                }
+                else
+                {
+                    query = methodModel.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.UPDATE, methodModel).ToString();
+                    await Db.ExecuteQueryWithMap<SignalrHubMethodModel>(query, methodModel);
+                }
+                methodModel = queryResponseDataHubMethod.FirstRow;
+
+                RoleRelationToSignalrHubMethodModel roleRelationToSignalrHubMethodModel = new RoleRelationToSignalrHubMethodModel();
+                roleRelationToSignalrHubMethodModel.RoleUuid = rootModel.Uuid;
+                roleRelationToSignalrHubMethodModel.SignalrHubMethodUuid = methodModel.Uuid;
+                query = roleRelationToSignalrHubMethodModel.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.SELECT, roleRelationToSignalrHubMethodModel).ToString();
+                QueryResponseData<RoleRelationToSignalrHubMethodModel> queryResponseDataRoleRelationToHubMethod = await Db.ExecuteQueryWithMap<RoleRelationToSignalrHubMethodModel>(query, roleRelationToSignalrHubMethodModel);
+
+                if (!queryResponseDataRoleRelationToHubMethod.HasData)
+                {
+
+                    query = roleRelationToSignalrHubMethodModel.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.INSERT).ToString();
+                    queryResponseDataRoleRelationToHubMethod = await Db.ExecuteQueryWithMap<RoleRelationToSignalrHubMethodModel>(query, roleRelationToSignalrHubMethodModel);
+                }
+                else
+                {
+                    query = roleRelationToSignalrHubMethodModel.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.UPDATE, roleRelationToSignalrHubMethodModel).ToString();
+                    await Db.ExecuteQueryWithMap<RoleRelationToSignalrHubMethodModel>(query, roleRelationToSignalrHubMethodModel);
+                }
+
+                var methodParams = method.GetParameters();
+                if (methodParams.Length > 0)
+                {
+                    foreach (var param in methodParams)
+                    {
+                        SignalrHubMethodArgumentsModel signalrHubMethodArgumentsModel = new SignalrHubMethodArgumentsModel();
+                        signalrHubMethodArgumentsModel.SignalrHubMethodUuid = methodModel.Uuid;
+                        signalrHubMethodArgumentsModel.Name = param.Name;
+
+                        query = signalrHubMethodArgumentsModel.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.SELECT, signalrHubMethodArgumentsModel).ToString();
+                        QueryResponseData<SignalrHubMethodArgumentsModel> queryResponseDataHubMethodArgs = await Db.ExecuteQueryWithMap<SignalrHubMethodArgumentsModel>(query, signalrHubMethodArgumentsModel);
+
+                        signalrHubMethodArgumentsModel.NetType = param.ParameterType.ToString();
+                        if (!queryResponseDataHubMethodArgs.HasData)//no method args in database 
+                        {
+
+                            query = signalrHubMethodArgumentsModel.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.INSERT).ToString();
+                            queryResponseDataHubMethodArgs = await Db.ExecuteQueryWithMap<SignalrHubMethodArgumentsModel>(query, signalrHubMethodArgumentsModel);
+                        }
+                        else
+                        {
+                            if (queryResponseDataHubMethodArgs.FirstRow.NetType.ToString() != signalrHubMethodArgumentsModel.NetType)//net type changed in method meta
+                            {
+
+                                query = signalrHubMethodArgumentsModel.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.UPDATE, methodModel).ToString();
+                                await Db.ExecuteQueryWithMap<SignalrHubMethodArgumentsModel>(query, signalrHubMethodArgumentsModel);
+                            }
+
+                        }
+                        signalrHubMethodArgumentsModel = queryResponseDataHubMethodArgs.FirstRow;
+                    }
+                }
+            }
+
+
         }
         public async void RegisterApi(CustomControllerBase controller, List<ControllerActionDescriptor> controllerDesc, List<HttpMethodModel> httpMethodModels, RoleModel rootRole, RoleModel anonymous)
 
@@ -128,7 +256,7 @@ namespace WebApiFunction.Application.Controller.Modules
             controllerModel.Name = controllerName;
             controllerModel.ApiUuid = queryResponseDataApi.FirstRow.Uuid;//api_uuid
             controllerModel.Active = true;
-            controllerModel.NodeTypeUuid = _nodeManagerHandler.NodeModel.NodeTypeUuid;
+            controllerModel.NodeUuid = _nodeManagerHandler.NodeModel.Uuid;
 
 
             query = controllerModel.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.SELECT, controllerModel).ToString();
@@ -241,7 +369,7 @@ namespace WebApiFunction.Application.Controller.Modules
                             queryResponseDataControllerActionRelToHttp = await Db.ExecuteQueryWithMap<ControllerActionRelationToHttpMethodModel>(query, relationToHttpMethodModel);
 
                             RoleRelationToControllerActionRelationToHttpMethodModel controllerActionRelationToHttpMethod = new RoleRelationToControllerActionRelationToHttpMethodModel();
-                            controllerActionRelationToHttpMethod.RoleUuid = queryResponseDataController.FirstRow.IsAuthcontroller || queryResponseDataController.FirstRow.IsErrorController ? anonymous.Uuid:rootRole.Uuid;//role
+                            controllerActionRelationToHttpMethod.RoleUuid = queryResponseDataController.FirstRow.IsAuthcontroller || queryResponseDataController.FirstRow.IsErrorController ? anonymous.Uuid : rootRole.Uuid;//role
                             controllerActionRelationToHttpMethod.ControllerActionRelationToHttpMethodUuid = queryResponseDataControllerActionRelToHttp.FirstRow.Uuid;//http rel w/ controller action
                             controllerActionRelationToHttpMethod.Active = true;
                             query = controllerActionRelationToHttpMethod.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.SELECT, controllerActionRelationToHttpMethod).ToString();

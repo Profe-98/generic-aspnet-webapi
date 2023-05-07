@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.AspNetCore.Hosting;
 using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
@@ -14,10 +15,11 @@ namespace WebApiFunction.Application.Model.Database.MySql.Dapper.TypeMapper
 {
     public static class DataMapperForDapperExtension
     {
-        public static void UseCustomDataMapperForDapper()
+        public static void UseCustomDataMapperForDapper(string[] entityNamespace)
         {
             List<SqlMapper.ITypeMap> mappers = new List<SqlMapper.ITypeMap>();
-            var classesFromNameSpace = AppDomain.CurrentDomain.GetAssemblies().SelectMany(t => t.GetTypes()).Where(t => t.IsClass && t.Namespace == BackendAPIDefinitionsProperties.DatabaseModelNamespace).ToList();
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            var classesFromNameSpace = assemblies.SelectMany(t => t.GetTypes()).Where(t => t.IsClass && entityNamespace.ToList().IndexOf(t.Namespace) != -1).ToList();
             foreach (var type in classesFromNameSpace)
             {
                 var typeMap = new CustomPropertyTypeMap(type, (type2, name) =>

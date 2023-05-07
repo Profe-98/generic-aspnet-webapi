@@ -18,7 +18,6 @@ using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
@@ -50,6 +49,7 @@ using WebApiFunction.Web.AspNet;
 using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 
 namespace WebApiFunction.Application.Model.Database.MySql.Entity
 {
@@ -284,7 +284,7 @@ namespace WebApiFunction.Application.Model.Database.MySql.Entity
         public bool SendMail(IMailHandler mailHandler, string fromMail, string subject, string body)
         {
             var mail = mailHandler.CreateMimeMessage(new MimeKit.InternetAddressList() { MimeKit.InternetAddress.Parse(User) }, null, MimeKit.MailboxAddress.Parse(fromMail), subject, body);
-            mailHandler.Enqueue(fromMail, mail);
+            mailHandler.SendMail(mail);
             return true;
         }
         public string NameConcat

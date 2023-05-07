@@ -26,7 +26,6 @@ using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
@@ -59,6 +58,8 @@ using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
 using Microsoft.AspNetCore.Identity;
 using WebApiFunction.Application.Controller.Modules;
+using System.Net.Http;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 
 namespace WebApiFunction.Web.Authentification
 {
@@ -66,7 +67,6 @@ namespace WebApiFunction.Web.Authentification
     {
         #region Private
         private readonly IScopedDatabaseHandler _databaseHandler;
-        private readonly IHttpContextHandler _httpContextHandler = null;
         private readonly IJWTHandler _jwtHandler = null;
         private readonly IScopedEncryptionHandler _encryptionHandler = null;
         private readonly IAppconfig _appConfig = null;
@@ -75,21 +75,19 @@ namespace WebApiFunction.Web.Authentification
         public UserModel PredictedCurrentUser { get; set; }
         #endregion
         #region Ctor & Dtor
-        public AuthHandler(IAppconfig appconfig, IScopedDatabaseHandler databaseHandler, IHttpContextHandler httpContextHandler, IJWTHandler jwtHandler, IScopedEncryptionHandler encryptionHandler)
+        public AuthHandler(IAppconfig appconfig, IScopedDatabaseHandler databaseHandler,IJWTHandler jwtHandler, IScopedEncryptionHandler encryptionHandler)
         {
             _databaseHandler = databaseHandler;
-            _httpContextHandler = httpContextHandler;
             _jwtHandler = jwtHandler;
             _encryptionHandler = encryptionHandler;
             _appConfig = appconfig;
-            SetPredictedUser();
         }
         #endregion
         #region Methods
-        private async void SetPredictedUser()
+        private async void SetPredictedUser(HttpContext httpContext)
         {
             UserModel userModel = null;
-            string token = _httpContextHandler.CurrentContext().GetRequestJWTFromHeader();
+            string token = httpContext.GetRequestJWTFromHeader();
             if (token != null)
             {
                 JWTModel data = DecodeJWT(token);
@@ -119,7 +117,7 @@ namespace WebApiFunction.Web.Authentification
 
             return data;
         }
-        public async Task<AuthModel> Login(string token)
+        public async Task<AuthModel> Login(HttpContext httpContext,string token)
         {
             AuthModel authModel = null;
 
@@ -131,16 +129,15 @@ namespace WebApiFunction.Web.Authentification
             if (userObject != null)
             {
                 UserModel userModel = userObject;
-                authModel = await Login(new UserDataTransferModel(userModel));
+                authModel = await Login(httpContext, new UserDataTransferModel(userModel));
             }
             return authModel;
         }
-        public async Task<AuthModel> Login(UserDataTransferModel userModel)
+        public async Task<AuthModel> Login(HttpContext httpContext,UserDataTransferModel userModel)
         {
 
             AuthModel authModel = null;
-            HttpContext context = _httpContextHandler.CurrentContext();
-            bool userAgentExists = context.Request.Headers.ContainsKey("User-Agent");
+            bool userAgentExists = httpContext.Request.Headers.ContainsKey("User-Agent");
             string passwordHash = await _encryptionHandler.MD5Async(userModel.Password);
             if (userAgentExists)
             {
@@ -151,7 +148,7 @@ namespace WebApiFunction.Web.Authentification
                     {
 
                         UserModel userObj = await GetUser(data.DataStorage[0].Uuid);
-                        AuthModel tmp = await CreateSessionRecord(userObj);
+                        AuthModel tmp = await CreateSessionRecord(httpContext, userObj);
                         authModel = tmp;
                     }
                     catch (Exception ex)
@@ -163,14 +160,13 @@ namespace WebApiFunction.Web.Authentification
             }
             return authModel;
         }
-        public async Task<AuthModel> Refresh(string refresh_token, string token)
+        public async Task<AuthModel> Refresh(HttpContext httpContext,string refresh_token, string token)
         {
             AuthModel authModel = null;
 
-            CheckLoginResponse checkLoginResponse = await CheckLogin(token, true);
+            CheckLoginResponse checkLoginResponse = await CheckLogin(httpContext, token, true);
             if (checkLoginResponse.IsCorrectUserAgent && checkLoginResponse.IsCorrectIp && checkLoginResponse.IsCorrectToken && !checkLoginResponse.TokenExpired && !checkLoginResponse.RefreshTokenExpired)
             {
-                HttpContext context = _httpContextHandler.CurrentContext();
 
                 JWTModel jwtData = _jwtHandler.Decode(token, _appConfig.AppServiceConfiguration.ApiSecurityConfigurationModel.Jwt.JwtBearerSecretStr);
 
@@ -190,7 +186,7 @@ namespace WebApiFunction.Web.Authentification
                         {
 
                             UserModel userObj = await GetUser(data.FirstRow.Uuid);
-                            AuthModel tmp = await CreateSessionRecord(userObj);
+                            AuthModel tmp = await CreateSessionRecord(httpContext,userObj);
                             authModel = tmp;
                         }
                         catch (Exception ex)
@@ -269,9 +265,9 @@ namespace WebApiFunction.Web.Authentification
             }
             return new List<AuthModel>();
         }
-        public async Task<bool> Logout(string token)
+        public async Task<bool> Logout(HttpContext httpContext, string token)
         {
-            CheckLoginResponse checkLoginResponse = await CheckLogin(token, true);
+            CheckLoginResponse checkLoginResponse = await CheckLogin(httpContext,token, true);
             if (checkLoginResponse.IsCorrectIp && checkLoginResponse.IsCorrectToken && checkLoginResponse.IsCorrectUserAgent && !checkLoginResponse.TokenExpired)
             {
                 QueryResponseData response = await _databaseHandler.ExecuteQuery<AuthModel>("UPDATE auth SET logout_datetime = NOW() WHERE token = @token", new AuthModel { Token = token });
@@ -280,14 +276,13 @@ namespace WebApiFunction.Web.Authentification
             }
             return false;
         }
-        public async Task<bool> CheckLogin(string token)
+        public async Task<bool> CheckLogin(HttpContext httpContext, string token)
         {
-            CheckLoginResponse tmp = await CheckLogin(token, false);
+            CheckLoginResponse tmp = await CheckLogin(httpContext,token, false);
             return tmp.IsCorrectToken;
         }
-        public async Task<CheckLoginResponse> CheckLogin(string token, bool checkAuthorisation = false)
+        public async Task<CheckLoginResponse> CheckLogin(HttpContext httpContext, string token, bool checkAuthorisation = false)
         {
-            HttpContext context = _httpContextHandler.CurrentContext();
             bool validToken = false;
             bool validUserAgent = false;
             bool validIp = false;
@@ -311,28 +306,28 @@ namespace WebApiFunction.Web.Authentification
                 if (!oAuthModel.IsTokenExpired && !oAuthModel.IsRefreshTokenExpired)
                 {
 
-                    string userAgentCurrentRequest = context.HeaderValueGet("user-agent");
+                    string userAgentCurrentRequest = httpContext.HeaderValueGet("user-agent");
                     if (userAgentCurrentRequest != null && userAgentCurrentRequest == oAuthModel.UserAgent)
                     {
                         validUserAgent = true;
                         bool localEqual = false;
                         bool remoteEqual = false;
-                        switch (context.Connection.RemoteIpAddress.AddressFamily)
+                        switch (httpContext.Connection.RemoteIpAddress.AddressFamily)
                         {
                             case System.Net.Sockets.AddressFamily.InterNetwork:
-                                remoteEqual = context.Connection.RemoteIpAddress != oAuthModel.IPv4RemoteObject;
+                                remoteEqual = httpContext.Connection.RemoteIpAddress != oAuthModel.IPv4RemoteObject;
                                 break;
                             case System.Net.Sockets.AddressFamily.InterNetworkV6:
-                                remoteEqual = context.Connection.RemoteIpAddress != oAuthModel.IPv6RemoteObject;
+                                remoteEqual = httpContext.Connection.RemoteIpAddress != oAuthModel.IPv6RemoteObject;
                                 break;
                         }
-                        switch (context.Connection.LocalIpAddress.AddressFamily)
+                        switch (httpContext.Connection.LocalIpAddress.AddressFamily)
                         {
                             case System.Net.Sockets.AddressFamily.InterNetwork:
-                                localEqual = context.Connection.RemoteIpAddress != oAuthModel.IPv4LocalObject;
+                                localEqual = httpContext.Connection.RemoteIpAddress != oAuthModel.IPv4LocalObject;
                                 break;
                             case System.Net.Sockets.AddressFamily.InterNetworkV6:
-                                localEqual = context.Connection.RemoteIpAddress != oAuthModel.IPv6LocalObject;
+                                localEqual = httpContext.Connection.RemoteIpAddress != oAuthModel.IPv6LocalObject;
                                 break;
                         }
                         if (localEqual && remoteEqual)
@@ -347,7 +342,7 @@ namespace WebApiFunction.Web.Authentification
                                 {
 
                                     apiAccessGrant = userModel.ApiAccessGranted;
-                                    string pathUri = _httpContextHandler.GetRoute();
+                                    //string pathUri = httpContext.GetRoute();
                                     if (userModel.ApiAccessGranted)
                                     {
                                         //if (userModel.IsAuthorizedPath(pathUri, context.Request.Method))
@@ -366,21 +361,21 @@ namespace WebApiFunction.Web.Authentification
             return new CheckLoginResponse(validUserAgent, validIp, isAuthorizedForUri, validToken, tokenExpired, refreshTokenExpired, apiAccessGrant, oAuthModel);
         }
 
-        public async Task<AuthModel> CreateSessionRecord(UserModel userModel)
+        public async Task<AuthModel> CreateSessionRecord(HttpContext httpContext,UserModel userModel)
         {
             AuthModel authModel = new AuthModel();
             DateTime now = DateTime.Now;
             DateTime expiresToken = now + BackendAPIDefinitionsProperties.ExpiresTokenTime;
             DateTime expiresRefreshToken = now + BackendAPIDefinitionsProperties.ExpiresRefreshTokenTime;
-            IPAddress ipObj = _httpContextHandler.CurrentContext().Connection.RemoteIpAddress;
-            int remotePort = _httpContextHandler.CurrentContext().Connection.RemotePort;
-            int localPort = _httpContextHandler.CurrentContext().Connection.LocalPort;
+            IPAddress ipObj = httpContext.Connection.RemoteIpAddress;
+            int remotePort = httpContext.Connection.RemotePort;
+            int localPort = httpContext.Connection.LocalPort;
             bool ipIsV4 = ipObj.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork;
             bool ipIsV6 = ipObj.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6;
-            IPAddress localIpObj = _httpContextHandler.CurrentContext().Connection.LocalIpAddress;
+            IPAddress localIpObj = httpContext.Connection.LocalIpAddress;
             bool iplocalIsV4 = ipObj.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork;
             bool iplocalIsV6 = ipObj.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6;
-            string userAgent = _httpContextHandler.CurrentContext().Request.Headers["User-Agent"].ToString();
+            string userAgent = httpContext.Request.Headers["User-Agent"].ToString();
             string ip = ipObj == null ? null : ipObj.ToString();
             string ipLocal = localIpObj == null ? null : localIpObj.ToString();
             string token = EncodeJWT(userModel, expiresToken, false);

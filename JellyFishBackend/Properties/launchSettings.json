@@ -1,0 +1,13 @@
+﻿{
+  "profiles": {
+    "WebApiAuthentificationService": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "dotnetRunMessages": "true",
+      "applicationUrl": "http://0.0.0.0:5030"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+﻿{
+  "rabbit_version": "3.8.9",
+  "rabbitmq_version": "3.8.9",
+  "product_name": "RabbitMQ",
+  "product_version": "3.8.9",
+  "users": [
+    {
+      "name": "webapi",
+      "password_hash": "dfrWOajIM5i4a/f1RhtL6DA1lFPSJ82X4CbdOP3NRQCWLNXt",passwordhash muss noch generiert werden mit dem password admin1234
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "administrator"
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "webapi"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "webapi",
+      "vhost": "webapi",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "topic_permissions": [
+
+  ],
+  "parameters": [
+
+  ],
+  "global_parameters": [
+    {
+      "name": "cluster_name",
+      "value": "rabbit@a8d5c6e08439"
+    },
+    {
+      "name": "internal_cluster_id",
+      "value": "rabbitmq-cluster-id-gXeBLbsUC2W2tU0Bx_QY_w"
+    }
+  ],
+  "policies": [
+
+  ],
+  "queues": [
+    {
+      "name": "webapi",
+      "vhost": "webapi",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-mode": "lazy",
+        "x-queue-type": "classic"
+      }
+    }
+  ],
+  "exchanges": [
+  ],
+  "bindings": [
+    {
+      "source": "amq.direct",
+      "vhost": "webapi",
+      "destination": "webapi",
+      "destination_type": "queue",
+      "routing_key": "webapi",
+      "arguments": {
+      }
+    }
+  ]
+}

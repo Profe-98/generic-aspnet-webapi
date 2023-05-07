@@ -28,11 +28,14 @@ using WebApiFunction.Controller;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Metric.Influxdb;
+using WebApiFunction.Startup;
 
 namespace WebApiAuthentificationService
 {
-    public class Startup
+    public class Startup:IWebApiStartup
     {
+        public static string[] DatabaseEntityNamespaces { get; } = new string[] { "WebApiFunction.Application.Model.Database.MySql.Entity" };
+
         readonly string AllowOrigin = "api-gateway";
         public Startup(IConfiguration configuration, Microsoft.AspNetCore.Hosting.IWebHostEnvironment env)
         {
@@ -64,6 +67,16 @@ namespace WebApiAuthentificationService
             initialDatabaseConfigurationModel.ConvertZeroDateTime = true;
             initialDatabaseConfigurationModel.OldGuids = true;
 
+            DatabaseConfigurationModel initialNodeManagerDatabaseConfigurationModel = new DatabaseConfigurationModel();
+            initialNodeManagerDatabaseConfigurationModel.Host = "localhost";
+            initialNodeManagerDatabaseConfigurationModel.Port = 3306;
+            initialNodeManagerDatabaseConfigurationModel.Database = "rest_api";
+            initialNodeManagerDatabaseConfigurationModel.User = "rest";
+            initialNodeManagerDatabaseConfigurationModel.Password = "meinDatabasePassword!";
+            initialNodeManagerDatabaseConfigurationModel.Timeout = 300;
+            initialNodeManagerDatabaseConfigurationModel.ConvertZeroDateTime = true;
+            initialNodeManagerDatabaseConfigurationModel.OldGuids = true;
+
             AmpqConfigurationModel initialRabbitMqConfigurationModel = new AmpqConfigurationModel();
             initialRabbitMqConfigurationModel.Host = "localhost";
             initialRabbitMqConfigurationModel.Port = 5672;
@@ -88,6 +101,7 @@ namespace WebApiAuthentificationService
             //merged alle config in eine json namens: appservice.json
             AppServiceConfigurationModel initialAppServiceConfigurationModel = new AppServiceConfigurationModel();
             initialAppServiceConfigurationModel.DatabaseConfigurationModel = initialDatabaseConfigurationModel;
+            initialAppServiceConfigurationModel.NodeManagerDatabaseConfigurationModel = initialNodeManagerDatabaseConfigurationModel;
             initialAppServiceConfigurationModel.WebApiConfigurationModel = initialWebApiConfigurationModel;
             initialAppServiceConfigurationModel.LogConfigurationModel = initialLogConfigurationModel;
             initialAppServiceConfigurationModel.ApiSecurityConfigurationModel = initialApiSecurityConfigurationModel;
@@ -144,8 +158,17 @@ namespace WebApiAuthentificationService
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddSingleton<IInfluxDbHandlerInterface, InfluxDbHandler>();
 
+            ServiceProvider serviceProvider = services.BuildServiceProvider();
+            var appConfigService = serviceProvider.GetService<IAppconfig>();
+            services.AddTransient<ITransientDatabaseHandler, MySqlDatabaseHandler>();
             services.AddScoped<IScopedDatabaseHandler, MySqlDatabaseHandler>();
-            services.AddSingleton<ISingletonDatabaseHandler, MySqlDatabaseHandler>();
+            if (appConfigService.AppServiceConfiguration.NodeManagerDatabaseConfigurationModel != null)
+            {
+                services.AddSingleton<ISingletonNodeDatabaseHandler>(new MySqlDatabaseHandler(appConfigService.AppServiceConfiguration.NodeManagerDatabaseConfigurationModel.MysqlConnectionString, appConfigService.AppServiceConfiguration.NodeManagerDatabaseConfigurationModel.AutoCommit));
+
+            }
+            services.AddSingleton<ISingletonDatabaseHandler>(new MySqlDatabaseHandler(appConfigService.AppServiceConfiguration.DatabaseConfigurationModel.MysqlConnectionString, appConfigService.AppServiceConfiguration.DatabaseConfigurationModel.AutoCommit));
+
             services.AddSingleton<INodeManagerHandler, NodeManagerHandler>();
             services.AddSingleton<ISingletonEncryptionHandler, EncryptionHandler>();
             services.AddScoped<IScopedEncryptionHandler, EncryptionHandler>();
@@ -153,6 +176,13 @@ namespace WebApiAuthentificationService
             services.AddScoped<IAuthHandler, AuthHandler>();//dependent on IHttpContextHandler & IScopedDatabaseHandler this is why these both are instancing first by a request
 
             services.AddScoped<IJsonApiDataHandler, JsonApiDataHandler>();
+
+            serviceProvider = services.BuildServiceProvider();
+
+            ISingletonNodeDatabaseHandler databaseHandler = serviceProvider.GetService<ISingletonNodeDatabaseHandler>();
+            CustomControllerBaseExtensions.RegisterNetClasses(databaseHandler, DatabaseEntityNamespaces);
+            INodeManagerHandler nodeManager = serviceProvider.GetService<INodeManagerHandler>();
+            nodeManager.Register();
             services.AddRabbitMq();
 
             services.AddControllers(options =>
@@ -206,13 +236,12 @@ namespace WebApiAuthentificationService
             app.UseCors(AllowOrigin);//must used between UseRouting & UseEndpoints
                                      //app.UseAuthorization();
 
-            ISingletonDatabaseHandler databaseHandler = serviceProvider.GetService<ISingletonDatabaseHandler>();
-            CustomControllerBaseExtensions.RegisterNetClasses(databaseHandler);
+            ISingletonNodeDatabaseHandler databaseHandler = serviceProvider.GetService<ISingletonNodeDatabaseHandler>();
             INodeManagerHandler nodeManager = serviceProvider.GetService<INodeManagerHandler>();
-            nodeManager.Register(BackendAPIDefinitionsProperties.NodeTypes.Authentification_Authorization);
+
             app.UseEndpoints(endpoints =>
             {
-                endpoints.RegisterBackend(nodeManager, serviceProvider,env, databaseHandler, actionDescriptorCollectionProvider, Configuration);
+                endpoints.RegisterBackend(nodeManager, serviceProvider,env, databaseHandler, actionDescriptorCollectionProvider, Configuration, DatabaseEntityNamespaces);
 
             });
 

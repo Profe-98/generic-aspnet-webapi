@@ -1,0 +1,55 @@
+{
+  "root_dir": "F:\\Helix\\RDBS\\webapi\\WebApiGateway",
+  "web_api_configuration": {
+    "encoding": "UTF-8",
+    "node_uuid": "4b14ba01-2278-4408-acea-cc6758ec38cd"
+  },
+  "api_security_configuration": {
+    "api_content_type": "application/json",
+    "jwt": {
+      "jwt_bearer_secret_string": "this is my custom Secret key for authnetication"
+    },
+    "site_protect": {
+      "max_http_request_uri_len": 255,
+      "max_http_header_field_len": 255,
+      "max_http_header_field_value_len": 255,
+      "max_http_content_len": 0
+    }
+  },
+  "logging_configuration": {
+    "log_level": 1,
+    "log_date_format": "yyyy-MM-dd",
+    "log_time_format": "HH:mm:ss",
+    "userinterface_date_format": "yyyy-MM-dd",
+    "userinterface_time_format": "HH:mm:ss"
+  },
+  "database_configuration": {
+    "host": "localhost",
+    "port": 3306,
+    "timeout_s": 300,
+    "user": "rest",
+    "password": "meinDatabasePassword!",
+    "database": "rest_api",
+    "old_guids": true,
+    "convert_zero_datetime": true,
+    "auto_commit": false
+  },
+  "ampq_rabbitmq_configuration": {
+    "host": "localhost",
+    "port": 5672,
+    "user": "webapi",
+    "password": "admin1234",
+    "virtual_host": "webapi",
+    "heartbeat_ms": 30000
+  },
+  "app_paths": {
+    "log\u002Blocal": "F:\\Helix\\RDBS\\webapi\\WebApiGateway\\log\\local",
+    "static": "F:\\Helix\\RDBS\\webapi\\WebApiGateway\\static",
+    "controller\u002Bfile\u002Battachments": "F:\\Helix\\RDBS\\webapi\\WebApiGateway\\controller\\file\\attachments",
+    "file\u002Buser\u002Bprofile": "F:\\Helix\\RDBS\\webapi\\WebApiGateway\\file\\user\\profile",
+    "file\u002Bnclam\u002Bquarantine": "F:\\Helix\\RDBS\\webapi\\WebApiGateway\\file\\nclam\\quarantine",
+    "file\u002Bnclam\u002Bcheck": "F:\\Helix\\RDBS\\webapi\\WebApiGateway\\file\\nclam\\check",
+    "mail\u002Battachment": "F:\\Helix\\RDBS\\webapi\\WebApiGateway\\mail\\attachment",
+    "mail\u002Blog": "F:\\Helix\\RDBS\\webapi\\WebApiGateway\\mail\\log"
+  }
+}

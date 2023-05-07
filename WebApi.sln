@@ -3,21 +3,26 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiApplicationService_alt", "WebApiApplicationService\WebApiApplicationService_alt.csproj", "{4AB9246A-737B-4915-B9DF-DEF4660F5D50}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiGateway", "WebApiGateway\WebApiGateway.csproj", "{2161DADF-67A6-44B1-A5DA-189C84423B33}"
 	ProjectSection(ProjectDependencies) = postProject
-		{4AB9246A-737B-4915-B9DF-DEF4660F5D50} = {4AB9246A-737B-4915-B9DF-DEF4660F5D50}
 		{BC253C72-8D42-4642-9AAF-BB2993C7053A} = {BC253C72-8D42-4642-9AAF-BB2993C7053A}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiAuthentificationService", "WebApiAuthentificationService\WebApiAuthentificationService.csproj", "{BC253C72-8D42-4642-9AAF-BB2993C7053A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiMailParser", "WebApiMailParser\WebApiMailParser.csproj", "{F020846A-2336-4839-B6D2-EF7EDF64D578}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelixTicket", "WebApiMailParser\HelixTicket.csproj", "{F020846A-2336-4839-B6D2-EF7EDF64D578}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiFunction", "WebApiFunction\WebApiFunction.csproj", "{030F856D-B1F7-4CDE-B1B4-1BCB8DED2DD3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiApplicationService_neu", "WebApiApplicationService - Kopie\WebApiApplicationService_neu.csproj", "{2B903288-1A22-45AE-9659-3972EC674F7C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiApplicationServiceV2", "WebApiApplicationServiceV2\WebApiApplicationServiceV2.csproj", "{2B903288-1A22-45AE-9659-3972EC674F7C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiApplicationServiceV2_Test", "WebApiApplicationServiceV2_Test\WebApiApplicationServiceV2_Test.csproj", "{D9A860DD-0C80-4852-9062-F9F71EF09081}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiFunction_Test", "WebApiFunction_Test\WebApiFunction_Test.csproj", "{D4BF9C1B-C19B-4BAD-9590-B91C9FF39542}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JellyFishBackend", "JellyFishBackend\JellyFishBackend.csproj", "{0153205E-1FCF-4976-85DE-EFE18EA69EC7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelixBackend", "HelixBackend\HelixBackend.csproj", "{AC719791-E02D-4E0E-A82D-6F447B39BC80}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +30,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4AB9246A-737B-4915-B9DF-DEF4660F5D50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4AB9246A-737B-4915-B9DF-DEF4660F5D50}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4AB9246A-737B-4915-B9DF-DEF4660F5D50}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4AB9246A-737B-4915-B9DF-DEF4660F5D50}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2161DADF-67A6-44B1-A5DA-189C84423B33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2161DADF-67A6-44B1-A5DA-189C84423B33}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2161DADF-67A6-44B1-A5DA-189C84423B33}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -49,6 +50,22 @@ Global
 		{2B903288-1A22-45AE-9659-3972EC674F7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B903288-1A22-45AE-9659-3972EC674F7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B903288-1A22-45AE-9659-3972EC674F7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9A860DD-0C80-4852-9062-F9F71EF09081}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9A860DD-0C80-4852-9062-F9F71EF09081}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9A860DD-0C80-4852-9062-F9F71EF09081}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9A860DD-0C80-4852-9062-F9F71EF09081}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4BF9C1B-C19B-4BAD-9590-B91C9FF39542}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4BF9C1B-C19B-4BAD-9590-B91C9FF39542}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4BF9C1B-C19B-4BAD-9590-B91C9FF39542}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4BF9C1B-C19B-4BAD-9590-B91C9FF39542}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0153205E-1FCF-4976-85DE-EFE18EA69EC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0153205E-1FCF-4976-85DE-EFE18EA69EC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0153205E-1FCF-4976-85DE-EFE18EA69EC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0153205E-1FCF-4976-85DE-EFE18EA69EC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC719791-E02D-4E0E-A82D-6F447B39BC80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC719791-E02D-4E0E-A82D-6F447B39BC80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC719791-E02D-4E0E-A82D-6F447B39BC80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC719791-E02D-4E0E-A82D-6F447B39BC80}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

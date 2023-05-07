@@ -17,7 +17,7 @@ using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
@@ -49,6 +49,7 @@ using WebApiFunction.Web.AspNet;
 using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
+using WebApiFunction.Startup;
 
 namespace WebApiFunction.Application.Model.Database.MySql
 {
@@ -436,7 +437,7 @@ namespace WebApiFunction.Application.Model.Database.MySql
             string tablename = ((AbstractModel)currentClassInstance).DatabaseTable;
             ClassModelWrapper classModelWrapper = SQLDefinitionProperties.BackendTablesEx.ContainsKey(tablename) ? SQLDefinitionProperties.BackendTablesEx[tablename] : null;
             if (classModelWrapper == null)
-                throw new InvalidOperationException("classModelWrapper for table '"+tablename+"' is not existend, target class could be in wrong namespace (targetnamespace:"+BackendAPIDefinitionsProperties.DatabaseModelNamespace+")");
+                throw new InvalidOperationException("classModelWrapper for table '"+tablename+"' is not existend, target class could be in wrong namespace (targetnamespace is defined in startup class via "+nameof(IWebApiStartup)+")");
             object instance = Activator.CreateInstance(currentClassInstance.GetType());
 
             List<PropertyInfo> defaultPropertiesWithValues = instance.GetType().GetProperties().ToList();
@@ -602,8 +603,13 @@ namespace WebApiFunction.Application.Model.Database.MySql
                         {
 
                             object value = propertyInfo.GetValue(customWhereClauseObject);
-                            DatabaseColumnPropertyAttribute databaseColumn = queryAttributes[propertyInfo];
-                            custWhereClauseList += databaseColumn.ColumnName + " = " + "@" + databaseColumn.ColumnName;
+                            DatabaseColumnPropertyAttribute databaseColumnPropertyAttribute = propertyInfo.GetCustomAttribute<DatabaseColumnPropertyAttribute>();
+                            string columnName = propertyInfo.Name;
+                            if(databaseColumnPropertyAttribute != null)
+                            {
+                                columnName = databaseColumnPropertyAttribute.ColumnName;
+                            }
+                            custWhereClauseList += columnName + " = " + "@" + columnName;
                             if (count < maxKeysCount)
                             {
                                 custWhereClauseList += " AND ";

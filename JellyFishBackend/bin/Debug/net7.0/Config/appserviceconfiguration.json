@@ -1,0 +1,147 @@
+{
+  "root_dir": "F:\\Helix\\RDBS\\webapi\\JellyFishBackend",
+  "web_api_configuration": {
+    "encoding": "UTF-8",
+    "node_uuid": "49bf8a55-e8e3-11ed-bdf1-7085c294413b"
+  },
+  "api_security_configuration": {
+    "api_content_type": "application/json",
+    "jwt": {
+      "jwt_bearer_secret_string": "this is my custom Secret key for authnetication"
+    },
+    "site_protect": {
+      "max_http_request_uri_len": 255,
+      "max_http_header_field_len": 255,
+      "max_http_header_field_value_len": 255,
+      "max_http_content_len": 0
+    }
+  },
+  "logging_configuration": {
+    "log_level": 1,
+    "log_date_format": "yyyy-MM-dd",
+    "log_time_format": "HH:mm:ss",
+    "userinterface_date_format": "yyyy-MM-dd",
+    "userinterface_time_format": "HH:mm:ss"
+  },
+  "mail_configuration": {
+    "imap_settings": {
+      "user": "mail@roos-it.net",
+      "password": "aChJz8nPf5dXZsa",
+      "server": "imap.strato.de",
+      "port": 993,
+      "secure_socket_options": 1,
+      "timeout_ms": 10000,
+      "logger_file_name": "imap.log"
+    },
+    "smtp_settings": {
+      "user": "mail@roos-it.net",
+      "password": "aChJz8nPf5dXZsa",
+      "server": "smtp.strato.de",
+      "port": 465,
+      "secure_socket_options": 1,
+      "timeout_ms": 10000,
+      "logger_file_name": "smtp.log"
+    },
+    "email_attachment_path": ""
+  },
+  "anti_virus_configuration": {
+    "host": "localhost",
+    "port": 3310,
+    "delete_infected_file_permantly": true
+  },
+  "database_configuration": {
+    "host": "localhost",
+    "port": 3306,
+    "timeout_s": 300,
+    "user": "jellyfish",
+    "password": "meinDatabasePassword!",
+    "database": "jellyfish",
+    "old_guids": true,
+    "convert_zero_datetime": true,
+    "auto_commit": false
+  },
+  "nodemanager_database_configuration": {
+    "host": "localhost",
+    "port": 3306,
+    "timeout_s": 300,
+    "user": "rest",
+    "password": "meinDatabasePassword!",
+    "database": "rest_api",
+    "old_guids": true,
+    "convert_zero_datetime": true,
+    "auto_commit": false
+  },
+  "cache_configuration": {
+    "hosts": [
+      {
+        "host": "10.0.0.77",
+        "port": 7300,
+        "timeout_s": 20,
+        "user": "",
+        "password": "test"
+      },
+      {
+        "host": "10.0.0.77",
+        "port": 7301,
+        "timeout_s": 20,
+        "user": "",
+        "password": "test"
+      },
+      {
+        "host": "10.0.0.77",
+        "port": 7302,
+        "timeout_s": 20,
+        "user": "",
+        "password": "test"
+      },
+      {
+        "host": "10.0.0.77",
+        "port": 7303,
+        "timeout_s": 20,
+        "user": "",
+        "password": "test"
+      },
+      {
+        "host": "10.0.0.77",
+        "port": 7304,
+        "timeout_s": 20,
+        "user": "",
+        "password": "test"
+      },
+      {
+        "host": "10.0.0.77",
+        "port": 7305,
+        "timeout_s": 20,
+        "user": "",
+        "password": "test"
+      }
+    ]
+  },
+  "ampq_rabbitmq_configuration": {
+    "host": "localhost",
+    "port": 5672,
+    "user": "jellyfish",
+    "password": "admin1234",
+    "virtual_host": "webapi",
+    "heartbeat_ms": 30000
+  },
+  "signalr_hub_configuration": {
+    "use_local_hub": true,
+    "debug_errors_detailed_clientside": false,
+    "timeout_sec": 15,
+    "keepalive_timemout": 15,
+    "client_timeout_sec": 30,
+    "handshake_timeout": 5,
+    "maximum_parallel_invocations_per_per_client": 1
+  },
+  "app_paths": {
+    "log\u002Blocal": "F:\\Helix\\RDBS\\webapi\\JellyFishBackend\\log\\local",
+    "static": "F:\\Helix\\RDBS\\webapi\\JellyFishBackend\\static",
+    "controller\u002Bfile\u002Battachments": "F:\\Helix\\RDBS\\webapi\\JellyFishBackend\\controller\\file\\attachments",
+    "file\u002Buser\u002Bprofile": "F:\\Helix\\RDBS\\webapi\\JellyFishBackend\\file\\user\\profile",
+    "file\u002Bnclam\u002Bquarantine": "F:\\Helix\\RDBS\\webapi\\JellyFishBackend\\file\\nclam\\quarantine",
+    "file\u002Bnclam\u002Bcheck": "F:\\Helix\\RDBS\\webapi\\JellyFishBackend\\file\\nclam\\check",
+    "mail\u002Battachment": "F:\\Helix\\RDBS\\webapi\\JellyFishBackend\\mail\\attachment",
+    "mail\u002Blog": "F:\\Helix\\RDBS\\webapi\\JellyFishBackend\\mail\\log"
+  }
+}

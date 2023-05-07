@@ -15,7 +15,7 @@ namespace WebApiFunction.Configuration
         public const string BinarayContentType = "application/octet-stream";//general
         public const string ZipContentType = "application/zip";//für driver (ddls+exe etc.)
         public const string MultipartFormData = "multipart/form-data";
-        public const string ApiAreaV1 = "apiv1";
+        public const string ApiAreaV1 = "default-apiv1";
         public enum LANGUAGE : int
         {
             DE = 0,

@@ -15,7 +15,7 @@ using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
@@ -54,8 +54,7 @@ namespace WebApiFunction.MicroService
     {
         #region Private
         private TaskObject taskObject;
-        private readonly ISingletonDatabaseHandler _databaseHandler;
-        private readonly IWebHostEnvironment _env;
+        private readonly ISingletonNodeDatabaseHandler _databaseHandler;
         private readonly IAppconfig _appConfig;
         private readonly ITaskSchedulerBackgroundServiceQueuer _taskSchedulerBackgroundServiceQueuer;
         private NodeModel _node = null;
@@ -63,11 +62,10 @@ namespace WebApiFunction.MicroService
         public NodeModel NodeModel => _node;
         #endregion
         #region Ctor
-        public NodeManagerHandler(ISingletonDatabaseHandler databaseHandler, IWebHostEnvironment env, ITaskSchedulerBackgroundServiceQueuer taskSchedulerBackgroundServiceQueuer, IAppconfig appconfig)
+        public NodeManagerHandler(ISingletonNodeDatabaseHandler databaseHandler, ITaskSchedulerBackgroundServiceQueuer taskSchedulerBackgroundServiceQueuer, IAppconfig appconfig)
         {
             _appConfig = appconfig;
             _databaseHandler = databaseHandler;
-            _env = env;
             _taskSchedulerBackgroundServiceQueuer = taskSchedulerBackgroundServiceQueuer;
             var envVars = Environment.GetEnvironmentVariables();
 
@@ -77,7 +75,16 @@ namespace WebApiFunction.MicroService
                 _appConfig.AppServiceConfiguration.WebApiConfigurationModel.NodeUuid = Guid.NewGuid();
                 _appConfig.Save();
             }
-            string[] split = envVars["ASPNETCORE_URLS"].ToString().Split(':');
+            string[] split = null;
+            if(envVars.Contains("ASPNETCORE_URLS"))
+            {
+                split = envVars["ASPNETCORE_URLS"].ToString().Split(':');
+            }
+            int port = 0;
+            if(split != null&&split.Length > 0&& split.Length>2) 
+            {
+                port = int.Parse(split[2]); 
+            }
             var ipInfo = NetworkUtilityHandler.GetPhysicalEthernetIPAdress();
             string gwDataStr = null;
             string dnsDataStr = null;
@@ -91,56 +98,51 @@ namespace WebApiFunction.MicroService
             }
             _node = new NodeModel()
             {
-                Name = env.ApplicationName,
+
                 Ip = ipInfo.Ip.ToString(),
                 Gateway = gwDataStr,
                 NetId = ipInfo.NetId.ToString(),
                 Mask = ipInfo.Mask.ToString(),
                 DnsServers = dnsDataStr,
-                Port = int.Parse(split[2]),
+                Port = port,
                 LastKeepAlive = DateTime.Now,
                 Uuid = _appConfig.AppServiceConfiguration.WebApiConfigurationModel.NodeUuid
             };
+            Register();
 
         }
         #endregion
         #region Methods
-        public async void Register(Guid typeUuid)
+        public async void Register()
         {
 
-
-
-            _node.NodeTypeUuid = typeUuid;
             NodeModel tmpNode = new NodeModel { Uuid = _appConfig.AppServiceConfiguration.WebApiConfigurationModel.NodeUuid };
             string queryS = tmpNode.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.SELECT).ToString();
             QueryResponseData<NodeModel> queryResponseDataS = await _databaseHandler.ExecuteQueryWithMap<NodeModel>(queryS, tmpNode);
             if (!queryResponseDataS.HasStorageData)
             {
-                string query = _node.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.INSERT).ToString();
-                QueryResponseData queryResponseData = await _databaseHandler.ExecuteQueryWithMap<NodeModel>(query, _node);
-                if (queryResponseData.HasErrors)
-                    throw new InvalidOperationException();
-
-
-                queryResponseDataS = await _databaseHandler.ExecuteQueryWithMap<NodeModel>(queryS, tmpNode);
+                throw new NotImplementedException("node is not found in database, that means the node must be registered in database and the uuid must be stored in appserviceconfiguration.json file for authentification of the node with the backend");
 
             }
             NodeModel currentDataFromDb = queryResponseDataS.FirstRow;
-            if (_node.Ip == currentDataFromDb.Ip)
-                _node.Ip = currentDataFromDb.Ip;
-            if (_node.Port == currentDataFromDb.Port)
-                _node.Port = currentDataFromDb.Port;
-            if (_node.DnsServers == currentDataFromDb.DnsServers)
-                _node.DnsServers = currentDataFromDb.DnsServers;
-            if (_node.Gateway == currentDataFromDb.Gateway)
-                _node.Gateway = currentDataFromDb.Gateway;
-            if (_node.NetId == currentDataFromDb.NetId)
-                _node.NetId = currentDataFromDb.NetId;
-            if (_node.Mask == currentDataFromDb.Mask)
-                _node.Mask = currentDataFromDb.Mask;
-            if (_node.Name == currentDataFromDb.Name)
+            if (_node.NodeTypeUuid != currentDataFromDb.NodeTypeUuid)
+                _node.NodeTypeUuid = currentDataFromDb.NodeTypeUuid;
+
+            if (_node.Name != currentDataFromDb.Name)
                 _node.Name = currentDataFromDb.Name;
 
+
+            NodeModel nodeModelNetworkParams = new NodeModel { 
+             Ip=_node.Ip,
+             Port=_node.Port,
+             DnsServers=_node.DnsServers,
+             Mask= _node.Mask,
+             NetId=_node.NetId,
+             Gateway= _node.Gateway,
+            };
+            queryS = nodeModelNetworkParams.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.UPDATE, tmpNode).ToString();
+            nodeModelNetworkParams.Uuid = tmpNode.Uuid;
+            await _databaseHandler.ExecuteQueryWithMap<NodeModel>(queryS, nodeModelNetworkParams);
 
             KeepAlive();
         }

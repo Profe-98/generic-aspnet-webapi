@@ -8,16 +8,13 @@ using System.Text.Json;
 using MySql.Data.MySqlClient;
 using WebApiFunction.Data.Web.MIME;
 using WebApiFunction.Application.Model.Internal;
-using WebApiFunction.Application.Model.Database.MySql;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
-using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
 using WebApiFunction.Collections;
 using WebApiFunction.Controller;
@@ -59,17 +56,17 @@ namespace WebApiFunction.Application.Model.Database.MySql.Entity
         #endregion Public
 
         [JsonPropertyName("uuid")]
-        [DatabaseColumnPropertyAttribute("uuid", MySqlDbType.String)]
+        [DatabaseColumnProperty("uuid", MySqlDbType.String)]
         public override Guid Uuid { get; set; } = Guid.Empty;
 
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(20, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("user")]
-        [DatabaseColumnPropertyAttribute("user", MySqlDbType.String)]
+        [DatabaseColumnProperty("user", MySqlDbType.String)]
         public string User { get; set; }
 
         [JsonPropertyName("communication_medium_uuid")]
-        [DatabaseColumnPropertyAttribute("communication_medium_uuid", MySqlDbType.String)]
+        [DatabaseColumnProperty("communication_medium_uuid", MySqlDbType.String)]
         public Guid CommunicationMediumUuid { get; set; } = Guid.Empty;
 
         #region Ctor & Dtor

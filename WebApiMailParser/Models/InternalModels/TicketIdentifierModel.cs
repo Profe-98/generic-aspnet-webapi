@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using WebApiFunction.Configuration;
 
-namespace WebApiMailParser.InternalModels
+namespace HelixTicket.InternalModels
 {
 
     public class TicketIdentifierCheckResponse

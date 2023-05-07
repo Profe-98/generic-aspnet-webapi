@@ -12,7 +12,7 @@ using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
@@ -47,7 +47,7 @@ using WebApiFunction.Web.Http;
 
 namespace WebApiFunction.Application.Controller.Modules
 {
-    public class ControllerActionModule : CustomBackendModule<ControllerActionModel>
+    public class ControllerActionModule : AbstractBackendModule<ControllerActionModel>
     {
         #region Private
         #endregion

@@ -19,7 +19,7 @@ using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
@@ -51,19 +51,31 @@ using WebApiFunction.Web.AspNet;
 using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
+using MySqlX.XDevAPI;
 
 namespace WebApiFunction.Ampq.Rabbitmq
 {
     public class RabbitMqHandler : IRabbitMqHandler, IDisposable
     {
+        public class RabbitMqSessionObject
+        {
+            public Func<MessageModel, MessageModelResponse> ConsumeAction { get; set; }
+            public Action OkMsgAct { get; set; }
+            public IModel Session { get; set; }
+            public RabbitMqSessionObject(Func<MessageModel, MessageModelResponse> func, Action okActMsg,IModel session)
+            {
+                ConsumeAction=func;
+                OkMsgAct=okActMsg;
+                Session=session;
+            }
+        }
         private readonly ILogger _logger;
         private IConnection _connection;
-        private IModel _queueBind;
         private readonly IAppconfig _appConfig;
         private readonly ISingletonJsonHandler _singletonJsonHandler;
         private readonly INodeManagerHandler _nodeManagerHandler;
         private readonly ISingletonEncryptionHandler _singletonEncryptionHandler;
-        private Dictionary<KeyValuePair<string, string>, Func<MessageModel, MessageModelResponse>> _ = new Dictionary<KeyValuePair<string, string>, Func<MessageModel, MessageModelResponse>>();
+        private static Dictionary<KeyValuePair<string, string>, RabbitMqSessionObject> _ = new Dictionary<KeyValuePair<string, string>, RabbitMqSessionObject>();
 
         public EventingBasicConsumer ConsumerEvent;
 
@@ -78,15 +90,16 @@ namespace WebApiFunction.Ampq.Rabbitmq
             {
                 throw new Exception("rabbitmq handler cant be used when no config is given");
             }
-            _connection = GetConnection();
             _singletonJsonHandler = singletonJsonHandler;
             _nodeManagerHandler = nodeManagerHandler;
             _singletonEncryptionHandler = singletonEncryptionHandler;
+
+            _connection = GetConnection();
             if (_connection.IsOpen)
             {
                 _logger.LogDebug("rabbitmq connection established");
             }
-            _ = new Dictionary<KeyValuePair<string, string>, Func<MessageModel, MessageModelResponse>>();
+            _ = new Dictionary<KeyValuePair<string, string>, RabbitMqSessionObject>();
         }
 
         public IConnection GetConnection(EventHandler<ConnectionBlockedEventArgs> connectionBlockedEventHandler = null,
@@ -97,6 +110,7 @@ namespace WebApiFunction.Ampq.Rabbitmq
             _logger.LogDebug("try to connect to rabbitmq");
             var factory = new ConnectionFactory()
             {
+                ClientProvidedName= _nodeManagerHandler.NodeModel.Name,
                 HostName = _appConfig.AppServiceConfiguration.RabbitMqConfigurationModel.Host,
                 UserName = _appConfig.AppServiceConfiguration.RabbitMqConfigurationModel.User,
                 Password = _appConfig.AppServiceConfiguration.RabbitMqConfigurationModel.Password,
@@ -152,43 +166,28 @@ namespace WebApiFunction.Ampq.Rabbitmq
             GC.SuppressFinalize(this);
         }
 
-        public void SubscibeExchange(string exchangeName, Func<MessageModel, MessageModelResponse> consumeAction, string routingKey = "")
+        public void SubscibeExchange(string exchangeName, Func<MessageModel, MessageModelResponse> consumeAction, Action okAct, string routingKey = "")
         {
-            var _queueBind = RegisterExchange(exchangeName, consumeAction, routingKey);
+            var _queueBind = RegisterExchange(exchangeName, consumeAction, okAct, routingKey);
         }
 
-        private ValueTuple<IModel, QueueDeclareOk> RegisterExchange(string exchangeName, Func<MessageModel, MessageModelResponse> consumeAction, string routingKey = "")
+        private ValueTuple<IModel, QueueDeclareOk> RegisterExchange(string exchangeName, Func<MessageModel, MessageModelResponse> consumeAction,Action okAct, string routingKey = "")
         {
-            if (_queueBind == null)
-                _queueBind = _connection.CreateModel();
 
             var key = new KeyValuePair<string, string>(exchangeName, routingKey);
             if (!_.ContainsKey(key))
             {
-                _.Add(key, consumeAction);
-                _logger.LogDebug("subscription registered: " + key.ToString() + " with consume action '" + consumeAction.GetType().FullName + "'");
-            }
-            else
-            {
-                if (consumeAction != null)
-                {
-                    _[key] = consumeAction;
-                    _logger.LogDebug("subscription register update: " + key.ToString() + " with consume action '" + consumeAction.GetType().FullName + "'");
-
-                }
-                else if (_[key] == null)
-                {
-                    _logger.LogDebug("subscription register update: " + key.ToString() + " with consume action '" + consumeAction.GetType().FullName + "'");
-                    _[key] = consumeAction;
-                }
+                _.Add(key, new RabbitMqSessionObject(consumeAction, okAct, _connection.CreateModel()));
+                _logger.LogDebug("subscription registered: " + key.ToString() + ""+(consumeAction ==null?"": " with consume action '" + consumeAction.GetType().FullName + "'") +"");
             }
 
-            _queueBind.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Direct);
+
+            _[key].Session.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Direct);
             _logger.LogDebug("exchange declare '" + exchangeName + "'");
 
 
-            var queueName = _queueBind.QueueDeclare(exchangeName, true, false, autoDelete: false);
-            _queueBind.QueueBind(queue: queueName,
+            var queueName = _[key].Session.QueueDeclare(exchangeName, true, false, autoDelete: false);
+            _[key].Session.QueueBind(queue: queueName,
                               exchange: queueName,
                               routingKey: routingKey);
             _logger.LogDebug("exchange-queue bind '" + queueName + "'");
@@ -197,13 +196,13 @@ namespace WebApiFunction.Ampq.Rabbitmq
             {
 
                 _logger.LogDebug("exchange-consumer registered for queue '" + queueName + "'");
-                ConsumerEvent = new EventingBasicConsumer(_queueBind);
+                ConsumerEvent = new EventingBasicConsumer(_[key].Session);
                 ConsumerEvent.Received += Consumer_Received;
-                _queueBind.BasicConsume(queueName, true, ConsumerEvent);
+                _[key].Session.BasicConsume(queueName, true, ConsumerEvent);
             }
-            return new(_queueBind, queueName);
+            return new(_[key].Session, queueName);
         }
-        public void PublishObject(string exchangeName, object entity, string routingKey, string message)
+        public void PublishObject(string exchangeName, object entity, string routingKey, string message, Func<MessageModel, MessageModelResponse> consumeAction, Action okAct)
         {
             var entT = entity.GetType().FullName;
             var objJson = _singletonJsonHandler.JsonSerialize(entity);
@@ -214,18 +213,19 @@ namespace WebApiFunction.Ampq.Rabbitmq
             msgModel.DataHashAlgo = "sha256";
 
             _logger.LogDebug("publish to exchange: '" + exchangeName + "', routingKey: '" + routingKey + "', message: '" + message + "', entityType: '" + entT + "'");
-            this.Publish(exchangeName, msgModel, routingKey: routingKey);
+            this.Publish(exchangeName, msgModel,  null,okAct, routingKey: routingKey);
         }
 
-        public void Publish(string exchangeName, MessageModel msg, Func<MessageModel, MessageModelResponse> consumeAction = null, string routingKey = "")
+        public void Publish(string exchangeName, MessageModel msg, Func<MessageModel, MessageModelResponse> consumeAction,Action okAct, string routingKey = "")
         {
             try
             {
-                var _queueBind = RegisterExchange(exchangeName, consumeAction, routingKey);
+                var _queueBind = RegisterExchange(exchangeName, consumeAction, okAct, routingKey);
 
                 var jsonSerialize = _singletonJsonHandler.JsonSerialize(msg);
                 var body = Encoding.UTF8.GetBytes(jsonSerialize);
                 var prop = _queueBind.Item1.CreateBasicProperties();
+                
                 _queueBind.Item1.BasicPublish(_queueBind.Item2, routingKey: routingKey, prop, body);
 
             }
@@ -273,17 +273,22 @@ namespace WebApiFunction.Ampq.Rabbitmq
                         _logger.LogDebug("deserialized message was null, continue");
                         var classType = Type.GetType(classFullName);
                         object instance = classType == null ? null : Activator.CreateInstance(classType);
-                        if (instance != null)
+                        if (instance != null && _[key].ConsumeAction != null)
                         {
 
                             var obj = _singletonJsonHandler.JsonDeserialize(messageModel.DataSerialized, classType, null);
                             messageModel.DataDeserialized = obj;
-                            var response = _[key].DynamicInvoke(messageModel);
+                            var data = _[key];
+                            var response = data.ConsumeAction(messageModel);
                             if (response != null)
                             {
                                 var messageProceedReturnModel = (MessageModelResponse)response;
                                 if (messageProceedReturnModel is MessageOK)
                                 {
+                                    if(data.OkMsgAct !=null)
+                                    {
+                                        Task.Run(data.OkMsgAct);
+                                    }
                                     _logger.LogDebug("consumer: exchange consume action '" + key.ToString() + "', action '" + _[key].GetType().FullName + "' invoke response was 'MessageOK'");
 
                                 }
@@ -304,6 +309,7 @@ namespace WebApiFunction.Ampq.Rabbitmq
 
 
                             }
+                             
                         }
                         else
                         {

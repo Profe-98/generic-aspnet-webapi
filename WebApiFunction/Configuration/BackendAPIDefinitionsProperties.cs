@@ -14,7 +14,7 @@ namespace WebApiFunction.Configuration
         public static TimeSpan NodeSendKeepAliveTime = new TimeSpan(0, 0, 30);
         public static readonly char[] LowerLetters = new char[26] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
         public static readonly char[] UpperLetters = null;
-        public const string DatabaseModelNamespace = "WebApiFunction.Application.Model.Database.MySql.Entity";
+
         public const int PaginationItemPerPage = 10;
         public static TimeSpan ExpiresRefreshTokenTime = ExpiresTokenTime.Add(new TimeSpan(0, 0, 60, 0, 0));//double of ExpiresTokenTime
         public static TimeSpan ExpiresTokenTime = new TimeSpan(0, 0, 30, 0, 0);
@@ -57,6 +57,7 @@ namespace WebApiFunction.Configuration
             { CmKeyTelegramm,Guid.Empty } ,
             { CmKeyWhatsappBusiness,Guid.Empty }
         };
+
 
         public struct NodeTypes
         {

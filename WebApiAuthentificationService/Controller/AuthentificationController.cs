@@ -14,7 +14,6 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using Microsoft.AspNetCore.Cors;
 using WebApiAuthentificationService;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
 using WebApiFunction.Web.AspNet.ActionResult;
 using WebApiFunction.Application.Model.Database.MySql.Entity;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
@@ -27,12 +26,13 @@ using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq;
 using System.IO;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 
 namespace WebApiAuthentificationService.Controller
 {
     [Controller]
     [ApiController]
-    [Area(GeneralDefs.ApiAreaV1)]
+    [Area("helix-api-1")]
     [Route("[area]/[controller]")]
     public class AuthentificationController : CustomControllerBase
     {
@@ -93,7 +93,7 @@ namespace WebApiAuthentificationService.Controller
                         }
                         authModel = (!String.IsNullOrEmpty(token))
                             ?
-                            await _authHandler.Login(token)
+                            await _authHandler.Login(HttpContext, token)
                             :
                             null;
                     }
@@ -105,7 +105,7 @@ namespace WebApiAuthentificationService.Controller
                 {
                     if (this.ModelState.IsValid)
                     {
-                        authModel = await _authHandler.Login(authUserModel);
+                        authModel = await _authHandler.Login(HttpContext, authUserModel);
                     }
                 }
             }
@@ -135,7 +135,7 @@ namespace WebApiAuthentificationService.Controller
             MethodDescriptor methodInfo = _webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = this.GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
             if (token != null)
             {
-                bool response = await _authHandler.Logout(token);
+                bool response = await _authHandler.Logout(HttpContext, token);
                 if (!response)
                 {
                     return JsonApiErrorResult(new List<ApiErrorModel> {
@@ -165,7 +165,7 @@ namespace WebApiAuthentificationService.Controller
                     string token = HttpContext.GetRequestJWTFromHeader();
                     if (token != null)
                     {
-                        AuthModel authModel = await _authHandler.Refresh(refresh_token, token);
+                        AuthModel authModel = await _authHandler.Refresh(HttpContext, refresh_token, token);
                         return Ok(authModel);
                     }
                 }
@@ -181,7 +181,7 @@ namespace WebApiAuthentificationService.Controller
         public async Task<ActionResult> Validate([FromBody] AuthentificationTokenModel authentificationTokenModel)
         {
             MethodDescriptor methodInfo = _webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = this.GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
-            var response = await _authHandler.CheckLogin(authentificationTokenModel.Token, true);
+            var response = await _authHandler.CheckLogin(HttpContext,authentificationTokenModel.Token, true);
             if(response.IsAuthorizatiOk)
             {
                 return Ok();

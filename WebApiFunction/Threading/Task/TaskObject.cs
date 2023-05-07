@@ -12,7 +12,7 @@ using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
@@ -44,7 +44,6 @@ using WebApiFunction.Web.AspNet;
 using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
-using System.Web.Http.ExceptionHandling;
 using WebApiFunction.Application;
 
 namespace WebApiFunction.Threading.Task
@@ -56,6 +55,7 @@ namespace WebApiFunction.Threading.Task
         private CancellationToken _taskCancelToken;
         private Action _action;
         private Func<System.Threading.Tasks.Task> _faction;
+        private System.Threading.Tasks.Task _taction;
         private object[] _args;
         private System.Threading.Tasks.Task _task = null;
         private TimeSpan _repeatTime = TimeSpan.Zero;
@@ -102,6 +102,10 @@ namespace WebApiFunction.Threading.Task
         {
             Init(action, repeationTime, cancelTokenRequestAction);
         }
+        public TaskObject(System.Threading.Tasks.Task action, TimeSpan repeationTime, Action cancelTokenRequestAction = null)
+        {
+            Init(action, repeationTime, cancelTokenRequestAction);
+        }
 
         private void Init(Action action, TimeSpan repeationTime, Action cancelTokenRequestAction = null, object[] args = null)
         {
@@ -127,6 +131,21 @@ namespace WebApiFunction.Threading.Task
             if (action == null)
                 Dispose();
             _faction = action;
+            _repeatTime = repeationTime;
+
+            _taskCancelToken = _taskCancelTokenInstance.Token;
+            _taskCancelToken.Register(cancelTokenRequestAction == null ?
+                new Action(DefaultMethod) : cancelTokenRequestAction);
+
+        }
+        private void Init(System.Threading.Tasks.Task action, TimeSpan repeationTime, Action cancelTokenRequestAction = null, object[] args = null)
+        {
+            _createTime = DateTime.Now;
+            DefaultMethod = DefaultCancelTaskRequestMethod;
+            _args = args;
+            if (action == null)
+                Dispose();
+            _taction = action;
             _repeatTime = repeationTime;
 
             _taskCancelToken = _taskCancelTokenInstance.Token;
@@ -215,7 +234,7 @@ namespace WebApiFunction.Threading.Task
                 return _task;
             }
         }
-        public void Run()
+        public async void Run()
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -226,7 +245,12 @@ namespace WebApiFunction.Threading.Task
             bool canRun = _task == null ? true : _task.Status != TaskStatus.Running;
             if (canRun)
             {
-                if (_faction != null)
+                if(_taction != null)
+                {
+                    _task = _taction;
+                    await _task.WaitAsync(_taskCancelToken);
+                }
+                else if (_faction != null)
                 {
 
                     _task = System.Threading.Tasks.Task.Run(_faction, _taskCancelToken).ContinueWith(delegate {

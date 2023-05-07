@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using System.Threading.Tasks;
-using WebApiMailParser.InternalModels;
-using WebApiMailParser.Handler;
+using HelixTicket.InternalModels;
+using HelixTicket.Handler;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,9 +23,10 @@ using WebApiFunction.Controller;
 using WebApiFunction.Utility;
 using WebApiFunction.Database.MySQL;
 using WebApiFunction.Log;
-using WebApiFunction.Application.Model.Database.MySql.Table;
+using WebApiFunction.Application.Model.Database.MySql.Entity;
+using WebApiFunction.Application.Model.Database.MySql.Helix;
 
-namespace WebApiMailParser
+namespace HelixTicket
 {
     public class TicketService : BackgroundService
     {

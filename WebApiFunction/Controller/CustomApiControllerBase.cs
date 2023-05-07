@@ -30,7 +30,7 @@ using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
@@ -68,7 +68,7 @@ namespace WebApiFunction.Controller
 {
     public abstract class CustomApiControllerBase<T, T2, T3> : CustomApiControllerBase<T, T2>
         where T : AbstractModel
-        where T2 : CustomBackendModule<T>
+        where T2 : AbstractBackendModule<T>
         where T3 : GeneralMimeFileFormData
     {
         private readonly IAppconfig _appconfig = null;
@@ -359,7 +359,7 @@ namespace WebApiFunction.Controller
     [Route("[area]/[controller]")]
     public class CustomApiControllerBase<T, T2> : CustomControllerBase
         where T : AbstractModel
-        where T2 : CustomBackendModule<T>
+        where T2 : AbstractBackendModule<T>
     {
         #region Private
 
@@ -451,7 +451,23 @@ namespace WebApiFunction.Controller
         }
         #endregion
         #region Ctor
-        public CustomApiControllerBase(ILogger<CustomApiControllerBase<T, T2>> logger, IScopedVulnerablityHandler vulnerablityHandler, IMailHandler mailHandler, IAuthHandler authHandler, IScopedDatabaseHandler databaseHandler, IJsonApiDataHandler jsonApiHandler, ITaskSchedulerBackgroundServiceQueuer queue, IScopedJsonHandler jsonHandler, ICachingHandler cache, IActionDescriptorCollectionProvider actionDescriptorCollectionProvider, IWebHostEnvironment env, IConfiguration configuration, IRabbitMqHandler rabbitMqHandler, IAppconfig appConfig, INodeManagerHandler nodeManagerHandler, IScopedEncryptionHandler scopedEncryptionHandler, WebApiFunction.Application.Model.Database.MySql.Dapper.Context.MysqlDapperContext mysqlDapperContext) :
+        public CustomApiControllerBase(ILogger<CustomApiControllerBase<T, T2>> logger, 
+            IScopedVulnerablityHandler vulnerablityHandler, 
+            IMailHandler mailHandler, 
+            IAuthHandler authHandler, 
+            IScopedDatabaseHandler databaseHandler, 
+            IJsonApiDataHandler jsonApiHandler, 
+            ITaskSchedulerBackgroundServiceQueuer queue, 
+            IScopedJsonHandler jsonHandler, 
+            ICachingHandler cache, 
+            IActionDescriptorCollectionProvider actionDescriptorCollectionProvider, 
+            IWebHostEnvironment env, 
+            IConfiguration configuration, 
+            IRabbitMqHandler rabbitMqHandler, 
+            IAppconfig appConfig, 
+            INodeManagerHandler nodeManagerHandler, 
+            IScopedEncryptionHandler scopedEncryptionHandler, 
+            MysqlDapperContext mysqlDapperContext) :
             base(env, cache, configuration, rabbitMqHandler)
         {
             _mailHandler = mailHandler;
@@ -475,27 +491,41 @@ namespace WebApiFunction.Controller
 
             InitProcedure();
         }
-        public CustomApiControllerBase(ILogger<CustomApiControllerBase<T, T2>> logger, IScopedVulnerablityHandler vulnerablityHandler, IMailHandler mailHandler, IAuthHandler authHandler, IScopedDatabaseHandler databaseHandler, IJsonApiDataHandler jsonApiHandler, ITaskSchedulerBackgroundServiceQueuer queue, IScopedJsonHandler jsonHandler, ICachingHandler cache, IWebHostEnvironment env, IConfiguration configuration, IRabbitMqHandler rabbitMqHandler, IAppconfig appConfig, INodeManagerHandler nodeManagerHandler, IScopedEncryptionHandler scopedEncryptionHandler,WebApiFunction.Application.Model.Database.MySql.Dapper.Context.MysqlDapperContext mysqlDapperContext) :
-            base(env, cache, configuration, rabbitMqHandler)
+        public CustomApiControllerBase(ILogger<CustomApiControllerBase<T, T2>> logger, 
+            IScopedVulnerablityHandler vulnerablityHandler, 
+            IMailHandler mailHandler,
+            IAuthHandler authHandler, 
+            IScopedDatabaseHandler databaseHandler,
+            IJsonApiDataHandler jsonApiHandler, 
+            ITaskSchedulerBackgroundServiceQueuer queue,
+            IScopedJsonHandler jsonHandler, 
+            ICachingHandler cache, 
+            IWebHostEnvironment env, 
+            IConfiguration configuration, 
+            IRabbitMqHandler rabbitMqHandler, 
+            IAppconfig appConfig, 
+            INodeManagerHandler nodeManagerHandler, 
+            IScopedEncryptionHandler scopedEncryptionHandler,
+            MysqlDapperContext mysqlDapperContext) :
+            this(logger,
+            vulnerablityHandler,
+            mailHandler,
+            authHandler,
+            databaseHandler,
+            jsonApiHandler,
+            queue,
+            jsonHandler,
+            cache,
+            null,
+            env,
+            configuration,
+            rabbitMqHandler,
+            appConfig,
+            nodeManagerHandler,
+            scopedEncryptionHandler,
+            mysqlDapperContext)
         {
-            _mailHandler = mailHandler;
-            _vulnerablityHandler = vulnerablityHandler;
-            _authHandler = authHandler;
-            _webHostEnvironment = env;
-            _jsonHandler = jsonHandler;
-            _queue = queue;
-            _logger = logger;
-            _databaseHandler = databaseHandler;
-            _mysqlDapperContext = mysqlDapperContext;
-            _backendModule = (T2)Activator.CreateInstance(typeof(T2), databaseHandler, cache, mysqlDapperContext);
-            _genericAbstractModelType = Activator.CreateInstance<T>();
-            _jsonApiHandler = jsonApiHandler;
-            _cacheHandler = cache;
-            _appConfig = appConfig;
-            _rabbitMqHandler = rabbitMqHandler;
-            _nodeManagerHandler = nodeManagerHandler;
-            _scopedEncryptionHandler = scopedEncryptionHandler;
-            InitProcedure();
+
         }
         [NonAction]
         private string GetExchangeDeclarationName()
@@ -509,10 +539,10 @@ namespace WebApiFunction.Controller
             {
 
                 string exchangeName = GetExchangeDeclarationName();
-                _rabbitMqHandler.SubscibeExchange(exchangeName, _generalFunc, RabbitMqGeneralRoutingKey);
-                _rabbitMqHandler.SubscibeExchange(exchangeName, _entityCreateFunc, RabbitMqEntityCreateRoutingKey);
-                _rabbitMqHandler.SubscibeExchange(exchangeName, _entityUpdateFunc, RabbitMqEntityUpdateRoutingKey);
-                _rabbitMqHandler.SubscibeExchange(exchangeName, _entityDeleteFunc, RabbitMqEntityDeleteRoutingKey);
+                _rabbitMqHandler.SubscibeExchange(exchangeName, _generalFunc,null, RabbitMqGeneralRoutingKey);
+                _rabbitMqHandler.SubscibeExchange(exchangeName, _entityCreateFunc, null, RabbitMqEntityCreateRoutingKey);
+                _rabbitMqHandler.SubscibeExchange(exchangeName, _entityUpdateFunc, null, RabbitMqEntityUpdateRoutingKey);
+                _rabbitMqHandler.SubscibeExchange(exchangeName, _entityDeleteFunc, null, RabbitMqEntityDeleteRoutingKey);
             }
         }
 
@@ -535,7 +565,7 @@ namespace WebApiFunction.Controller
             return await Get(Guid.Empty.ToString());
         }
 
-        public async Task<JsonApiTreeSearchFilterModel> funcT(string[] x, int y, JsonApiTreeSearchFilterModel z)
+        public async Task<JsonApiTreeSearchFilterModel> CreateSearchFilterModelChain(string[] x, int y, JsonApiTreeSearchFilterModel z)
         {
 
             var values = SQLDefinitionProperties.BackendTablesEx.Values;
@@ -548,16 +578,18 @@ namespace WebApiFunction.Controller
                 {
                     var m = foundObj.ClassModel;
                     var t = new JsonApiTreeSearchFilterModel { EntityName = x[y] };
+                    if (z.FilterRelationNames == null)
+                        z.FilterRelationNames = new List<JsonApiTreeSearchFilterModel>();
                     z.FilterRelationNames.Add(t);
-                    if(x.Length - 1 >0)
+                    if(x.Length>0)
                     {
 
-                        string[] a = new string[x.Length - 1];
-                        for (int i = y + 1; i < x.Length; i++)
+                        string[] a = new string[x.Length];
+                        for (int i = y; i < x.Length; i++)
                         {
                             a[i] = x[i];
                         }
-                        return await funcT(a, y + 1, t);
+                        return await CreateSearchFilterModelChain(a, y + 1, t);
                     }
                     return z;
                 }
@@ -580,7 +612,7 @@ namespace WebApiFunction.Controller
 
         public virtual async Task<ActionResult<ApiRootNodeModel>> Get(string id, int maxDepth = 0)
         {
-            MethodDescriptor methodInfo = _webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
+            MethodDescriptor methodInfo = _webHostEnvironment==null||_webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
             Logger.TraceHttpTraffic(MethodBase.GetCurrentMethod(), HttpContext, ControllerName);
 
             T instance = Activator.CreateInstance<T>();
@@ -631,6 +663,7 @@ namespace WebApiFunction.Controller
                             {
                                 string currentRelationLevel = null;
                                 JsonApiTreeSearchFilterModel relation = new JsonApiTreeSearchFilterModel();
+                                relation.FilterRelationNames = new List<JsonApiTreeSearchFilterModel>();
                                 if (val.Contains("."))
                                 {
                                     string[] split = val.Split(".");
@@ -640,13 +673,13 @@ namespace WebApiFunction.Controller
                                         calcMaxDepth = split.Length;
                                     }
                                     currentRelationLevel = split[0];
-                                    string[] tmpArr = new string[split.Length-1];
-                                    for (int i = 1; i < split.Length; i++)
+                                    string[] tmpArr = new string[split.Length];
+                                    for (int i = 0; i < split.Length; i++)
                                     {
-                                        tmpArr[i-1] = split[i];
+                                        tmpArr[i] = split[i];
                                     }
 
-                                    relation = await funcT(tmpArr,0,relation);
+                                    relation = await CreateSearchFilterModelChain(tmpArr,0,relation);
                                 }
                                 else
                                 {
@@ -791,7 +824,7 @@ namespace WebApiFunction.Controller
 
 
             var resp = await _jsonApiHandler.GetorSetCacheData(instance);
-            dataExists = !(resp == null);
+            dataExists = !(resp == null || resp.Count ==0);
             if (dataExists)
             {
                 foreach (var item in resp)
@@ -896,7 +929,7 @@ namespace WebApiFunction.Controller
 
                 OkObjectResult tmp = Ok(apiRootNodeModel);
 
-                _rabbitMqHandler.PublishObject(GetExchangeDeclarationName(), apiRootNodeModel, RabbitMqGeneralRoutingKey, "general-test");
+                _rabbitMqHandler.PublishObject(GetExchangeDeclarationName(), apiRootNodeModel, RabbitMqGeneralRoutingKey, "general-test",null,null);
                 apiRootNodeModel.Dispose();
                 return tmp;
             }
@@ -1241,7 +1274,7 @@ namespace WebApiFunction.Controller
                     }
 
                     string message = "entities-updated";
-                    _rabbitMqHandler.PublishObject(GetExchangeDeclarationName(), response, RabbitMqEntityUpdateRoutingKey, message);
+                    _rabbitMqHandler.PublishObject(GetExchangeDeclarationName(), response, RabbitMqEntityUpdateRoutingKey, message, null,null);
                     return Accepted(response);
                 }
                 else//bei single node in body
@@ -1265,7 +1298,7 @@ namespace WebApiFunction.Controller
                                 tmp.Dispose();
 
                                 string message = "entity-updated";
-                                _rabbitMqHandler.PublishObject(GetExchangeDeclarationName(), response, RabbitMqEntityUpdateRoutingKey, message);
+                                _rabbitMqHandler.PublishObject(GetExchangeDeclarationName(), response, RabbitMqEntityUpdateRoutingKey, message, null,null);
                                 return Ok(response);
                             default:
                                 return JsonApiErrorResult(new List<ApiErrorModel> {
@@ -1969,7 +2002,8 @@ namespace WebApiFunction.Controller
                     response = await _jsonApiHandler.CreateApiRootNodeFromModel<AbstractModel>(GetArea().RouteKey, itemList);
 
                     string message = "entity-created";
-                    _rabbitMqHandler.PublishObject(GetExchangeDeclarationName(), response, RabbitMqEntityCreateRoutingKey, message);
+                    _rabbitMqHandler.PublishObject(GetExchangeDeclarationName(), response, RabbitMqEntityCreateRoutingKey, message, null,null
+                        );
 
                     return Created(HttpContext.Request.Path.Value, response);
                 }
@@ -1992,9 +2026,9 @@ namespace WebApiFunction.Controller
         {
             CreatedAbstractModelResponse<AbstractModel> responseValue = new CreatedAbstractModelResponse<AbstractModel>();
             AbstractModel dataT = (AbstractModel)item.Attributes;
-            /*Type type = typeof(CustomBackendModule<>).MakeGenericType(new Type[] { item.NetType });
+            /*Type type = typeof(AbstractBackendModule<>).MakeGenericType(new Type[] { item.NetType });
             var backendModule= Activator.CreateInstance(type,args:new object[] { _databaseHandler,_cacheHandler });
-            QueryResponseData<AbstractModel> existingData = await ((CustomBackendModule<AbstractModel>)backendModule).Select(dataT, dataT);*/
+            QueryResponseData<AbstractModel> existingData = await ((AbstractBackendModule<AbstractModel>)backendModule).Select(dataT, dataT);*/
 
             string selectQuery = dataT.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.SELECT, dataT, dataT).ToString();
             QueryResponseData<object> existingData = await _databaseHandler.ExecuteQueryWithMap(selectQuery, dataT, item.NetType);
@@ -2138,7 +2172,7 @@ namespace WebApiFunction.Controller
                                     tmp.Dispose();
 
                                     string message = "entity-deleted";
-                                    _rabbitMqHandler.PublishObject(GetExchangeDeclarationName(), response, RabbitMqEntityDeleteRoutingKey, message);
+                                    _rabbitMqHandler.PublishObject(GetExchangeDeclarationName(), response, RabbitMqEntityDeleteRoutingKey, message, null,null);
                                     return Ok(response);
                                 }
                                 break;
@@ -2184,7 +2218,7 @@ namespace WebApiFunction.Controller
 
     public abstract class CustomApiV1ControllerBase<T, T2> : CustomApiControllerBase<T, T2>
         where T : AbstractModel
-        where T2 : CustomBackendModule<T>
+        where T2 : AbstractBackendModule<T>
     {
         public CustomApiV1ControllerBase(ILogger<CustomApiControllerBase<T, T2>> logger, IScopedVulnerablityHandler vulnerablityHandler, IMailHandler mailHandler, IAuthHandler authHandler, IScopedDatabaseHandler databaseHandler, IJsonApiDataHandler jsonApiHandler, ITaskSchedulerBackgroundServiceQueuer queue, IScopedJsonHandler jsonHandler, ICachingHandler cache, IActionDescriptorCollectionProvider actionDescriptorCollectionProvider, IWebHostEnvironment env, IConfiguration configuration, IRabbitMqHandler rabbitMqHandler, IAppconfig appConfig, INodeManagerHandler nodeManagerHandler, IScopedEncryptionHandler scopedEncryptionHandler, WebApiFunction.Application.Model.Database.MySql.Dapper.Context.MysqlDapperContext mysqlDapperContext) :
             base(logger, vulnerablityHandler, mailHandler, authHandler, databaseHandler, jsonApiHandler, queue, jsonHandler, cache, actionDescriptorCollectionProvider, env, configuration, rabbitMqHandler, appConfig, nodeManagerHandler, scopedEncryptionHandler, mysqlDapperContext)

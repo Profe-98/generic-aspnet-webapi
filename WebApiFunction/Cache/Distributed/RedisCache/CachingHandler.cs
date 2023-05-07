@@ -36,7 +36,7 @@ using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
-using WebApiFunction.Application.Model.DataTransferObject.Frontend.Transfer;
+using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
@@ -81,13 +81,12 @@ namespace WebApiFunction.Cache.Distributed.RedisCache
         private readonly IDistributedFailoverCache _failoverCache;*/
         private readonly ISingletonJsonHandler _jsonHandler;
         private readonly IAppconfig _appconfig;
-        private readonly IServiceProvider _serviceProvider;
 
         #endregion
         #region Public
         #endregion
         #region Ctor & Dtor
-        public CachingHandler(IServiceProvider serviceProvider, IConnectionMultiplexer connectionMultiplexer, IAppconfig appconfig, ISingletonJsonHandler jsonHandler, IMemoryCache localCache/*, IDistributedMainCache mainDistributedCache,IDistributedFailoverCache failoverDistributedCache*/)
+        public CachingHandler(IConnectionMultiplexer connectionMultiplexer, IAppconfig appconfig, ISingletonJsonHandler jsonHandler, IMemoryCache localCache/*, IDistributedMainCache mainDistributedCache,IDistributedFailoverCache failoverDistributedCache*/)
         {
             _localCache = localCache;
             /*_mainCache = mainDistributedCache;
@@ -96,10 +95,9 @@ namespace WebApiFunction.Cache.Distributed.RedisCache
             _connectionMultiplexer = connectionMultiplexer;
             _useLocalCache = true;
             _appconfig = appconfig;
-            _serviceProvider = serviceProvider;
 
         }
-        public CachingHandler(IServiceProvider serviceProvider, ISingletonJsonHandler jsonHandler, IAppconfig appconfig, IMemoryCache localCache/*, IDistributedMainCache mainDistributedCache,IDistributedFailoverCache failoverDistributedCache*/)
+        public CachingHandler(ISingletonJsonHandler jsonHandler, IAppconfig appconfig, IMemoryCache localCache/*, IDistributedMainCache mainDistributedCache,IDistributedFailoverCache failoverDistributedCache*/)
         {
             _localCache = localCache;
             /*_mainCache = mainDistributedCache;
@@ -107,7 +105,6 @@ namespace WebApiFunction.Cache.Distributed.RedisCache
             _jsonHandler = jsonHandler;
             _useLocalCache = true;
             _appconfig = appconfig;
-            _serviceProvider = serviceProvider;
 
         }
         ~CachingHandler()
@@ -212,14 +209,14 @@ namespace WebApiFunction.Cache.Distributed.RedisCache
             return response;
         }
 
-        public void ReInitConnectionMultiplexer()
+        public void ReInitConnectionMultiplexer(IServiceProvider serviceProvider)
         {
-            var serviceProvider = _serviceProvider.GetService<IConnectionMultiplexer>();
-            if (serviceProvider == null)
+
+            if (_connectionMultiplexer == null)
             {
 
                 var cacheConfig = _appconfig.AppServiceConfiguration.CacheConfigurationModel;
-                var serviceCollection = _serviceProvider.GetService<IServiceCollection>();
+                var serviceCollection = serviceProvider.GetService<IServiceCollection>();
 
                 if (serviceCollection != null)
                 {
@@ -388,23 +385,13 @@ namespace WebApiFunction.Cache.Distributed.RedisCache
 
     public static class CachingHandlerExtensions
     {
-        public static IServiceCollection UseServerSideCache(this IServiceCollection builder, CacheConfigurationModel cacheConfigurationModel)
+        public static IConnectionMultiplexer CreateConnectionMultiplexer(CacheConfigurationModel cacheConfigurationModel)
         {
-
-            /*builder.AddStackExchangeRedisCache(x =>
-                {
-                    x.Configuration = $"{server.Address}:{server.Port}"+ password == null?"": (",password="+ password + "") + "";
-                });*/
-            //builder.AddStackExchangeRedisCache(x => x = mainDistributedCacheOptions);
-            MemoryCacheOptions localCacheOptions = new MemoryCacheOptions { };
+            if (cacheConfigurationModel == null)
+                return null;
             var hosts = cacheConfigurationModel?.Hosts?.ToList();
             EndPoint[] endPoints = hosts.Select<CacheHostConfigurationModel, EndPoint>(x => x.EndPoint).ToArray();
             string clusterPassword = hosts.First().Password;
-            builder.AddOptions();
-
-            var actionLocal1 = new Action<MemoryCacheOptions>((localCacheOptions) => { });
-
-            builder.AddMemoryCache(actionLocal1);
 
             var multiplexerConfig = new ConfigurationOptions()
             {
@@ -417,10 +404,10 @@ namespace WebApiFunction.Cache.Distributed.RedisCache
                     "PING", "ECHO", "CLIENT"
                 }, available: false),*/
             };
+            ConnectionMultiplexer multiplexer = null;
             if (endPoints != null)
             {
                 endPoints.ToList().ForEach(x => multiplexerConfig.EndPoints.Add(x));
-                ConnectionMultiplexer multiplexer = null;
                 try
                 {
 
@@ -434,32 +421,21 @@ namespace WebApiFunction.Cache.Distributed.RedisCache
                  * Test @StackExchange.Redis
                  * 
                  */
-                if (multiplexer != null)
-                {
-                    var connState = multiplexer.GetStatus();
-                    foreach (EndPoint endpoint in multiplexer.GetEndPoints())
-                    {
-                        var server = multiplexer.GetServer(endpoint);
+            }
+            return multiplexer;
+        }
+        public static IServiceCollection UseServerSideCache(this IServiceCollection builder, CacheConfigurationModel cacheConfigurationModel)
+        {
 
-                        try
-                        {
-                            var clients = server.ClientList(CommandFlags.None);
-                            var keys = server.Keys().ToList();
-                            var memoryStats = server.MemoryStats();
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex.ToString() + ", Solution for no route to private net (class c) is to add route on system");
-                        }
-                    }
-                    var db = multiplexer.GetDatabase();
-                    db.StringSet(new RedisKey("test2"), new RedisValue("testbymika"), expiry: new TimeSpan(0, 10, 0), flags: CommandFlags.None);
+            MemoryCacheOptions localCacheOptions = new MemoryCacheOptions { };
+            var actionLocal1 = new Action<MemoryCacheOptions>((localCacheOptions) => { });
 
-                    var get = db.StringGet(new RedisKey("test2"));
-
-                    /**/
-                    builder.AddSingleton<IConnectionMultiplexer>(multiplexer);
-                }
+            builder.AddMemoryCache(actionLocal1);
+            builder.AddOptions();
+            var multiplexer = CreateConnectionMultiplexer(cacheConfigurationModel);
+            if (multiplexer != null)
+            {
+                builder.AddSingleton<IConnectionMultiplexer>(multiplexer);
             }
 
 
