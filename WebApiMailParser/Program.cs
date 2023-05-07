@@ -22,6 +22,7 @@ namespace HelixTicket
         }
 
 
+
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(logging =>
