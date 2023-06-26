@@ -368,7 +368,7 @@ namespace WebApiFunction.Network
                 var addr = ni.GetIPProperties().GatewayAddresses.FirstOrDefault();
                 if (addr != null && !addr.Address.ToString().Equals("0.0.0.0"))
                 {
-                    if (ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+                    if (ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet || ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
                     {
                         var props = ni.GetIPProperties();
                         foreach (var item in props.UnicastAddresses)

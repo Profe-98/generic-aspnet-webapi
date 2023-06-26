@@ -15,15 +15,15 @@ using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfe
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Configuration;
 using WebApiFunction.Collections;
-using WebApiFunction.Controller;
+using WebApiFunction.Web.AspNet.Controller;
 using WebApiFunction.Data;
 using WebApiFunction.Data.Web;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Database;
-using WebApiFunction.Database.MySQL;
-using WebApiFunction.Database.MySQL.Data;
-using WebApiFunction.Filter;
+using WebApiFunction.Application.Model.Database.MySQL;
+using WebApiFunction.Application.Model.Database.MySQL.Data;
+using WebApiFunction.Web.AspNet.Filter;
 using WebApiFunction.Formatter;
 using WebApiFunction.LocalSystem.IO.File;
 using WebApiFunction.Log;
@@ -43,7 +43,7 @@ using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
 
-namespace WebApiFunction.Application.Model.Database.MySql.Helix
+namespace WebApiFunction.Application.Model.Database.MySQL.Helix
 {
     [Serializable]
     public class OdbcDriverVersionModel : AbstractModel

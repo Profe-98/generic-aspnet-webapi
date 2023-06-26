@@ -9,8 +9,6 @@ using MySql.Data.MySqlClient;
 using WebApiFunction.Converter;
 using WebApiFunction.Data.Web.MIME;
 using WebApiFunction.Application.Model.Internal;
-using WebApiFunction.Application.Model.Database.MySql;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
@@ -18,18 +16,17 @@ using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
 using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
-using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
 using WebApiFunction.Collections;
-using WebApiFunction.Controller;
+using WebApiFunction.Web.AspNet.Controller;
 using WebApiFunction.Data;
 using WebApiFunction.Data.Web;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Database;
-using WebApiFunction.Database.MySQL;
-using WebApiFunction.Database.MySQL.Data;
-using WebApiFunction.Filter;
+using WebApiFunction.Application.Model.Database.MySQL;
+using WebApiFunction.Application.Model.Database.MySQL.Data;
+using WebApiFunction.Web.AspNet.Filter;
 using WebApiFunction.Formatter;
 using WebApiFunction.LocalSystem.IO.File;
 using WebApiFunction.Log;
@@ -49,7 +46,7 @@ using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
 
-namespace WebApiFunction.Application.Model.Database.MySql.Entity
+namespace WebApiFunction.Application.Model.Database.MySQL.Table
 {
     [Serializable]
     public class AuthModel : AbstractModel
@@ -60,76 +57,76 @@ namespace WebApiFunction.Application.Model.Database.MySql.Entity
         #endregion Public
 
         [JsonIgnore]
-        [DatabaseColumnPropertyAttribute("uuid", MySqlDbType.String)]
+        [DatabaseColumnProperty("uuid", MySqlDbType.String)]
         public override Guid Uuid { get; set; } = Guid.Empty;
 
         [JsonIgnore]
-        [DatabaseColumnPropertyAttribute("user_uuid", MySqlDbType.String)]
+        [DatabaseColumnProperty("user_uuid", MySqlDbType.String)]
         public Guid UserUuid { get; set; } = Guid.Empty;
 
         [DataType(DataType.Text)]
         [MaxLength(45, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonIgnore]
-        [DatabaseColumnPropertyAttribute("ip_addrv4_remote", MySqlDbType.String)]
+        [DatabaseColumnProperty("ip_addrv4_remote", MySqlDbType.String)]
         public string Ipv4 { get; set; }
 
         [DataType(DataType.Text)]
         [MaxLength(150, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonIgnore]
-        [DatabaseColumnPropertyAttribute("ip_addrv6_remote", MySqlDbType.String)]
+        [DatabaseColumnProperty("ip_addrv6_remote", MySqlDbType.String)]
         public string Ipv6 { get; set; }
 
         [JsonIgnore]
-        [DatabaseColumnPropertyAttribute("remote_port", MySqlDbType.Int32)]
+        [DatabaseColumnProperty("remote_port", MySqlDbType.Int32)]
         public int RemotePort { get; set; }
 
         [JsonIgnore]
-        [DatabaseColumnPropertyAttribute("local_port", MySqlDbType.Int32)]
+        [DatabaseColumnProperty("local_port", MySqlDbType.Int32)]
         public int LocalPort { get; set; }
 
         [DataType(DataType.Text)]
         [MaxLength(45, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonIgnore]
-        [DatabaseColumnPropertyAttribute("ip_addrv4_local", MySqlDbType.String)]
+        [DatabaseColumnProperty("ip_addrv4_local", MySqlDbType.String)]
         public string Ipv4Local { get; set; }
 
         [DataType(DataType.Text)]
         [MaxLength(150, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonIgnore]
-        [DatabaseColumnPropertyAttribute("ip_addrv6_local", MySqlDbType.String)]
+        [DatabaseColumnProperty("ip_addrv6_local", MySqlDbType.String)]
         public string Ipv6Local { get; set; }
 
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg), MaxLength(2000, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("token")]
-        [DatabaseColumnPropertyAttribute("token", MySqlDbType.String)]
+        [DatabaseColumnProperty("token", MySqlDbType.String)]
         public string Token { get; set; }
 
         [DataType(DataType.DateTime, ErrorMessage = DataValidationMessageStruct.WrongDateTimeFormatMsg)]
         [JsonPropertyName("token_expires")]
-        [DatabaseColumnPropertyAttribute("token_expires_in", MySqlDbType.DateTime)]
+        [DatabaseColumnProperty("token_expires_in", MySqlDbType.DateTime)]
         public DateTime TokenExpires { get; set; }
 
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg), MaxLength(2000, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("refresh_token")]
-        [DatabaseColumnPropertyAttribute("refresh_token", MySqlDbType.String)]
+        [DatabaseColumnProperty("refresh_token", MySqlDbType.String)]
         public string RefreshToken { get; set; }
 
         [DataType(DataType.DateTime, ErrorMessage = DataValidationMessageStruct.WrongDateTimeFormatMsg)]
         [JsonPropertyName("refresh_token_expires")]
-        [DatabaseColumnPropertyAttribute("refresh_token_expires_in", MySqlDbType.DateTime)]
+        [DatabaseColumnProperty("refresh_token_expires_in", MySqlDbType.DateTime)]
         public DateTime RefreshTokenExpires { get; set; }
 
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg), MaxLength(1024, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonIgnore]
-        [DatabaseColumnPropertyAttribute("user_agent", MySqlDbType.String)]
+        [DatabaseColumnProperty("user_agent", MySqlDbType.String)]
         public string UserAgent { get; set; }
 
         [DataType(DataType.DateTime, ErrorMessage = DataValidationMessageStruct.WrongDateTimeFormatMsg)]
         [JsonPropertyName("logout_datetime")]
-        [DatabaseColumnPropertyAttribute("logout_datetime", MySqlDbType.DateTime)]
+        [DatabaseColumnProperty("logout_datetime", MySqlDbType.DateTime)]
         public DateTime LogoutTime { get; set; }
 
-        [JsonConverter(typeof(WebApiFunction.Converter.JsonConverter.JsonBoolConverter))]
+        [JsonConverter(typeof(Converter.JsonConverter.JsonBoolConverter))]
         [JsonPropertyName("is_admin")]
         public bool IsAdmin { get; set; }
 

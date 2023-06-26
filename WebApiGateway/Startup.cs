@@ -375,7 +375,7 @@ namespace WebApiGateway
             {
                 foreach (var item in routesHealthQueryData.DataStorage)
                 {
-                    var claims = new Dictionary<string, bool>() { { "rootRole", true } };
+                    var claims = new List<string> {"root" };
                     var route = new RoutesConfigurationModel.RouteModel();
                     route.AuthenticationOptions = new RoutesConfigurationModel.AuthenticationOptionsModel
                     {
@@ -388,7 +388,7 @@ namespace WebApiGateway
 
                     route.UpstreamHttpMethod = new List<string>() { "Get" };
                     route.UpstreamPathTemplate = pathTemplateUpStream;
-                    route.RouteClaimsRequirement = claims;
+                    route.RouteClaimsRequirement = new RoutesConfigurationModel.RouteClaimsRequirementModel { Role=claims };
                     route.LoadBalancerOptions = new RoutesConfigurationModel.LoadBalancerOptionsModel
                     {
                         Type = "RoundRobin"
@@ -410,14 +410,14 @@ namespace WebApiGateway
                         AuthenticationProviderKey = "Base"
                     };
 
-                    Dictionary<string, bool> claims = new Dictionary<string, bool>();
+                    List<string> claims = new List<string>();
                     if (item.Roles != null && !isAnonEndpoint)
                     {
                         foreach (string role in item.Roles.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
                         {
-                            if (!claims.ContainsKey(role))
+                            if (!claims.Contains(role))
                             {
-                                claims.Add(role + "Role", true);
+                                claims.Add(role);
                             }
                         }
                     }
@@ -436,7 +436,7 @@ namespace WebApiGateway
                     }
                     route.UpstreamHttpMethod = methodData;
                     route.UpstreamPathTemplate = pathTemplateUpStream;
-                    route.RouteClaimsRequirement = claims;
+                    route.RouteClaimsRequirement = new RoutesConfigurationModel.RouteClaimsRequirementModel { Role= claims };
                     route.LoadBalancerOptions = new RoutesConfigurationModel.LoadBalancerOptionsModel
                     {
                         Type = "RoundRobin"
@@ -479,11 +479,6 @@ namespace WebApiGateway
                     // Route 3: /account/{id?} <----------- Exception und doppelt da Route 2 ja schon existiert
                     if (row.ActionRoute == null)//||row.ActionRoute.Contains("?}"))
                         continue;
-
-                    if (row.ActionRoute == "'apiv1/authentification/login'")
-                    {
-
-                    }
 
                     var route = new RoutesConfigurationModel.RouteModel();
                     if (!isAnonEndpoint)
@@ -536,18 +531,18 @@ namespace WebApiGateway
                     {
                         continue;
                     }
-                    Dictionary<string, bool> claims = new Dictionary<string, bool>();
+                    List<string> claims = new List<string>();
                     if (row.Roles != null && !isAnonEndpoint)
                     {
                         foreach (string role in row.Roles.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
                         {
-                            if (!claims.ContainsKey(role))
+                            if (!claims.Contains(role))
                             {
-                                claims.Add(role + "Role", true);
+                                claims.Add(role);
                             }
                         }
                     }
-                    route.RouteClaimsRequirement = !isAnonEndpoint ? claims : null;
+                    route.RouteClaimsRequirement = !isAnonEndpoint ? new RoutesConfigurationModel.RouteClaimsRequirementModel { Role=claims } : null;
 
                     bool hasOptionalIdParameter = route.UpstreamPathTemplate.Contains(BackendAPIDefinitionsProperties.ActionParameterOptionalIdWildcard);
 

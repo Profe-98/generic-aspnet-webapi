@@ -7,8 +7,6 @@ using System.ComponentModel.DataAnnotations;
 using MySql.Data.MySqlClient;
 using WebApiFunction.Data.Web.MIME;
 using WebApiFunction.Application.Model.Internal;
-using WebApiFunction.Application.Model.Database.MySql;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
@@ -16,18 +14,17 @@ using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
 using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
-using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
 using WebApiFunction.Collections;
-using WebApiFunction.Controller;
+using WebApiFunction.Web.AspNet.Controller;
 using WebApiFunction.Data;
 using WebApiFunction.Data.Web;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Database;
-using WebApiFunction.Database.MySQL;
-using WebApiFunction.Database.MySQL.Data;
-using WebApiFunction.Filter;
+using WebApiFunction.Application.Model.Database.MySQL;
+using WebApiFunction.Application.Model.Database.MySQL.Data;
+using WebApiFunction.Web.AspNet.Filter;
 using WebApiFunction.Formatter;
 using WebApiFunction.LocalSystem.IO.File;
 using WebApiFunction.Log;
@@ -47,7 +44,7 @@ using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
 
-namespace WebApiFunction.Application.Model.Database.MySql.Entity
+namespace WebApiFunction.Application.Model.Database.MySQL.Table
 {
     [Serializable]
     public class RoleRelationToControllerActionRelationToHttpMethodModel : AbstractModel
@@ -57,11 +54,11 @@ namespace WebApiFunction.Application.Model.Database.MySql.Entity
         #region Public
 
         [JsonPropertyName("role_uuid")]
-        [DatabaseColumnPropertyAttribute("role_uuid", MySqlDbType.String)]
+        [DatabaseColumnProperty("role_uuid", MySqlDbType.String)]
         public Guid RoleUuid { get; set; } = Guid.Empty;
 
         [JsonPropertyName("controller_action_relation_to_http_method_uuid")]
-        [DatabaseColumnPropertyAttribute("controller_action_relation_to_http_method_uuid", MySqlDbType.String)]
+        [DatabaseColumnProperty("controller_action_relation_to_http_method_uuid", MySqlDbType.String)]
         public Guid ControllerActionRelationToHttpMethodUuid { get; set; } = Guid.Empty;
         #endregion Public
 

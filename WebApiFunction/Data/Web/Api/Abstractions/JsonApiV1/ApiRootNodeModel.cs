@@ -4,10 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Text.Json.Serialization;
 using System.Text.Json;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using WebApiFunction.Application.Model.Internal;
-using WebApiFunction.Application.Model.Database.MySql;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
+
+
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
@@ -18,15 +17,15 @@ using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
 using WebApiFunction.Collections;
-using WebApiFunction.Controller;
+using WebApiFunction.Web.AspNet.Controller;
 using WebApiFunction.Data;
 using WebApiFunction.Data.Web;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Database;
-using WebApiFunction.Database.MySQL;
-using WebApiFunction.Database.MySQL.Data;
-using WebApiFunction.Filter;
+using WebApiFunction.Application.Model.Database.MySQL;
+using WebApiFunction.Application.Model.Database.MySQL.Data;
+using WebApiFunction.Web.AspNet.Filter;
 using WebApiFunction.Formatter;
 using WebApiFunction.LocalSystem.IO.File;
 using WebApiFunction.Log;
@@ -45,10 +44,10 @@ using WebApiFunction.Web.AspNet;
 using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
+using MimeKit.Encodings;
 
 namespace WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1
 {
-    [ValidateNever]
     [Serializable]
     public class ApiRootNodeModel : JsonApiDataHandler, IDisposable
     {
@@ -69,7 +68,7 @@ namespace WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1
             Version = "1.0"
         };
         [JsonIgnore]
-        public Type[] NotExportedTypes { get; set; }
+        public Type[] ?NotExportedTypes { get; set; }
         [JsonIgnore]
         public string RootModelType
         {
@@ -131,10 +130,10 @@ namespace WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1
             }
         }
         [JsonPropertyName("errors")]
-        public List<ApiErrorModel> Errors { get; set; }
+        public List<ApiErrorModel> ?Errors { get; set; }
 
         [JsonPropertyName("meta")]
-        public ApiMetaModel Meta
+        public ApiMetaModel ?Meta
         {
             get
             {
@@ -322,6 +321,24 @@ namespace WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1
                 return tmp;
             }
             return null;
+        }
+
+        public List<T> ExtractByType<T>() where T : class
+        {
+            if (this.RootNodes == null)
+                return null;
+
+            var result = this.RootNodes.FindAll(x=> x.NetType == typeof(T));
+            if (result == null)
+                return null;
+
+            List<T> list = new List<T>();
+
+            result.ForEach(x => {
+
+                list.Add((T)x.Attributes);
+            });
+            return list;
         }
 
         public void Dispose()

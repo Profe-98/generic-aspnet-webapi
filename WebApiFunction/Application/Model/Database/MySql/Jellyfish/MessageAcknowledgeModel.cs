@@ -10,7 +10,7 @@ using WebApiFunction.Configuration;
 using WebApiFunction.Database;
 using MySql.Data.MySqlClient;
 
-namespace WebApiFunction.Application.Model.Database.MySql.Jellyfish
+namespace WebApiFunction.Application.Model.Database.MySQL.Jellyfish
 {
     [Serializable]
     public class MessageAcknowledgeModel : AbstractModel

@@ -9,7 +9,7 @@ using WebApiFunction.Database;
 using WebApiFunction.Configuration;
 using MySql.Data.MySqlClient;
 
-namespace WebApiFunction.Application.Model.Database.MySql.Helix
+namespace WebApiFunction.Application.Model.Database.MySQL.Helix
 {
     [Serializable]
     public class MessageConversationStateTypeModel : AbstractModel

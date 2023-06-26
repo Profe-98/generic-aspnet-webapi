@@ -17,8 +17,8 @@ using System.IO;
 using MySql.Data.MySqlClient;
 using System.Reflection.Metadata.Ecma335;
 using WebApiFunction.Application.Model.Internal;
-using WebApiFunction.Application.Model.Database.MySql;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
+
+
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
@@ -29,15 +29,15 @@ using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
 using WebApiFunction.Collections;
-using WebApiFunction.Controller;
+using WebApiFunction.Web.AspNet.Controller;
 using WebApiFunction.Data;
 using WebApiFunction.Data.Web;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Database;
-using WebApiFunction.Database.MySQL;
-using WebApiFunction.Database.MySQL.Data;
-using WebApiFunction.Filter;
+using WebApiFunction.Application.Model.Database.MySQL;
+using WebApiFunction.Application.Model.Database.MySQL.Data;
+using WebApiFunction.Web.AspNet.Filter;
 using WebApiFunction.Formatter;
 using WebApiFunction.LocalSystem.IO.File;
 using WebApiFunction.Log;
@@ -235,7 +235,7 @@ namespace WebApiFunction.Configuration
             [JsonPropertyName("timeout_ms")]
             public int Timeout { get; set; } = 10000;
             [JsonPropertyName("logger_file_name")]
-            public string LoggerFile { get; set; } = "./MailLogs/mail.log";
+            public string LoggerFolderPath { get; set; } = Environment.CurrentDirectory;
         }
         [JsonPropertyName("imap_settings")]
         public MailSettingsModel ImapSettings { get; set; } = new MailSettingsModel
@@ -244,12 +244,8 @@ namespace WebApiFunction.Configuration
             Server = "imap.strato.de",
             Port = 993,
             SecureSocketOptions = SecureSocketOptions.Auto,
-            /*public string UserServiceImap = "service@helixdb.org";
-            public string UserDatenschutzImap = "datenschutz@helixdb.org";
-            public string UserSupportImap = "support@helixdb.org";
-            public string PasswordImap = "g9iMFhYnxGMbzs9";*/
             Timeout = 10000,
-            LoggerFile = "MailLogs/imap/imap.log"
+            LoggerFolderPath = "MailLogs/imap/imap.log"
         };
         [JsonPropertyName("smtp_settings")]
         public MailSettingsModel SmtpSettings { get; set; } = new MailSettingsModel
@@ -257,12 +253,8 @@ namespace WebApiFunction.Configuration
             Server = "smtp.strato.de",
             Port = 465,
             SecureSocketOptions = SecureSocketOptions.Auto,
-            /*public string UserServiceImap = "service@helixdb.org";
-            public string UserDatenschutzImap = "datenschutz@helixdb.org";
-            public string UserSupportImap = "support@helixdb.org";
-            public string PasswordImap = "g9iMFhYnxGMbzs9";*/
             Timeout = 10000,
-            LoggerFile = "MailLogs/smtp/smtp.log"
+            LoggerFolderPath = "MailLogs/smtp/smtp.log"
         };
         [JsonPropertyName("email_attachment_path")]
         public string EmailAttachmentPath { get; set; }// = System.IO.Path.Combine(AppPaths.RootDir, "mail_attachment");
@@ -362,7 +354,10 @@ namespace WebApiFunction.Configuration
         {
             public string AuthenticationProviderKey { get; set; }
         }
-
+        public class RouteClaimsRequirementModel
+        {
+            public List<string> Role { get; set; } = new List<string>();
+        }
         public class RouteModel
         {
             public string DownstreamPathTemplate { get; set; }
@@ -371,7 +366,7 @@ namespace WebApiFunction.Configuration
             public string UpstreamPathTemplate { get; set; }
             public List<string> UpstreamHttpMethod { get; set; }
             public AuthenticationOptionsModel AuthenticationOptions { get; set; }
-            public object RouteClaimsRequirement { get; set; }
+            public RouteClaimsRequirementModel RouteClaimsRequirement { get; set; }
             public LoadBalancerOptionsModel LoadBalancerOptions { get; set; }
         }
 

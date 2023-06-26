@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "g/5vsMhqjt54+4huZm9jwvoPZJbs7kUrKz6gNCNPKpl0KIOv2G276vgG9ELe2gPa+O0X/bhJRcbKX8HCZElIvg==",
-  "success": true,
-  "projectFilePath": "F:\\Helix\\RDBS\\webapi\\HelixTicket\\HelixTicket.csproj",
+  "dgSpecHash": "uX45DwdTVoYFZLWtMlkp2sV2quG7rg+S0ZspZLS0lDV59ZHrMx+IL8S+Y7YzqGHglif/hDAzF1OpCRGxL+Ahbw==",
+  "success": false,
+  "projectFilePath": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\HelixTicket\\HelixTicket.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Mika\\.nuget\\packages\\csvhelper\\30.0.1\\csvhelper.30.0.1.nupkg.sha512",
     "C:\\Users\\Mika\\.nuget\\packages\\dapper\\2.0.123\\dapper.2.0.123.nupkg.sha512",
@@ -140,5 +140,24 @@
     "C:\\Users\\Mika\\.nuget\\packages\\system.threading.tasks\\4.3.0\\system.threading.tasks.4.3.0.nupkg.sha512",
     "C:\\Users\\Mika\\.nuget\\packages\\system.windows.extensions\\6.0.0\\system.windows.extensions.6.0.0.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1605",
+      "level": "Error",
+      "message": "Warning As Error: Ein Downgrade des Pakets \"MailKit\" von 4.0.0 auf 3.4.3 wurde festgestellt. Verweisen Sie direkt aus dem Projekt auf das Paket, um eine andere Version auszuwählen. \r\n HelixTicket -> WebApiFunction -> MailKit (>= 4.0.0) \r\n HelixTicket -> MailKit (>= 3.4.3)",
+      "libraryId": "MailKit",
+      "targetGraphs": [
+        "net7.0"
+      ]
+    },
+    {
+      "code": "NU1605",
+      "level": "Error",
+      "message": "Warning As Error: Ein Downgrade des Pakets \"MimeKit\" von 4.0.0 auf 3.4.3 wurde festgestellt. Verweisen Sie direkt aus dem Projekt auf das Paket, um eine andere Version auszuwählen. \r\n HelixTicket -> WebApiFunction -> MimeKit (>= 4.0.0) \r\n HelixTicket -> MimeKit (>= 3.4.3)",
+      "libraryId": "MimeKit",
+      "targetGraphs": [
+        "net7.0"
+      ]
+    }
+  ]
 }

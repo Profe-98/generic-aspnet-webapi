@@ -66,7 +66,7 @@ using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfe
 namespace HelixBackend.Controllers.APIv1
 {
 
-    public class UserController : AbstractController<UserModel, UserModule>
+    public class UserController : AbstractController<UserModel>
     {
         private readonly IAuthHandler _auth;
         private readonly IScopedEncryptionHandler _encryptionHandler;

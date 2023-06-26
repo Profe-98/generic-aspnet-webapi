@@ -10,7 +10,7 @@ using WebApiFunction.Configuration;
 using WebApiFunction.Database;
 using MySql.Data.MySqlClient;
 
-namespace WebApiFunction.Application.Model.Database.MySql.Jellyfish
+namespace WebApiFunction.Application.Model.Database.MySQL.Jellyfish
 {
     [Serializable]
     public class MessageModel : AbstractModel
@@ -28,9 +28,17 @@ namespace WebApiFunction.Application.Model.Database.MySql.Jellyfish
         /// <summary>
         /// Message Content e.g. HTML+CSS (MIME), JSON, Plain-Text etc.
         /// </summary>
-        [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(20, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
+        [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(65535, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("text")]
-        [DatabaseColumnProperty("text", MySqlDbType.Binary)]
-        public byte[] Text { get; set; }
+        [DatabaseColumnProperty("text", MySqlDbType.Text)]
+        public string Text { get; set; }
+
+        /// <summary>
+        /// For Pictures, Videos etc.
+        /// </summary>
+        /// 
+        [JsonPropertyName("binary_content")]
+        [DatabaseColumnProperty("binary_content", MySqlDbType.Binary)]
+        public byte[] ?Content { get; set; } = null;
     }
 }

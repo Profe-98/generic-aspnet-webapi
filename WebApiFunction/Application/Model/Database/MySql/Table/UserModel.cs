@@ -10,8 +10,6 @@ using MySql.Data.MySqlClient;
 using WebApiFunction.Mail;
 using WebApiFunction.Data.Web.MIME;
 using WebApiFunction.Application.Model.Internal;
-using WebApiFunction.Application.Model.Database.MySql;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
 
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
@@ -19,18 +17,17 @@ using WebApiFunction.Ampq.Rabbitmq;
 using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
 using WebApiFunction.Application.Model.DataTransferObject;
-using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
 using WebApiFunction.Collections;
-using WebApiFunction.Controller;
+using WebApiFunction.Web.AspNet.Controller;
 using WebApiFunction.Data;
 using WebApiFunction.Data.Web;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Database;
-using WebApiFunction.Database.MySQL;
-using WebApiFunction.Database.MySQL.Data;
-using WebApiFunction.Filter;
+using WebApiFunction.Application.Model.Database.MySQL;
+using WebApiFunction.Application.Model.Database.MySQL.Data;
+using WebApiFunction.Web.AspNet.Filter;
 using WebApiFunction.Formatter;
 using WebApiFunction.LocalSystem.IO.File;
 using WebApiFunction.Log;
@@ -50,8 +47,10 @@ using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
 using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
+using Microsoft.AspNetCore.Components.Web.Virtualization;
+using WebApiFunction.Application.Model.Database.MySQL.View;
 
-namespace WebApiFunction.Application.Model.Database.MySql.Entity
+namespace WebApiFunction.Application.Model.Database.MySQL.Table
 {
     [Serializable]
     public class UserModel : AbstractModel
@@ -61,94 +60,110 @@ namespace WebApiFunction.Application.Model.Database.MySql.Entity
         #endregion Private
         #region Public
         [JsonPropertyName("user_type_uuid")]
-        [DatabaseColumnPropertyAttribute("user_type_uuid", MySqlDbType.String)]
-        public Guid UserTypeUuid { get; set; } = Guid.Empty;
+        [DatabaseColumnProperty("user_type_uuid", MySqlDbType.String)]
+        public virtual Guid UserTypeUuid { get; set; } = Guid.Empty;
 
         [JsonPropertyName("account_uuid")]
-        [DatabaseColumnPropertyAttribute("account_uuid", MySqlDbType.String)]
-        public Guid AccountUuid { get; set; } = Guid.Empty;
+        [DatabaseColumnProperty("account_uuid", MySqlDbType.String)]
+        public virtual Guid AccountUuid { get; set; } = Guid.Empty;
 
         //users email is user
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(20, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("user")]
-        [DatabaseColumnPropertyAttribute("user", MySqlDbType.String)]
-        public string User { get; set; }
+        [DatabaseColumnProperty("user", MySqlDbType.String)]
+        public virtual string User { get; set; }
 
         [DataType(DataType.Password, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(45, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("password")]
-        [DatabaseColumnPropertyAttribute("password", MySqlDbType.String)]
-        public string Password { get; set; }
+        [DatabaseColumnProperty("password", MySqlDbType.String)]
+        public virtual string Password { get; set; }
 
         [JsonPropertyName("max_auth_token")]
-        [DatabaseColumnPropertyAttribute("max_auth_token", MySqlDbType.Int32)]
-        public int MaxCurrentActiveTokens { get; set; }
-
-        [JsonPropertyName("api_access_granted")]
-        [DatabaseColumnPropertyAttribute("api_access_granted", MySqlDbType.Bit)]
-        public bool ApiAccessGranted { get; set; }
+        [DatabaseColumnProperty("max_auth_token", MySqlDbType.Int32)]
+        public virtual int MaxCurrentActiveTokens { get; set; }
 
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(20, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("first_name")]
-        [DatabaseColumnPropertyAttribute("first_name", MySqlDbType.String)]
-        public string FirstName { get; set; }
+        [DatabaseColumnProperty("first_name", MySqlDbType.String)]
+        public virtual string FirstName { get; set; }
 
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(20, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("last_name")]
-        [DatabaseColumnPropertyAttribute("last_name", MySqlDbType.String)]
-        public string LastName { get; set; }
+        [DatabaseColumnProperty("last_name", MySqlDbType.String)]
+        public virtual string LastName { get; set; }
 
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(20, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("phone")]
-        [DatabaseColumnPropertyAttribute("phone", MySqlDbType.String)]
-        public string Phone { get; set; }
+        [DatabaseColumnProperty("phone", MySqlDbType.String)]
+        public virtual string Phone { get; set; }
 
         [DataType(DataType.DateTime, ErrorMessage = DataValidationMessageStruct.WrongDateTimeFormatMsg)]
         [JsonPropertyName("date_of_birth")]
-        [DatabaseColumnPropertyAttribute("date_of_birth", MySqlDbType.DateTime)]
-        public DateTime DateOfBirth { get; set; }
+        [DatabaseColumnProperty("date_of_birth", MySqlDbType.DateTime)]
+        public virtual DateTime DateOfBirth { get; set; }
 
         //base64 like Bearer Token for OAuth: includes expirestime
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(20, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
 
         [JsonPropertyName("activation_token")]
-        [DatabaseColumnPropertyAttribute("activation_token", MySqlDbType.String)]
-        public string ActivationToken { get; set; }
+        [DatabaseColumnProperty("activation_token", MySqlDbType.String)]
+        public virtual string ActivationToken { get; set; }
 
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
-        [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(4, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(4, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
+        [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(BackendAPIDefinitionsProperties.RegisterActivationCodeLen, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(BackendAPIDefinitionsProperties.RegisterActivationCodeLen, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("activation_code")]
-        [DatabaseColumnPropertyAttribute("activation_code", MySqlDbType.String)]
-        public string ActivationCode { get; set; }
+        [DatabaseColumnProperty("activation_code", MySqlDbType.String)]
+        public virtual string ActivationCode { get; set; }
 
-        [JsonConverter(typeof(WebApiFunction.Converter.JsonConverter.JsonDateTimeToIsoConverter))]
+        [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
+        [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(BackendAPIDefinitionsProperties.PasswordResetCodeLen, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(BackendAPIDefinitionsProperties.PasswordResetCodeLen, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
+        [JsonPropertyName("password_reset_code")]
+        [DatabaseColumnProperty("password_reset_code", MySqlDbType.String)]
+        public virtual string PasswordResetCode { get; set; }
+
+        [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(BackendAPIDefinitionsProperties.PasswordResetCodeLen, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(BackendAPIDefinitionsProperties.PasswordResetCodeLen, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
+        [JsonPropertyName("password_reset_code_confirmation")]
+        [DatabaseColumnProperty("password_reset_code_confirmation", MySqlDbType.Bit)]
+        public virtual bool PasswordResetCodeConfirmation { get; set; }
+
+        [JsonPropertyName("password_reset_token")]
+        [DatabaseColumnProperty("password_reset_token", MySqlDbType.String)]
+        public virtual string PasswordResetToken { get; set; }
+
+        [JsonConverter(typeof(Converter.JsonConverter.JsonDateTimeToIsoConverter))]
         [JsonPropertyName("expires_time")]
-        public DateTime ActivationTokenExpires { get; set; }
+        public virtual DateTime ActivationTokenExpires { get; set; }
+
+        [DataType(DataType.DateTime, ErrorMessage = DataValidationMessageStruct.WrongDateTimeFormatMsg)]
+        [JsonPropertyName("password_reset_expires_in")]
+        [DatabaseColumnProperty("password_reset_expires_in", MySqlDbType.DateTime)]
+        public DateTime PasswordResetExpiresIn { get; set; }
 
         [JsonPropertyName("last_api_call_ticks")]
-        public long LastApiCall { get; set; }
+        public virtual long LastApiCall { get; set; }
 
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
         [MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(5, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("user_profile_pic_file_ext")]
-        [DatabaseColumnPropertyAttribute("user_profile_pic_file_ext", MySqlDbType.String)]
-        public string UserProfilePicFileExtension { get; set; }
+        [DatabaseColumnProperty("user_profile_pic_file_ext", MySqlDbType.String)]
+        public virtual string UserProfilePicFileExtension { get; set; }
 
-        [JsonConverter(typeof(WebApiFunction.Converter.JsonConverter.JsonBoolConverter))]
+        [JsonConverter(typeof(Converter.JsonConverter.JsonBoolConverter))]
         [JsonPropertyName("is_adm")]
-        public bool IsAdmin { get; set; }
+        public virtual bool IsAdmin { get; set; }
 
 
         [JsonIgnore]
-        public UserTypeModel UserType { get; set; }
+        public virtual UserTypeModel UserType { get; set; }
 
         [JsonIgnore]
-        public bool HasProfilePicture
+        public virtual bool HasProfilePicture
         {
             get
             {
@@ -160,10 +175,10 @@ namespace WebApiFunction.Application.Model.Database.MySql.Entity
         /// Key is the Hour e.g. 4 and the Value of the Key is the count of request per hour (key)
         /// </summary>
         [JsonPropertyName("api_calls")]
-        public Dictionary<int, int> ApiCalls { get; set; } = new Dictionary<int, int>();
+        public virtual Dictionary<int, int> ApiCalls { get; set; } = new Dictionary<int, int>();
 
         [JsonIgnore]
-        public bool MaxRequestPerHourExceeded
+        public virtual bool MaxRequestPerHourExceeded
         {
             get
             {
@@ -176,7 +191,7 @@ namespace WebApiFunction.Application.Model.Database.MySql.Entity
         /// True when the Time ago after last request is smaller than granted for user
         /// </summary>
         [JsonIgnore]
-        public bool HasTimeBetweenLastRequestViolation
+        public virtual bool HasTimeBetweenLastRequestViolation
         {
             get
             {
@@ -201,13 +216,13 @@ namespace WebApiFunction.Application.Model.Database.MySql.Entity
         /// Count for User that counts upward for each TimeBetweenLastRequest Violation
         /// </summary>
         [JsonIgnore]
-        public int TimeBetweenLastRequestViolationCount { get; set; }
+        public virtual int TimeBetweenLastRequestViolationCount { get; set; }
 
         /// <summary>
         /// Select the max granted request count for user for api calls /backend calls
         /// </summary>
         [JsonIgnore]
-        public int MaxGrantedRequestPerHour
+        public virtual int MaxGrantedRequestPerHour
         {
             get
             {
@@ -219,7 +234,7 @@ namespace WebApiFunction.Application.Model.Database.MySql.Entity
         /// Max granted time between two request
         /// </summary>
         [JsonIgnore]
-        public int MaxGrantedTimeToNextRequest
+        public virtual int MaxGrantedTimeToNextRequest
         {
             get
             {
@@ -260,11 +275,11 @@ namespace WebApiFunction.Application.Model.Database.MySql.Entity
         {
             _registerDataTransferModel = registerDataTransferModel;
         }
-        public string GenerateCode()
+        public string GenerateCode(int len)
         {
             string actCode = null;
             Random random = new Random();
-            for (int i = 0; i < BackendAPIDefinitionsProperties.RegisterActivationCodeLen; i++)
+            for (int i = 0; i < len; i++)
             {
                 actCode += random.Next(0, 9);
             }

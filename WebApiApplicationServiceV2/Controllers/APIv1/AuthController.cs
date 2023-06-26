@@ -11,8 +11,7 @@ using WebApiFunction.Mail;
 using WebApiFunction.Data.Web.MIME;
 using WebApiFunction.Application.Controller.Modules;
 using WebApiFunction.Application.Model.Internal;
-using WebApiFunction.Application.Model.Database.MySql;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
+
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
@@ -23,14 +22,13 @@ using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
 using WebApiFunction.Collections;
-using WebApiFunction.Controller;
 using WebApiFunction.Data;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Database;
-using WebApiFunction.Database.MySQL;
-using WebApiFunction.Database.MySQL.Data;
-using WebApiFunction.Filter;
+using WebApiFunction.Application.Model.Database.MySQL;
+using WebApiFunction.Application.Model.Database.MySQL.Data;
+using WebApiFunction.Web.AspNet.Filter;
 using WebApiFunction.Formatter;
 using WebApiFunction.LocalSystem.IO.File;
 using WebApiFunction.Log;
@@ -49,38 +47,26 @@ using WebApiFunction.Web.AspNet;
 using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
-using WebApiFunction.Healthcheck;
+using WebApiFunction.Web.AspNet.Healthcheck;
 using WebApiFunction.Application;
 using WebApiFunction.Web.Authentification.JWT;
+using WebApiFunction.Application.Model.Database.MySQL.Table;
+using WebApiFunction.Web.AspNet.Controller;
 
 namespace WebApiApplicationService.Controllers.APIv1
 {
-    
-    public class AuthController : CustomApiV1ControllerBase<AuthModel, AuthModule>
+
+    public class AuthController : CustomApiV1ControllerBase<AuthModel>
     {
-        public AuthController(ILogger<AuthController> logger, IScopedVulnerablityHandler vulnerablityHandler, IMailHandler mailHandler, IAuthHandler authHandler, IScopedDatabaseHandler databaseHandler, IJsonApiDataHandler jsonApiHandler,ITaskSchedulerBackgroundServiceQueuer queue, IScopedJsonHandler jsonHandler, ICachingHandler cache, IActionDescriptorCollectionProvider actionDescriptorCollectionProvider,IWebHostEnvironment env,Microsoft.Extensions.Configuration.IConfiguration configuration,IRabbitMqHandler rabbitMqHandler,IAppconfig appConfig, INodeManagerHandler nodeManagerHandler, IScopedEncryptionHandler scopedEncryptionHandler, WebApiFunction.Application.Model.Database.MySql.Dapper.Context.MysqlDapperContext mysqlDapperContext) :
-           base(logger, vulnerablityHandler,mailHandler, authHandler,databaseHandler,jsonApiHandler,queue,jsonHandler,cache, actionDescriptorCollectionProvider, env,configuration,rabbitMqHandler,appConfig,nodeManagerHandler,scopedEncryptionHandler,mysqlDapperContext)
+        public AuthController(ILogger<AuthController> logger, IScopedVulnerablityHandler vulnerablityHandler, IMailHandler mailHandler, IAuthHandler authHandler, IScopedDatabaseHandler databaseHandler, IJsonApiDataHandler jsonApiHandler,ITaskSchedulerBackgroundServiceQueuer queue, IScopedJsonHandler jsonHandler, ICachingHandler cache, IActionDescriptorCollectionProvider actionDescriptorCollectionProvider,IWebHostEnvironment env,Microsoft.Extensions.Configuration.IConfiguration configuration,IRabbitMqHandler rabbitMqHandler,IAppconfig appConfig, INodeManagerHandler nodeManagerHandler, IScopedEncryptionHandler scopedEncryptionHandler,IAbstractBackendModule<AuthModel> abstractBackendModule, IServiceProvider serviceProvider) :
+           base(logger, vulnerablityHandler,mailHandler, authHandler,databaseHandler,jsonApiHandler,queue,jsonHandler,cache, actionDescriptorCollectionProvider, env,configuration,rabbitMqHandler,appConfig,nodeManagerHandler,scopedEncryptionHandler, abstractBackendModule, serviceProvider)
         {
 
         }
 
-
-        //prüft bei request ob user in role 
-        //[AuthorizationFilter("root", AuthorizationFilter.CRUD.Create | AuthorizationFilter.CRUD.Read | AuthorizationFilter.CRUD.Update | AuthorizationFilter.CRUD.Delete)]
-        [HttpPost("test-mit-static-role")]
-        public ActionResult TestS()
+        public override AbstractBackendModule<AuthModel> GetConcreteModule()
         {
-
-            return NotFound("tests");
+            throw new NotImplementedException();
         }
-
-        ////prüft bei request ob user role an der route verfügbar ist
-        [HttpPost("test-mit-dyn-role")]
-        public ActionResult TestD()
-        {
-
-            return NotFound("testd");
-        }
-
     }
 }

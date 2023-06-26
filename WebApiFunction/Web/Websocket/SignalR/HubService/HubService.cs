@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SignalR;
+using MySqlX.XDevAPI;
 using MySqlX.XDevAPI.Common;
 using System;
 using System.Collections.Generic;
@@ -12,9 +13,9 @@ using WebApiFunction.Web.Websocket.SignalR.HubService.Attribute;
 
 namespace WebApiFunction.Web.Websocket.SignalR.HubService
 {
-    public abstract class HubService:Hub
+    public abstract class HubService:Hub, IHubService
     {
-        public virtual HttpConnectionDispatcherOptions HttpConnectionDispatcherOptions { get; private set; }
+        public virtual HttpConnectionDispatcherOptions HttpConnectionDispatcherOptions { get; set; }
         public HubServiceRouteAttribute RouteAttribute
         {
             get
@@ -31,7 +32,7 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubService
         }
         public HubService() 
         {
-
+            
         }
 
         public override Task OnConnectedAsync()
@@ -43,4 +44,26 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubService
             return base.OnDisconnectedAsync(exception);
         }
     }
+    public class HubService<T> : Hub<T>,IHubService where T : class 
+    {
+        public virtual HttpConnectionDispatcherOptions HttpConnectionDispatcherOptions { get; set; }
+        public HubServiceRouteAttribute RouteAttribute
+        {
+            get
+            {
+                return this.GetType().GetCustomAttribute<HubServiceRouteAttribute>();
+            }
+        }
+        public MethodInfo[] HubMethods
+        {
+            get
+            {
+                return this.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public);
+            }
+        }
+        public HubService() {
+        
+        }
+    }
+
 }

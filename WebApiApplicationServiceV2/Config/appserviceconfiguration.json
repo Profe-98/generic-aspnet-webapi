@@ -56,6 +56,17 @@
     "convert_zero_datetime": true,
     "auto_commit": false
   },
+  "nodemanager_database_configuration": {
+    "host": "localhost",
+    "port": 3306,
+    "timeout_s": 300,
+    "user": "rest",
+    "password": "meinDatabasePassword!",
+    "database": "rest_api",
+    "old_guids": true,
+    "convert_zero_datetime": true,
+    "auto_commit": false
+  },
   "cache_configuration": {
     "hosts": [
       {

@@ -2251,12 +2251,12 @@
         "dependencies": {
           "Dapper": "2.0.123",
           "InfluxDB.Client": "4.9.0",
-          "MailKit": "3.4.3",
+          "MailKit": "4.0.0",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "7.0.2",
           "Microsoft.AspNetCore.SignalR.Client": "7.0.5",
           "Microsoft.AspNetCore.SpaServices.Extensions": "7.0.2",
           "Microsoft.Extensions.Caching.StackExchangeRedis": "7.0.2",
-          "MimeKit": "3.4.3",
+          "MimeKit": "4.0.0",
           "MySql.Data": "8.0.32",
           "RabbitMQ.Client": "6.4.0",
           "Serilog": "2.12.0",
@@ -6666,11 +6666,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "F:\\Helix\\RDBS\\webapi\\HelixTicket\\HelixTicket.csproj",
+      "projectUniqueName": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\HelixTicket\\HelixTicket.csproj",
       "projectName": "HelixTicket",
-      "projectPath": "F:\\Helix\\RDBS\\webapi\\HelixTicket\\HelixTicket.csproj",
+      "projectPath": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\HelixTicket\\HelixTicket.csproj",
       "packagesPath": "C:\\Users\\Mika\\.nuget\\packages\\",
-      "outputPath": "F:\\Helix\\RDBS\\webapi\\HelixTicket\\obj\\",
+      "outputPath": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\HelixTicket\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -6692,8 +6692,8 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "projectReferences": {
-            "F:\\Helix\\RDBS\\webapi\\WebApiFunction\\WebApiFunction.csproj": {
-              "projectPath": "F:\\Helix\\RDBS\\webapi\\WebApiFunction\\WebApiFunction.csproj"
+            "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj": {
+              "projectPath": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj"
             }
           }
         }
@@ -6775,5 +6775,25 @@
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1605",
+      "level": "Error",
+      "message": "Warning As Error: Ein Downgrade des Pakets \"MailKit\" von 4.0.0 auf 3.4.3 wurde festgestellt. Verweisen Sie direkt aus dem Projekt auf das Paket, um eine andere Version auszuwählen. \r\n HelixTicket -> WebApiFunction -> MailKit (>= 4.0.0) \r\n HelixTicket -> MailKit (>= 3.4.3)",
+      "libraryId": "MailKit",
+      "targetGraphs": [
+        "net7.0"
+      ]
+    },
+    {
+      "code": "NU1605",
+      "level": "Error",
+      "message": "Warning As Error: Ein Downgrade des Pakets \"MimeKit\" von 4.0.0 auf 3.4.3 wurde festgestellt. Verweisen Sie direkt aus dem Projekt auf das Paket, um eine andere Version auszuwählen. \r\n HelixTicket -> WebApiFunction -> MimeKit (>= 4.0.0) \r\n HelixTicket -> MimeKit (>= 3.4.3)",
+      "libraryId": "MimeKit",
+      "targetGraphs": [
+        "net7.0"
+      ]
+    }
+  ]
 }

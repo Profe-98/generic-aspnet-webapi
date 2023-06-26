@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using WebApiFunction.Data.Web.MIME;
 using WebApiFunction.Application.Model.Internal;
-using WebApiFunction.Application.Model.Database.MySql;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
@@ -16,18 +14,17 @@ using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
 using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
-using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
 using WebApiFunction.Collections;
-using WebApiFunction.Controller;
+using WebApiFunction.Web.AspNet.Controller;
 using WebApiFunction.Data;
 using WebApiFunction.Data.Web;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Database;
-using WebApiFunction.Database.MySQL;
-using WebApiFunction.Database.MySQL.Data;
-using WebApiFunction.Filter;
+using WebApiFunction.Application.Model.Database.MySQL;
+using WebApiFunction.Application.Model.Database.MySQL.Data;
+using WebApiFunction.Web.AspNet.Filter;
 using WebApiFunction.Formatter;
 using WebApiFunction.LocalSystem.IO.File;
 using WebApiFunction.Log;
@@ -48,7 +45,7 @@ using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
 using System.Net;
 
-namespace WebApiFunction.Application.Model.Database.MySql.Entity
+namespace WebApiFunction.Application.Model.Database.MySQL.View
 {
     public class ControllerRelationToRoleView
     {
@@ -57,69 +54,69 @@ namespace WebApiFunction.Application.Model.Database.MySql.Entity
         [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = DataValidationMessageStruct.OnlyCharsInStringAllowedMsg)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(256, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("api_name")]
-        [DatabaseColumnPropertyAttribute("api_name", MySqlDbType.String)]
+        [DatabaseColumnProperty("api_name", MySqlDbType.String)]
         public string ApiName { get; set; }
 
 
         [JsonPropertyName("api_uuid")]
-        [DatabaseColumnPropertyAttribute("api_uuid", MySqlDbType.String)]
+        [DatabaseColumnProperty("api_uuid", MySqlDbType.String)]
         public Guid ApiUuid { get; set; } = Guid.Empty;
 
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
         [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = DataValidationMessageStruct.OnlyCharsInStringAllowedMsg)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(256, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("controller_name")]
-        [DatabaseColumnPropertyAttribute("controller_name", MySqlDbType.String)]
+        [DatabaseColumnProperty("controller_name", MySqlDbType.String)]
         public string ControllerName { get; set; }
 
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
         [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = DataValidationMessageStruct.OnlyCharsInStringAllowedMsg)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(256, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("controller_uuid")]
-        [DatabaseColumnPropertyAttribute("controller_uuid", MySqlDbType.String)]
+        [DatabaseColumnProperty("controller_uuid", MySqlDbType.String)]
         public string ControllerUuid { get; set; }
 
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
         [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = DataValidationMessageStruct.OnlyCharsInStringAllowedMsg)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(256, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("action_route")]
-        [DatabaseColumnPropertyAttribute("action_route", MySqlDbType.String)]
+        [DatabaseColumnProperty("action_route", MySqlDbType.String)]
         public string ActionRoute { get; set; }
 
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
         [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = DataValidationMessageStruct.OnlyCharsInStringAllowedMsg)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(256, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("http_methods_concatted")]
-        [DatabaseColumnPropertyAttribute("http_methods_concatted", MySqlDbType.String)]
+        [DatabaseColumnProperty("http_methods_concatted", MySqlDbType.String)]
         public string HttpMethods { get; set; }
 
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
         [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = DataValidationMessageStruct.OnlyCharsInStringAllowedMsg)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(256, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("role_concatted")]
-        [DatabaseColumnPropertyAttribute("role_concatted", MySqlDbType.String)]
+        [DatabaseColumnProperty("role_concatted", MySqlDbType.String)]
         public string Roles { get; set; }
 
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
         [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = DataValidationMessageStruct.OnlyCharsInStringAllowedMsg)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(256, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("available_node_sockets")]
-        [DatabaseColumnPropertyAttribute("available_node_sockets", MySqlDbType.String)]
+        [DatabaseColumnProperty("available_node_sockets", MySqlDbType.String)]
         public string AvailableNodeSockets { get; set; }
 
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
         [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = DataValidationMessageStruct.OnlyCharsInStringAllowedMsg)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(256, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("available_nodes_str")]
-        [DatabaseColumnPropertyAttribute("available_nodes_str", MySqlDbType.String)]
+        [DatabaseColumnProperty("available_nodes_str", MySqlDbType.String)]
         public string AvailableNodesString { get; set; }
 
         [JsonPropertyName("is_authcontroller")]
-        [DatabaseColumnPropertyAttribute("is_authcontroller", MySqlDbType.Bit)]
+        [DatabaseColumnProperty("is_authcontroller", MySqlDbType.Bit)]
         public bool IsAuthController { get; set; }
 
         [JsonPropertyName("is_errorcontroller")]
-        [DatabaseColumnPropertyAttribute("is_errorcontroller", MySqlDbType.Bit)]
+        [DatabaseColumnProperty("is_errorcontroller", MySqlDbType.Bit)]
         public bool IsErrorController { get; set; }
 
         [JsonIgnore]

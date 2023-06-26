@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Text.Json.Serialization;
 
-namespace WebApiFunction.Application.Model.Database.MySql.Helix
+namespace WebApiFunction.Application.Model.Database.MySQL.Helix
 {
     public class MessageQueueFileExtensions_SubModel
     {

@@ -9,7 +9,7 @@ using System.Reflection;
 using MySql.Data.MySqlClient;
 using WebApiFunction.Data.Web.MIME;
 using WebApiFunction.Application.Model.Internal;
-using WebApiFunction.Application.Model.Database.MySql;
+
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
@@ -20,15 +20,15 @@ using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
 using WebApiFunction.Collections;
-using WebApiFunction.Controller;
+using WebApiFunction.Web.AspNet.Controller;
 using WebApiFunction.Data;
 using WebApiFunction.Data.Web;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Database;
-using WebApiFunction.Database.MySQL;
-using WebApiFunction.Database.MySQL.Data;
-using WebApiFunction.Filter;
+using WebApiFunction.Application.Model.Database.MySQL;
+using WebApiFunction.Application.Model.Database.MySQL.Data;
+using WebApiFunction.Web.AspNet.Filter;
 using WebApiFunction.Formatter;
 using WebApiFunction.LocalSystem.IO.File;
 using WebApiFunction.Log;
@@ -47,7 +47,8 @@ using WebApiFunction.Web.AspNet;
 using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
-using WebApiFunction.Application.Model.Database.MySql.Helix;
+using WebApiFunction.Application.Model.Database.MySQL.Dapper.Context;
+using WebApiFunction.Application.Model.Database.MySQL.Helix;
 
 namespace WebApiFunction.Application.Controller.Modules.Helix
 {
@@ -59,7 +60,7 @@ namespace WebApiFunction.Application.Controller.Modules.Helix
 
         #endregion
         #region Ctor & Dtor
-        public SoftwareModule(IScopedDatabaseHandler databaseHandler, ICachingHandler cache, Model.Database.MySql.Dapper.Context.MysqlDapperContext mysqlDapperContext) : base(databaseHandler, cache, mysqlDapperContext)
+        public SoftwareModule(ISingletonDatabaseHandler databaseHandler, ICachingHandler cache, IMysqlDapperContext mysqlDapperContext) : base(databaseHandler, cache, mysqlDapperContext)
         {
 
         }

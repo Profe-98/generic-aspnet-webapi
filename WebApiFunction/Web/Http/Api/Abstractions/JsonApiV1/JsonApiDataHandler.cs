@@ -9,8 +9,6 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Text;
 using Microsoft.Extensions.Caching.Memory;
-using WebApiFunction.Application.Model.Database.MySql;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
@@ -20,17 +18,15 @@ using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfe
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
-using WebApiFunction.Controller;
+using WebApiFunction.Web.AspNet.Controller;
 using WebApiFunction.Data;
 using WebApiFunction.Data.Web;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Database;
-using WebApiFunction.Database.MySQL;
-using WebApiFunction.Database.MySQL.Data;
-using WebApiFunction.Filter;
+using WebApiFunction.Web.AspNet.Filter;
 using WebApiFunction.Formatter;
-using WebApiFunction.Healthcheck;
+using WebApiFunction.Web.AspNet.Healthcheck;
 using WebApiFunction.LocalSystem.IO.File;
 using WebApiFunction.Log;
 using WebApiFunction.Metric;
@@ -47,6 +43,9 @@ using WebApiFunction.Web;
 using WebApiFunction.Web.AspNet;
 using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
+using WebApiFunction.Application.Model.Database.MySQL.Data;
+using WebApiFunction.Application.Model.Database.MySQL.Table;
+using WebApiFunction.Application.Model.Database.MySQL;
 
 namespace WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1
 {
@@ -247,44 +246,47 @@ namespace WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1
                 }
             }
             List<bool> regexMatches = new List<bool>();
-            foreach (var item in query.WhereClauseValues)
+            if(!String.IsNullOrEmpty(json))
             {
-                string pattern = "(\"" + item.Key + "\":[^\"]*\"" + item.Value + "\")";
-                regexMatches.Add(Regex.Match(json, pattern, RegexOptions.IgnoreCase).Success);
-            }
-            if (regexMatches.Count == query.WhereClauseValues.Keys.Count)
-            {
-                Type type = typeof(List<>);
-                type = type.MakeGenericType(model.GetType());
-                var tmpObj = (List<object>)_jsonHandler.JsonDeserialize(json, typeof(List<object>));
-                foreach (var item in tmpObj)
+                foreach (var item in query.WhereClauseValues)
                 {
-                    var tt = item.GetType();
-                    JsonElement itemValue = (JsonElement)item;
-                    object val = itemValue.Deserialize(model.GetType());
-                    var propertyInfos = val.GetType().GetProperties();
-                    List<bool> whereClauseChecks = new List<bool>(query.WhereClauseValues.Keys.Count);
-                    foreach (var propertyInfo in propertyInfos)
+                    string pattern = "(\"" + item.Key + "\":[^\"]*\"" + item.Value + "\")";
+                    regexMatches.Add(Regex.Match(json, pattern, RegexOptions.IgnoreCase).Success);
+                }
+                if (regexMatches.Count == query.WhereClauseValues.Keys.Count)
+                {
+                    Type type = typeof(List<>);
+                    type = type.MakeGenericType(model.GetType());
+                    var tmpObj = (List<object>)_jsonHandler.JsonDeserialize(json, typeof(List<object>));
+                    foreach (var item in tmpObj)
                     {
-                        var attr = propertyInfo.GetCustomAttribute<JsonPropertyNameAttribute>();
-                        if (attr != null && query.WhereClauseValues.ContainsKey(attr.Name))
+                        var tt = item.GetType();
+                        JsonElement itemValue = (JsonElement)item;
+                        object val = itemValue.Deserialize(model.GetType());
+                        var propertyInfos = val.GetType().GetProperties();
+                        List<bool> whereClauseChecks = new List<bool>(query.WhereClauseValues.Keys.Count);
+                        foreach (var propertyInfo in propertyInfos)
                         {
-                            object valueWhere = query.WhereClauseValues[attr.Name];
-                            object valueObj = propertyInfo.GetValue(val);
-                            whereClauseChecks.Add(valueWhere.ToString() == valueObj.ToString());
+                            var attr = propertyInfo.GetCustomAttribute<JsonPropertyNameAttribute>();
+                            if (attr != null && query.WhereClauseValues.ContainsKey(attr.Name))
+                            {
+                                object valueWhere = query.WhereClauseValues[attr.Name];
+                                object valueObj = propertyInfo.GetValue(val);
+                                whereClauseChecks.Add(valueWhere.ToString() == valueObj.ToString());
+                            }
+                        }
+                        if (whereClauseChecks.FindAll(x => x).Count() == query.WhereClauseValues.Keys.Count)
+                        {
+
+                            resultSet.Add(val);
                         }
                     }
-                    if (whereClauseChecks.FindAll(x => x).Count() == query.WhereClauseValues.Keys.Count)
-                    {
-
-                        resultSet.Add(val);
-                    }
                 }
-            }
-            else
-            {
-                json = null;
-                goto JUMPER;
+                else
+                {
+                    json = null;
+                    goto JUMPER;
+                }
             }
             return resultSet;
         }
@@ -321,7 +323,7 @@ namespace WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1
 
                     object instanceRel = (AbstractModel)GetForeignObject<T>(datam, rel);
                     var resultSet = await GetorSetCacheData(instanceRel);
-                    if (resultSet.Count != 0)
+                    if (resultSet != null &&resultSet.Count != 0)
                     {
 
                         Type currentInstance = GetType();

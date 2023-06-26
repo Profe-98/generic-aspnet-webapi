@@ -8,7 +8,8 @@ using System.IO;
 using System.Reflection;
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Database;
-using WebApiFunction.Application.Model.Database.MySql.Helix;
+using WebApiFunction.Application.Model.Database.MySQL.Dapper.Context;
+using WebApiFunction.Application.Model.Database.MySQL.Helix;
 
 namespace WebApiFunction.Application.Controller.Modules.Helix
 {
@@ -20,7 +21,7 @@ namespace WebApiFunction.Application.Controller.Modules.Helix
 
         #endregion
         #region Ctor & Dtor
-        public MessageRelationToAttachmentModule(IScopedDatabaseHandler databaseHandler, ICachingHandler cache, Model.Database.MySql.Dapper.Context.MysqlDapperContext mysqlDapperContext) : base(databaseHandler, cache, mysqlDapperContext)
+        public MessageRelationToAttachmentModule(ISingletonDatabaseHandler databaseHandler, ICachingHandler cache, IMysqlDapperContext mysqlDapperContext) : base(databaseHandler, cache, mysqlDapperContext)
         {
 
         }

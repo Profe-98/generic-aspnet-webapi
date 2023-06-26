@@ -10,7 +10,7 @@ using WebApiFunction.Configuration;
 using WebApiFunction.Database;
 using MySql.Data.MySqlClient;
 
-namespace WebApiFunction.Application.Model.Database.MySql.Jellyfish
+namespace WebApiFunction.Application.Model.Database.MySQL.Jellyfish
 {
     [Serializable]
     public class UserTypeModel : AbstractModel
@@ -24,7 +24,7 @@ namespace WebApiFunction.Application.Model.Database.MySql.Jellyfish
         [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = DataValidationMessageStruct.OnlyCharsInStringAllowedMsg), MaxLength(45, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg)]
         [JsonPropertyName("name")]
-        [DatabaseColumnPropertyAttribute("name", MySqlDbType.String)]
+        [DatabaseColumnProperty("name", MySqlDbType.String)]
         public string Name { get; set; }
 
         #region Ctor & Dtor

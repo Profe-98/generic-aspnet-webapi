@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Application\Controller\Modules\Jellyfish\" />
     <Folder Include="Cache\Local\Memory\" />
     <Folder Include="Database\Oracle\" />
     <Folder Include="Database\PostgreSql\" />
@@ -28,7 +27,7 @@
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.123" />
     <PackageReference Include="InfluxDB.Client" Version="4.9.0" />
-    <PackageReference Include="MailKit" Version="3.4.3" />
+    <PackageReference Include="MailKit" Version="4.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="7.0.2" />
@@ -37,7 +36,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="7.0.2" />
-    <PackageReference Include="MimeKit" Version="3.4.3" />
+    <PackageReference Include="MimeKit" Version="4.0.0" />
     <PackageReference Include="MySql.Data" Version="8.0.32" />
     <PackageReference Include="nClam" Version="7.0.0" />
     <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />

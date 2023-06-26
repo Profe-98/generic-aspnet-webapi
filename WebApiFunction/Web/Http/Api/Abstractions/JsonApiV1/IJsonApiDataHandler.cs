@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using System.Text.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
-using WebApiFunction.Application.Model.Database.MySql;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
+using WebApiFunction.Application.Model.Database.MySQL.Table;
+using WebApiFunction.Application.Model.Database.MySQL;
 
 namespace WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1
 {

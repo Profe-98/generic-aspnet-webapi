@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Helix\\RDBS\\webapi\\WebApiFunction_Test\\WebApiFunction_Test.csproj": {}
+    "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction_Test\\WebApiFunction_Test.csproj": {}
   },
   "projects": {
-    "F:\\Helix\\RDBS\\webapi\\WebApiFunction\\WebApiFunction.csproj": {
+    "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Helix\\RDBS\\webapi\\WebApiFunction\\WebApiFunction.csproj",
+        "projectUniqueName": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj",
         "projectName": "WebApiFunction",
-        "projectPath": "F:\\Helix\\RDBS\\webapi\\WebApiFunction\\WebApiFunction.csproj",
+        "projectPath": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj",
         "packagesPath": "C:\\Users\\Mika\\.nuget\\packages\\",
-        "outputPath": "F:\\Helix\\RDBS\\webapi\\WebApiFunction\\obj\\",
+        "outputPath": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -55,7 +55,7 @@
             },
             "MailKit": {
               "target": "Package",
-              "version": "[3.4.3, )"
+              "version": "[4.0.0, )"
             },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
@@ -81,7 +81,7 @@
             },
             "MimeKit": {
               "target": "Package",
-              "version": "[3.4.3, )"
+              "version": "[4.0.0, )"
             },
             "MySql.Data": {
               "target": "Package",
@@ -128,14 +128,14 @@
         }
       }
     },
-    "F:\\Helix\\RDBS\\webapi\\WebApiFunction_Test\\WebApiFunction_Test.csproj": {
+    "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction_Test\\WebApiFunction_Test.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Helix\\RDBS\\webapi\\WebApiFunction_Test\\WebApiFunction_Test.csproj",
+        "projectUniqueName": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction_Test\\WebApiFunction_Test.csproj",
         "projectName": "WebApiFunction_Test",
-        "projectPath": "F:\\Helix\\RDBS\\webapi\\WebApiFunction_Test\\WebApiFunction_Test.csproj",
+        "projectPath": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction_Test\\WebApiFunction_Test.csproj",
         "packagesPath": "C:\\Users\\Mika\\.nuget\\packages\\",
-        "outputPath": "F:\\Helix\\RDBS\\webapi\\WebApiFunction_Test\\obj\\",
+        "outputPath": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction_Test\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -157,8 +157,8 @@
           "net7.0": {
             "targetAlias": "net7.0",
             "projectReferences": {
-              "F:\\Helix\\RDBS\\webapi\\WebApiFunction\\WebApiFunction.csproj": {
-                "projectPath": "F:\\Helix\\RDBS\\webapi\\WebApiFunction\\WebApiFunction.csproj"
+              "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj": {
+                "projectPath": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj"
               }
             }
           }

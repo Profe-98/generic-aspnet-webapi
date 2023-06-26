@@ -18,9 +18,8 @@ using Microsoft.Extensions.Caching.Memory;
 using WebApiFunction.Database;
 using WebApiFunction;
 using WebApiFunction.Web.Authentification.JWT;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
 
-using WebApiFunction.Application.Model.Database.MySql;
+
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
@@ -29,16 +28,15 @@ using WebApiFunction.Antivirus.nClam;
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
-using WebApiFunction.Controller;
 using WebApiFunction.Data;
 using WebApiFunction.Data.Web;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
-using WebApiFunction.Database.MySQL;
-using WebApiFunction.Database.MySQL.Data;
-using WebApiFunction.Filter;
+using WebApiFunction.Application.Model.Database.MySQL;
+using WebApiFunction.Application.Model.Database.MySQL.Data;
+using WebApiFunction.Web.AspNet.Filter;
 using WebApiFunction.Formatter;
-using WebApiFunction.Healthcheck;
+using WebApiFunction.Web.AspNet.Healthcheck;
 using WebApiFunction.LocalSystem.IO.File;
 using WebApiFunction.Log;
 using WebApiFunction.Metric;
@@ -60,6 +58,8 @@ using Microsoft.AspNetCore.Identity;
 using WebApiFunction.Application.Controller.Modules;
 using System.Net.Http;
 using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
+using WebApiFunction.Application.Model.Database.MySQL.Table;
+using WebApiFunction.Web.AspNet.Controller;
 
 namespace WebApiFunction.Web.Authentification
 {
@@ -72,10 +72,9 @@ namespace WebApiFunction.Web.Authentification
         private readonly IAppconfig _appConfig = null;
         #endregion
         #region Public
-        public UserModel PredictedCurrentUser { get; set; }
         #endregion
         #region Ctor & Dtor
-        public AuthHandler(IAppconfig appconfig, IScopedDatabaseHandler databaseHandler,IJWTHandler jwtHandler, IScopedEncryptionHandler encryptionHandler)
+        public AuthHandler(IAppconfig appconfig, IScopedDatabaseHandler databaseHandler, IJWTHandler jwtHandler, IScopedEncryptionHandler encryptionHandler)
         {
             _databaseHandler = databaseHandler;
             _jwtHandler = jwtHandler;
@@ -84,21 +83,6 @@ namespace WebApiFunction.Web.Authentification
         }
         #endregion
         #region Methods
-        private async void SetPredictedUser(HttpContext httpContext)
-        {
-            UserModel userModel = null;
-            string token = httpContext.GetRequestJWTFromHeader();
-            if (token != null)
-            {
-                JWTModel data = DecodeJWT(token);
-                userModel = (UserModel)data.UserModel;
-                if (userModel != null)
-                {
-                    userModel = await GetUser(userModel.Uuid);
-                }
-            }
-            PredictedCurrentUser = userModel;
-        }
         private async Task<string> GenerateRefreshToken(UserModel userModel)
         {
             QueryResponseData queryResponseData = await _databaseHandler.GetUUID();
@@ -117,23 +101,7 @@ namespace WebApiFunction.Web.Authentification
 
             return data;
         }
-        public async Task<AuthModel> Login(HttpContext httpContext,string token)
-        {
-            AuthModel authModel = null;
-
-            JWTModel data = _jwtHandler.Decode(token, _appConfig.AppServiceConfiguration.ApiSecurityConfigurationModel.Jwt.JwtBearerSecretStr);
-
-            UserModel userObject = (UserModel)data.UserModel;
-
-
-            if (userObject != null)
-            {
-                UserModel userModel = userObject;
-                authModel = await Login(httpContext, new UserDataTransferModel(userModel));
-            }
-            return authModel;
-        }
-        public async Task<AuthModel> Login(HttpContext httpContext,UserDataTransferModel userModel)
+        public async Task<AuthModel> Login(HttpContext httpContext, UserDataTransferModel userModel)
         {
 
             AuthModel authModel = null;
@@ -160,12 +128,12 @@ namespace WebApiFunction.Web.Authentification
             }
             return authModel;
         }
-        public async Task<AuthModel> Refresh(HttpContext httpContext,string refresh_token, string token)
+        public async Task<AuthModel> Refresh(HttpContext httpContext, string refresh_token, string token)
         {
             AuthModel authModel = null;
 
-            CheckLoginResponse checkLoginResponse = await CheckLogin(httpContext, token, true);
-            if (checkLoginResponse.IsCorrectUserAgent && checkLoginResponse.IsCorrectIp && checkLoginResponse.IsCorrectToken && !checkLoginResponse.TokenExpired && !checkLoginResponse.RefreshTokenExpired)
+            CheckLoginResponse<AuthModel> checkLoginResponse = await CheckLogin(httpContext, token);
+            if (checkLoginResponse.IsCorrectUserAgent && checkLoginResponse.IsCorrectIp && !checkLoginResponse.TokenExpired && !checkLoginResponse.RefreshTokenExpired)
             {
 
                 JWTModel jwtData = _jwtHandler.Decode(token, _appConfig.AppServiceConfiguration.ApiSecurityConfigurationModel.Jwt.JwtBearerSecretStr);
@@ -178,7 +146,7 @@ namespace WebApiFunction.Web.Authentification
                         token = token,
                         active = true,
                     };
-                    QueryResponseData<UserModel> data = await _databaseHandler.ExecuteQueryWithMap<UserModel>("SELECT u.* FROM user as u inner join auth as a on(a.user_uuid = u.uuid) WHERE u.active = @active AND u.uuid = @uuid AND a.token = @token LIMIT 1;", 
+                    QueryResponseData<UserModel> data = await _databaseHandler.ExecuteQueryWithMap<UserModel>("SELECT u.* FROM user as u inner join auth as a on(a.user_uuid = u.uuid) WHERE u.active = @active AND u.uuid = @uuid AND a.token = @token LIMIT 1;",
                         queryObject);
                     if (data.HasStorageData)
                     {
@@ -186,7 +154,7 @@ namespace WebApiFunction.Web.Authentification
                         {
 
                             UserModel userObj = await GetUser(data.FirstRow.Uuid);
-                            AuthModel tmp = await CreateSessionRecord(httpContext,userObj);
+                            AuthModel tmp = await CreateSessionRecord(httpContext, userObj);
                             authModel = tmp;
                         }
                         catch (Exception ex)
@@ -267,8 +235,8 @@ namespace WebApiFunction.Web.Authentification
         }
         public async Task<bool> Logout(HttpContext httpContext, string token)
         {
-            CheckLoginResponse checkLoginResponse = await CheckLogin(httpContext,token, true);
-            if (checkLoginResponse.IsCorrectIp && checkLoginResponse.IsCorrectToken && checkLoginResponse.IsCorrectUserAgent && !checkLoginResponse.TokenExpired)
+            CheckLoginResponse<AuthModel> checkLoginResponse = await CheckLogin(httpContext, token);
+            if (checkLoginResponse.IsCorrectIp && checkLoginResponse.IsCorrectUserAgent && !checkLoginResponse.TokenExpired)
             {
                 QueryResponseData response = await _databaseHandler.ExecuteQuery<AuthModel>("UPDATE auth SET logout_datetime = NOW() WHERE token = @token", new AuthModel { Token = token });
                 if (!response.HasErrors)
@@ -276,14 +244,8 @@ namespace WebApiFunction.Web.Authentification
             }
             return false;
         }
-        public async Task<bool> CheckLogin(HttpContext httpContext, string token)
+        public async Task<CheckLoginResponse<AuthModel>> CheckLogin(HttpContext httpContext, string token)
         {
-            CheckLoginResponse tmp = await CheckLogin(httpContext,token, false);
-            return tmp.IsCorrectToken;
-        }
-        public async Task<CheckLoginResponse> CheckLogin(HttpContext httpContext, string token, bool checkAuthorisation = false)
-        {
-            bool validToken = false;
             bool validUserAgent = false;
             bool validIp = false;
             bool isAuthorizedForUri = false;
@@ -300,7 +262,6 @@ namespace WebApiFunction.Web.Authentification
 
             if (oAuthModel != null)
             {
-                validToken = true;
                 tokenExpired = oAuthModel.IsTokenExpired;
                 refreshTokenExpired = oAuthModel.IsRefreshTokenExpired;
                 if (!oAuthModel.IsTokenExpired && !oAuthModel.IsRefreshTokenExpired)
@@ -310,58 +271,33 @@ namespace WebApiFunction.Web.Authentification
                     if (userAgentCurrentRequest != null && userAgentCurrentRequest == oAuthModel.UserAgent)
                     {
                         validUserAgent = true;
-                        bool localEqual = false;
                         bool remoteEqual = false;
-                        switch (httpContext.Connection.RemoteIpAddress.AddressFamily)
+                        if(httpContext.Connection != null)
                         {
-                            case System.Net.Sockets.AddressFamily.InterNetwork:
-                                remoteEqual = httpContext.Connection.RemoteIpAddress != oAuthModel.IPv4RemoteObject;
-                                break;
-                            case System.Net.Sockets.AddressFamily.InterNetworkV6:
-                                remoteEqual = httpContext.Connection.RemoteIpAddress != oAuthModel.IPv6RemoteObject;
-                                break;
+                            switch (httpContext.Connection.RemoteIpAddress?.AddressFamily)
+                            {
+                                case System.Net.Sockets.AddressFamily.InterNetwork:
+                                    remoteEqual = httpContext.Connection.RemoteIpAddress != oAuthModel.IPv4RemoteObject;
+                                    break;
+                                case System.Net.Sockets.AddressFamily.InterNetworkV6:
+                                    remoteEqual = httpContext.Connection.RemoteIpAddress != oAuthModel.IPv6RemoteObject;
+                                    break;
+                            }
                         }
-                        switch (httpContext.Connection.LocalIpAddress.AddressFamily)
-                        {
-                            case System.Net.Sockets.AddressFamily.InterNetwork:
-                                localEqual = httpContext.Connection.RemoteIpAddress != oAuthModel.IPv4LocalObject;
-                                break;
-                            case System.Net.Sockets.AddressFamily.InterNetworkV6:
-                                localEqual = httpContext.Connection.RemoteIpAddress != oAuthModel.IPv6LocalObject;
-                                break;
-                        }
-                        if (localEqual && remoteEqual)
+                        if (remoteEqual)
                         {
 
                             validIp = true;
-                            if (checkAuthorisation)
-                            {
-                                UserModel userModel = oAuthModel.UserModel;
-
-                                if (userModel != null)
-                                {
-
-                                    apiAccessGrant = userModel.ApiAccessGranted;
-                                    //string pathUri = httpContext.GetRoute();
-                                    if (userModel.ApiAccessGranted)
-                                    {
-                                        //if (userModel.IsAuthorizedPath(pathUri, context.Request.Method))
-                                        {
-                                            isAuthorizedForUri = true;
-                                        }
-                                    }
-                                }
-                            }
                         }
 
                     }
                 }
 
             }
-            return new CheckLoginResponse(validUserAgent, validIp, isAuthorizedForUri, validToken, tokenExpired, refreshTokenExpired, apiAccessGrant, oAuthModel);
+            return new CheckLoginResponse<AuthModel>(validUserAgent, validIp, tokenExpired, refreshTokenExpired, apiAccessGrant, oAuthModel);
         }
 
-        public async Task<AuthModel> CreateSessionRecord(HttpContext httpContext,UserModel userModel)
+        public async Task<AuthModel> CreateSessionRecord(HttpContext httpContext, UserModel userModel)
         {
             AuthModel authModel = new AuthModel();
             DateTime now = DateTime.Now;

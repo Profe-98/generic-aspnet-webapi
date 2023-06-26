@@ -10,8 +10,7 @@ using Microsoft.Extensions.Caching.Memory;
 using System.Data.Common;
 using WebApiFunction.Data.Web.MIME;
 using WebApiFunction.Application.Model.Internal;
-using WebApiFunction.Application.Model.Database.MySql;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
+using WebApiFunction.Application.Model.Database.MySQL.Table;
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
@@ -22,15 +21,13 @@ using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
 using WebApiFunction.Collections;
-using WebApiFunction.Controller;
+using WebApiFunction.Web.AspNet.Controller;
 using WebApiFunction.Data;
 using WebApiFunction.Data.Web;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Database;
-using WebApiFunction.Database.MySQL;
-using WebApiFunction.Database.MySQL.Data;
-using WebApiFunction.Filter;
+using WebApiFunction.Web.AspNet.Filter;
 using WebApiFunction.Formatter;
 using WebApiFunction.LocalSystem.IO.File;
 using WebApiFunction.Log;
@@ -49,43 +46,40 @@ using WebApiFunction.Web.AspNet;
 using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
-using WebApiFunction.Application.Controller.DapperModules;
-using WebApiFunction.Application.Model.Database.MySql.Dapper.Context;
+using Microsoft.Extensions.DependencyInjection;
+using WebApiFunction.Application.Model.Database.MySQL.Dapper.Context;
+using WebApiFunction.Application.Model.Database.MySQL;
+using Dapper;
 
 namespace WebApiFunction.Application.Controller.Modules
 {
-    public class AbstractBackendModule<T> : IDisposable
-        where T : AbstractModel
+    public class AbstractBackendModule<T> : IAbstractBackendModule<T>, IDisposable where T : AbstractModel
     {
         #region Private
         private readonly ICachingHandler _cachingHandler;
-        private readonly IScopedDatabaseHandler _db = null;
-        private readonly IAbstractDapperRepository<T> _abstractDapperRepository;
-        private readonly MysqlDapperContext _mysqlDapperContext;
+        private readonly ISingletonDatabaseHandler _db = null;
+        private IMysqlDapperContext _mysqlDapperContext;
         #endregion
-        public IScopedDatabaseHandler Db
+        public ISingletonDatabaseHandler Db
         {
             get
             {
                 return _db;
             }
         }
+
+        public IMysqlDapperContext MysqlDapperContext => _mysqlDapperContext;
+
         #region Ctor
-        public AbstractBackendModule(IScopedDatabaseHandler databaseHandler, ICachingHandler cachingHandler,WebApiFunction.Application.Model.Database.MySql.Dapper.Context.MysqlDapperContext mysqlDapperContext)
+        public AbstractBackendModule(
+            ISingletonDatabaseHandler databaseHandler, 
+            ICachingHandler cachingHandler,
+            IMysqlDapperContext mysqlDapperContext)
         {
             _cachingHandler = cachingHandler;
             _db = databaseHandler;
             _mysqlDapperContext = mysqlDapperContext;
-            _abstractDapperRepository = InitDapper();
-            string t = typeof(T).Name;
-        }
-        private IAbstractDapperRepository<T> InitDapper()
-        {
 
-            Type dapperType = typeof(AbstractDapperRepository<>);
-            var newT = dapperType.MakeGenericType(typeof(T));
-            var dapperInstance = (IAbstractDapperRepository<T>)Activator.CreateInstance(newT,args: new object[] { _mysqlDapperContext });
-            return dapperInstance;
         }
         ~AbstractBackendModule()
         {
@@ -95,6 +89,7 @@ namespace WebApiFunction.Application.Controller.Modules
         #region Methods
         private async Task<QueryResponseData> SqlOp(T model, SQLDefinitionProperties.SQL_STATEMENT_ART stmnt, DbTransaction transaction = null)
         {
+
             string query = model.GenerateQuery(stmnt, null, model).ToString();
             QueryResponseData dt = await Db.ExecuteQuery<T>(query, model, transaction: transaction);
             return dt;
@@ -103,6 +98,7 @@ namespace WebApiFunction.Application.Controller.Modules
         private async Task<QueryResponseData<T>> SqlOp(T model, SQLDefinitionProperties.SQL_STATEMENT_ART stmnt, T whereClauseValueObject, DbTransaction transaction = null)
         {
             string query = model.GenerateQuery(stmnt, whereClauseValueObject, model).ToString();
+            model.Uuid = whereClauseValueObject.Uuid;
             QueryResponseData<T> dt = await Db.ExecuteQueryWithMap<T>(query, model, transaction: transaction);
             return dt;
         }
@@ -158,7 +154,13 @@ namespace WebApiFunction.Application.Controller.Modules
             return response;
         }
 
-
+        public AbstractBackendModule<T> BackendModule
+        {
+            get
+            {
+                return this;
+            }
+        }
         public void Dispose()
         {
             GC.SuppressFinalize(this);

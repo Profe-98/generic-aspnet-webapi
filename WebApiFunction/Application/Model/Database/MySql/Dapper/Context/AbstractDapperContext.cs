@@ -7,18 +7,19 @@ using System.Text;
 using System.Threading.Tasks;
 using WebApiFunction.Configuration;
 
-namespace WebApiFunction.Application.Model.Database.MySql.Dapper.Context
+namespace WebApiFunction.Application.Model.Database.MySQL.Dapper.Context
 {
-    public class MysqlDapperContext
+    public class AbstractDapperContext : IMysqlDapperContext
     {
         private readonly IAppconfig _config;
         private readonly string _connectionString;
-        public MysqlDapperContext(IAppconfig appconfig)
+        private MySqlConnection _connection;
+        public AbstractDapperContext(IAppconfig appconfig)
         {
             _config = appconfig;
             _connectionString = _config.AppServiceConfiguration.DatabaseConfigurationModel.MysqlConnectionString.ToString();
 
         }
-        public IDbConnection GetConnection() => new MySqlConnection(_connectionString);
+        public MySqlConnection GetConnection() => _connection = _connection??new MySqlConnection(_connectionString);
     }
 }

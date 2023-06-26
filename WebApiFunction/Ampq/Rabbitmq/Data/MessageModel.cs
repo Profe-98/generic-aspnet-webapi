@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Collections;
 using System.Collections.Generic;
-using WebApiFunction.Application.Model.Database.MySql;
+using WebApiFunction.Application.Model.Database.MySQL;
 
 namespace WebApiFunction.Ampq.Rabbitmq.Data
 {

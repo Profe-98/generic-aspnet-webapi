@@ -10,8 +10,6 @@ using System.Text;
 using MySql.Data.MySqlClient;
 using WebApiFunction.Data.Web.MIME;
 using WebApiFunction.Application.Model.Internal;
-using WebApiFunction.Application.Model.Database.MySql;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
@@ -19,18 +17,15 @@ using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
 using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
-using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
 using WebApiFunction.Collections;
-using WebApiFunction.Controller;
+using WebApiFunction.Web.AspNet.Controller;
 using WebApiFunction.Data;
 using WebApiFunction.Data.Web;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Database;
-using WebApiFunction.Database.MySQL;
-using WebApiFunction.Database.MySQL.Data;
-using WebApiFunction.Filter;
+using WebApiFunction.Web.AspNet.Filter;
 using WebApiFunction.Formatter;
 using WebApiFunction.LocalSystem.IO.File;
 using WebApiFunction.Log;
@@ -50,8 +45,12 @@ using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
 using WebApiFunction.Startup;
+using WebApiFunction.Application.Controller.Modules;
+using System.Runtime.CompilerServices;
+using WebApiFunction.Application.Model.Database.MySQL.Data;
+using WebApiFunction.Application.Model.Database.MySQL.Table;
 
-namespace WebApiFunction.Application.Model.Database.MySql
+namespace WebApiFunction.Application.Model.Database.MySQL
 {
     public class AbstractModel : IDisposable
     {
@@ -207,35 +206,35 @@ namespace WebApiFunction.Application.Model.Database.MySql
         #endregion Public
 
         [JsonPropertyName("uuid")]
-        [DatabaseColumnPropertyAttribute("uuid", MySqlDbType.String)]
+        [DatabaseColumnProperty("uuid", MySqlDbType.String)]
         virtual public Guid Uuid { get; set; } = Guid.Empty;
 
         [DataType(DataType.DateTime, ErrorMessage = DataValidationMessageStruct.WrongDateTimeFormatMsg)]
         [JsonPropertyName("creation_datetime")]
-        [DatabaseColumnPropertyAttribute("creation_datetime", MySqlDbType.DateTime)]
+        [DatabaseColumnProperty("creation_datetime", MySqlDbType.DateTime)]
         virtual public DateTime CreationDateTime { get; set; }
 
         [JsonPropertyName("active")]
-        [DatabaseColumnPropertyAttribute("active", MySqlDbType.Bit)]
+        [DatabaseColumnProperty("active", MySqlDbType.Bit)]
         virtual public bool Active { get; set; } = false;
 
         [DataType(DataType.DateTime, ErrorMessage = DataValidationMessageStruct.WrongDateTimeFormatMsg)]
         [JsonPropertyName("activation_datetime")]
-        [DatabaseColumnPropertyAttribute("activation_datetime", MySqlDbType.DateTime)]
+        [DatabaseColumnProperty("activation_datetime", MySqlDbType.DateTime)]
         virtual public DateTime ActivationDateTime { get; set; }
 
         [JsonPropertyName("deleted")]
-        [DatabaseColumnPropertyAttribute("deleted", MySqlDbType.Bit, true)]
+        [DatabaseColumnProperty("deleted", MySqlDbType.Bit, true)]
         virtual public bool Deleted { get; set; }
 
         [DataType(DataType.DateTime, ErrorMessage = DataValidationMessageStruct.WrongDateTimeFormatMsg)]
         [JsonPropertyName("deletion_datetime")]
-        [DatabaseColumnPropertyAttribute("deletion_datetime", MySqlDbType.DateTime)]
+        [DatabaseColumnProperty("deletion_datetime", MySqlDbType.DateTime)]
         virtual public DateTime DeletionDateTime { get; set; }
 
         [DataType(DataType.DateTime, ErrorMessage = DataValidationMessageStruct.WrongDateTimeFormatMsg)]
         [JsonPropertyName("changed_datetime")]
-        [DatabaseColumnPropertyAttribute("changed_datetime", MySqlDbType.DateTime)]
+        [DatabaseColumnProperty("changed_datetime", MySqlDbType.DateTime)]
         virtual public DateTime ChangedDateTime { get; set; }
 
         #region Ctor & Dtor
@@ -246,6 +245,27 @@ namespace WebApiFunction.Application.Model.Database.MySql
         }
         #endregion Ctor & Dtor
         #region Methods
+        /// <summary>
+        /// Mapped the data from the AbstractModel Type to a concrete Type of DataTransferModelAbstract
+        /// The Propertynames must be equal to map the data correct from A to B
+        /// </summary>
+        /// <typeparam name="T">Concrete Implementation of DataTransferModelAbstract</typeparam>
+        /// <returns></returns>
+        public T GetMappedDataTransferModel<T>() where T : DataTransferModelAbstract
+        {
+            T mappedDataTransferModel = Activator.CreateInstance<T>();
+            var dtoProperties = mappedDataTransferModel.GetType().GetProperties()?.ToList();
+            var currentInstanceProperties = this.GetType().GetProperties()?.ToList();
+            foreach(var prop in currentInstanceProperties)
+            {
+                PropertyInfo foundInDto = dtoProperties.Find(x=>x.Name == prop.Name && x.PropertyType ==prop.PropertyType);
+                if (foundInDto == null)
+                    continue;
+                var val = prop.GetValue(this);
+                foundInDto.SetValue(mappedDataTransferModel, val);
+            }
+            return mappedDataTransferModel; 
+        }
         public string GetDisplayName(string str)
         {
             return str.Replace("_", "");
@@ -352,13 +372,13 @@ namespace WebApiFunction.Application.Model.Database.MySql
         /// <typeparam name="T">Generic System.Attribute which should by find and extracted by given MemberInfo</typeparam>
         /// <param name="member">The MemberInfo of a specific class</param>
         /// <returns>Generic System.Attribute with all matching System.Attributes T by given MemberInfo member</returns>
-        private T GetMemberAttribute<T>(MemberInfo member) where T : System.Attribute
+        private T GetMemberAttribute<T>(MemberInfo member) where T : Attribute
         {
             T responseValue = null;
             List<T> attributes = GetMemberAttributes<T>(member);
             if (attributes.Count != 0)
             {
-                System.Attribute attribute = attributes.First();
+                Attribute attribute = attributes.First();
                 if (attribute != null)
                 {
                     T databaseColumn = (T)attribute;
@@ -373,7 +393,7 @@ namespace WebApiFunction.Application.Model.Database.MySql
         /// <typeparam name="T">Generic System.Attribute which should by find and extracted by given MemberInfo</typeparam>
         /// <param name="member">The MemberInfo of a specific class</param>
         /// <returns>List<System.Attribute> with all matching System.Attributes T by given MemberInfo member</returns>
-        private List<T> GetMemberAttributes<T>(MemberInfo member) where T : System.Attribute
+        private List<T> GetMemberAttributes<T>(MemberInfo member) where T : Attribute
         {
             List<T> attributes = member.GetCustomAttributes(typeof(T)).ToList().OfType<T>().ToList();
             return attributes;
@@ -437,7 +457,7 @@ namespace WebApiFunction.Application.Model.Database.MySql
             string tablename = ((AbstractModel)currentClassInstance).DatabaseTable;
             ClassModelWrapper classModelWrapper = SQLDefinitionProperties.BackendTablesEx.ContainsKey(tablename) ? SQLDefinitionProperties.BackendTablesEx[tablename] : null;
             if (classModelWrapper == null)
-                throw new InvalidOperationException("classModelWrapper for table '"+tablename+"' is not existend, target class could be in wrong namespace (targetnamespace is defined in startup class via "+nameof(IWebApiStartup)+")");
+                throw new InvalidOperationException("classModelWrapper for table '" + tablename + "' is not existend, target class could be in wrong namespace (targetnamespace is defined in startup class via " + nameof(IWebApiStartup) + ")");
             object instance = Activator.CreateInstance(currentClassInstance.GetType());
 
             List<PropertyInfo> defaultPropertiesWithValues = instance.GetType().GetProperties().ToList();
@@ -605,7 +625,7 @@ namespace WebApiFunction.Application.Model.Database.MySql
                             object value = propertyInfo.GetValue(customWhereClauseObject);
                             DatabaseColumnPropertyAttribute databaseColumnPropertyAttribute = propertyInfo.GetCustomAttribute<DatabaseColumnPropertyAttribute>();
                             string columnName = propertyInfo.Name;
-                            if(databaseColumnPropertyAttribute != null)
+                            if (databaseColumnPropertyAttribute != null)
                             {
                                 columnName = databaseColumnPropertyAttribute.ColumnName;
                             }
@@ -684,6 +704,8 @@ namespace WebApiFunction.Application.Model.Database.MySql
         /// <returns>PropertyInfo of found member</returns>
         public PropertyInfo FindPropertyByColumnName(object instance, DatabaseColumnPropertyAttribute databaseColumn)
         {
+            if (databaseColumn == null)
+                return null;
             if (instance != null)
             {
                 List<PropertyInfo> propertyInfos = instance.GetType().GetProperties().ToList();

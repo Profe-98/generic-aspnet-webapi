@@ -49,7 +49,7 @@ namespace WebApiFunction.Data.Format.Json
         public static JsonSerializerOptions Settings = new JsonSerializerOptions
         {
             WriteIndented = true,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, 
         };
 
         public event EventHandler<Exception> ExceptionOccuredWhileSerializingEvent;
@@ -111,7 +111,7 @@ namespace WebApiFunction.Data.Format.Json
             }
             return default;
         }
-        public Dictionary<string, dynamic> JsonDeserialize(string json, JsonSerializerOptions presets = null)
+        public dynamic JsonDeserialize(string json, JsonSerializerOptions presets = null)
         {
             if (string.IsNullOrEmpty(json))
                 return default;
@@ -120,9 +120,9 @@ namespace WebApiFunction.Data.Format.Json
                 presets = Settings;
             try
             {
-                Dictionary<string, dynamic> response = null;
+                dynamic response = null;
 
-                response = JsonSerializer.Deserialize<Dictionary<string, dynamic>>(json, presets);
+                response = JsonSerializer.Deserialize<dynamic>(json, presets);
                 return response;
             }
             catch (Exception ex)
@@ -186,4 +186,5 @@ namespace WebApiFunction.Data.Format.Json
             return responseValue;
         }
     }
+
 }

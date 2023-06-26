@@ -4,7 +4,7 @@ using MySql.Data.MySqlClient;
 using WebApiFunction.Configuration;
 using WebApiFunction.Database;
 
-namespace WebApiFunction.Application.Model.Database.MySql.Entity
+namespace WebApiFunction.Application.Model.Database.MySQL.Table
 {
     [Serializable]
     public class SignalrHubMethodModel : AbstractModel
@@ -18,23 +18,23 @@ namespace WebApiFunction.Application.Model.Database.MySql.Entity
         [DataType(DataType.Text)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(45, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("class_location")]
-        [DatabaseColumnPropertyAttribute("class_location", MySqlDbType.String)]
+        [DatabaseColumnProperty("class_location", MySqlDbType.String)]
         public string ClassLocation { get; set; }
 
         [DataType(DataType.Text)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(45, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("access_modifyer")]
-        [DatabaseColumnPropertyAttribute("access_modifyer", MySqlDbType.String)]
+        [DatabaseColumnProperty("access_modifyer", MySqlDbType.String)]
         public string AccessModifiyer { get; set; }
 
         [DataType(DataType.Text)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(45, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("name")]
-        [DatabaseColumnPropertyAttribute("name", MySqlDbType.String)]
+        [DatabaseColumnProperty("name", MySqlDbType.String)]
         public string Name { get; set; }
 
         [JsonPropertyName("signalr_hub_uuid")]
-        [DatabaseColumnPropertyAttribute("signalr_hub_uuid", MySqlDbType.String)]
+        [DatabaseColumnProperty("signalr_hub_uuid", MySqlDbType.String)]
         public Guid SignalrHubUuid { get; set; } = Guid.Empty;
 
 

@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Security.Claims;
 using System.ComponentModel;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
+using WebApiFunction.Application.Model.Database.MySQL.Table;
 
 namespace WebApiFunction.Web.Authentification.JWT
 {

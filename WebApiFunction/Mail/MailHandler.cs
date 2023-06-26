@@ -16,7 +16,8 @@ using System.Collections.Concurrent;
 using WebApiFunction.Configuration;
 using WebApiFunction.Log;
 using WebApiFunction.Security.Encryption;
-using WebApiFunction.Controller;
+using MySqlX.XDevAPI;
+using WebApiFunction.Web.AspNet.Controller;
 
 namespace WebApiFunction.Mail
 {
@@ -67,7 +68,16 @@ namespace WebApiFunction.Mail
         protected string UserImap;
         protected string PasswordImap;
         public readonly int TimeoutImap;
-        public readonly string LoggerFileImap;
+        public readonly string LoggerFileImapFolder;
+        public static string LoggerFileNamePostfixImap  = "imap.log";
+        public string LoggerFileImapPath
+        {
+            get
+            {
+                string fileName = string.Format("{0}-{1}.{2}",DateTime.Now.Year, DateTime.Now.Month, LoggerFileNamePostfixImap);
+                return Path.Combine(LoggerFileImapFolder, fileName);
+            }
+        }
 
         public readonly string ServerSmtp;
         public readonly int PortSmtp;
@@ -75,7 +85,16 @@ namespace WebApiFunction.Mail
         protected string UserSmtp;
         protected string PasswordSmtp;
         public readonly int TimeoutSmtp;
-        public readonly string LoggerFileSmtp;
+        public readonly string LoggerFileSmtpFolder;
+        public static string LoggerFilePostfixSmtp = "smtp.log";
+        public string LoggerFileSmtpPath
+        {
+            get
+            {
+                string fileName = string.Format("{0}-{1}.{2}", DateTime.Now.Year, DateTime.Now.Month, LoggerFilePostfixSmtp);
+                return Path.Combine(LoggerFileSmtpFolder, fileName);
+            }
+        }
 
         private readonly ILogger<MailHandler> _logger;
 
@@ -95,23 +114,24 @@ namespace WebApiFunction.Mail
         {
             _logger = new LoggerFactory().CreateLogger<MailHandler>();
 
+            #region IMAP
             UserImap = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.User;
             PasswordImap = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.Password;
             ServerImap = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.Server;
             PortImap = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.Port;
             SecureSocketOptionsImap = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.SecureSocketOptions;
-
             TimeoutImap = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.Timeout;
-            LoggerFileImap = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.LoggerFile;
-
-            UserSmtp = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.User;
-            PasswordSmtp = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.Password;
-            ServerSmtp = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.Server;
-            PortSmtp = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.Port;
-            SecureSocketOptionsSmtp = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.SecureSocketOptions;
-
-            TimeoutSmtp = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.Timeout;
-            LoggerFileSmtp = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.LoggerFile;
+            LoggerFileImapFolder = appconfig.AppServiceConfiguration.MailConfigurationModel.ImapSettings.LoggerFolderPath;
+            #endregion
+            #region SMTP
+            UserSmtp = appconfig.AppServiceConfiguration.MailConfigurationModel.SmtpSettings.User;
+            PasswordSmtp = appconfig.AppServiceConfiguration.MailConfigurationModel.SmtpSettings.Password;
+            ServerSmtp = appconfig.AppServiceConfiguration.MailConfigurationModel.SmtpSettings.Server;
+            PortSmtp = appconfig.AppServiceConfiguration.MailConfigurationModel.SmtpSettings.Port;
+            SecureSocketOptionsSmtp = appconfig.AppServiceConfiguration.MailConfigurationModel.SmtpSettings.SecureSocketOptions;
+            TimeoutSmtp = appconfig.AppServiceConfiguration.MailConfigurationModel.SmtpSettings.Timeout;
+            LoggerFileSmtpFolder = appconfig.AppServiceConfiguration.MailConfigurationModel.SmtpSettings.LoggerFolderPath;
+            #endregion
             Init();
         }
 
@@ -211,10 +231,10 @@ namespace WebApiFunction.Mail
                 IMailFolder mailFolder = folderName == null ?
                         imapClient.Inbox : await imapClient.GetFolderAsync(folderName);
 
-                FolderAccess acces = mailFolder.Open(FolderAccess.ReadOnly);
+                FolderAccess acces = await mailFolder.OpenAsync(FolderAccess.ReadOnly);
                 CurrentFolder = mailFolder;
 
-                IList<UniqueId> uids = mailFolder.Search(searchQuery);
+                IList<UniqueId> uids = await mailFolder.SearchAsync(searchQuery);
                 /*System.Collections.Concurrent.BlockingCollection<UniqueId> threadSafeList = new System.Collections.Concurrent.BlockingCollection<UniqueId>();
                 uids.ToList().ForEach(x => threadSafeList.Add(x));
                 threadSafeList..ForEach(async (x) => response.Add(x, await Utils.CallAsyncFunc<UniqueId, MimeMessage>(x, async (x) => await mailFolder.GetMessageAsync(x))));
@@ -224,9 +244,9 @@ namespace WebApiFunction.Mail
                     var mime = await mailFolder.GetMessageAsync(uid);
                     response.Add(uid, mime);
                 }
-                mailFolder.Close();
+                await mailFolder.CloseAsync();
                 if (!wasNotInit)
-                    imapClient.Disconnect(true);
+                    await imapClient.DisconnectAsync(true);
             }
             catch (Exception ex)
             {
@@ -240,12 +260,12 @@ namespace WebApiFunction.Mail
             List<UniqueId> response = new List<UniqueId>();
             bool wasNotInit = imapClient != null;
             imapClient = wasNotInit ? imapClient : await CreateImapConnection(user, password);
-            FolderAccess acces = mailFolder.Open(FolderAccess.ReadOnly);
+            FolderAccess acces = await mailFolder.OpenAsync(FolderAccess.ReadOnly);
 
-            IList<UniqueId> uids = mailFolder.Search(searchQuery);
-            mailFolder.Close();
+            IList<UniqueId> uids = await mailFolder.SearchAsync(searchQuery);
+            await mailFolder.CloseAsync();
             if (!wasNotInit)
-                imapClient.Disconnect(true);
+                await imapClient.DisconnectAsync(true);
             return response;
         }
         public async Task<List<IMailFolder>> DeleteFolder(IMailFolder mailFolder, string user = null, string password = null, ImapClient imapClient = null)
@@ -260,7 +280,7 @@ namespace WebApiFunction.Mail
             {
                 try
                 {
-                    FolderAccess folderAccessSource = x.Open(FolderAccess.ReadWrite);
+                    FolderAccess folderAccessSource = await x.OpenAsync(FolderAccess.ReadWrite);
                     await x.DeleteAsync();
                     mailFolder.Remove(x);
                     x.Close();
@@ -272,7 +292,7 @@ namespace WebApiFunction.Mail
 
             });
             if (!wasNotInit)
-                imapClient.Disconnect(true);
+                await imapClient.DisconnectAsync(true);
             return mailFolder;
         }
         public async Task<List<UniqueId>> DeleteMail(IMailFolder mailFolder, UniqueId uniqueId, string user = null, string password = null, ImapClient imapClient = null)
@@ -288,7 +308,7 @@ namespace WebApiFunction.Mail
         public async Task<MimeMessage> SendMail(MimeMessage mimeMessage, string user = null, string password = null, SmtpClient smtpClient = null)
         {
             List<MimeMessage> messages = await SendMails(new List<MimeMessage> { mimeMessage }, user, password, smtpClient);
-            return messages.Count == 0 ? null : messages[0];
+            return messages == null||messages.Count == 0 ? null : messages[0];
         }
         public async Task<List<MimeMessage>> SendMails(List<MimeMessage> mimeMessages, string user = null, string password = null, SmtpClient smtpClient = null)
         {
@@ -296,11 +316,13 @@ namespace WebApiFunction.Mail
             try
             {
                 smtpClient = wasNotInit ? smtpClient : await CreateSmtpConnection(user, password);
-                mimeMessages.ForEach(async (x) =>
+                if (smtpClient == null)
+                    return null;
+                mimeMessages.ForEach((x) =>
                 {
                     try
                     {
-                        await smtpClient.SendAsync(x);
+                        smtpClient.Send(x);
                     }
                     catch (Exception ex)
                     {
@@ -309,7 +331,7 @@ namespace WebApiFunction.Mail
 
                 });
                 if (!wasNotInit)
-                    smtpClient.Disconnect(true);
+                    await smtpClient.DisconnectAsync(true);
             }
             catch (Exception ex)
             {
@@ -434,17 +456,17 @@ namespace WebApiFunction.Mail
 
                 }
             }
-            source.Close();
+            await source.CloseAsync();
             //destination.Close();
             if (!wasNotInit)
-                imapClient.Disconnect(true);
+                await imapClient.DisconnectAsync(true);
             return response;
         }
         public async Task<List<UniqueId>> MarkMailsAs(IMailFolder mailFolder, List<UniqueId> uniqueIds, MessageFlags messageFlags, string user = null, string password = null, ImapClient imapClient = null)
         {
             bool wasNotInit = imapClient != null;
             imapClient = wasNotInit ? imapClient : await CreateImapConnection(user, password);
-            FolderAccess folderAccessDest = mailFolder.Open(FolderAccess.ReadWrite);
+            FolderAccess folderAccessDest = await mailFolder.OpenAsync(FolderAccess.ReadWrite);
             uniqueIds.ForEach(async (x) =>
             {
                 try
@@ -458,9 +480,9 @@ namespace WebApiFunction.Mail
                 }
 
             });
-            mailFolder.Close();
+            await mailFolder.CloseAsync();
             if (!wasNotInit)
-                imapClient.Disconnect(true);
+                await imapClient.DisconnectAsync(true);
             return uniqueIds;
         }
 
@@ -472,12 +494,15 @@ namespace WebApiFunction.Mail
                 ImapClient imapClient = null;
                 try
                 {
-                    imapClient = new ImapClient(new ProtocolLogger(LoggerFileImap, true));
+                    if(!Directory.Exists(LoggerFileImapFolder))
+                    {
+                        Directory.CreateDirectory(LoggerFileImapFolder);
+                    }
+                    imapClient = new ImapClient(new ProtocolLogger(LoggerFileImapPath, true));
                 }
                 catch (Exception ex)
                 {
-                    DateTime dateTime = DateTime.Now;
-                    FileStream fileStream = File.Create(dateTime.ToString("yyyy_MM_dd") + "_" + dateTime.Ticks + "_" + LoggerFileImap);
+                    FileStream fileStream = File.Create(LoggerFileImapPath);
                     imapClient = new ImapClient(new ProtocolLogger(fileStream, true));
                 }
 
@@ -485,7 +510,7 @@ namespace WebApiFunction.Mail
                 UserImap = UserImap??user;
                 PasswordImap = PasswordImap??password;
                 await imapClient.ConnectAsync(ServerImap, PortImap, SecureSocketOptionsImap);
-                await imapClient.AuthenticateAsync(user, password);
+                await imapClient.AuthenticateAsync(UserImap, PasswordImap);
                 return imapClient;
             }
             catch (Exception ex)
@@ -500,12 +525,16 @@ namespace WebApiFunction.Mail
                 SmtpClient smtpClient = null;
                 try
                 {
-                    smtpClient = new SmtpClient(new ProtocolLogger(LoggerFileSmtp, true));
+                    if (!Directory.Exists(LoggerFileSmtpFolder))
+                    {
+                        Directory.CreateDirectory(LoggerFileSmtpFolder);
+                    }
+                    smtpClient = new SmtpClient(new ProtocolLogger(LoggerFileSmtpPath, true));
                 }
                 catch (Exception ex)
                 {
                     DateTime dateTime = DateTime.Now;
-                    FileStream fileStream = File.Create(dateTime.ToString("yyyy_MM_dd") + "_" + dateTime.Ticks + "_" + LoggerFileSmtp);
+                    FileStream fileStream = File.Create(LoggerFileSmtpPath);
                     smtpClient = new SmtpClient(new ProtocolLogger(fileStream, true));
                 }
                 smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
@@ -513,8 +542,9 @@ namespace WebApiFunction.Mail
 
                 UserSmtp = UserSmtp ??user;
                 PasswordSmtp = PasswordSmtp ??password;
-                await smtpClient.ConnectAsync(ServerSmtp, PortSmtp, SecureSocketOptionsSmtp);
-                await smtpClient.AuthenticateAsync(user, password);
+                smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                await smtpClient.ConnectAsync(ServerSmtp, PortSmtp, SecureSocketOptions.SslOnConnect);
+                await smtpClient.AuthenticateAsync(UserSmtp, PasswordSmtp);
                 return smtpClient;
             }
             catch (Exception ex)

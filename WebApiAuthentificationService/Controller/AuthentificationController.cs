@@ -66,47 +66,11 @@ namespace WebApiAuthentificationService.Controller
         {
             MethodDescriptor methodInfo = _webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = this.GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
             AuthModel authModel = null;
-            bool jwtByAuthInit = false;
-            if (jwtByAuthInit)
+            if (authUserModel != null)
             {
-                if (!this.ModelState.IsValid)
+                if (this.ModelState.IsValid)
                 {
-
-                    string authHttpHeaderKey = HttpContext.Request.Headers.Keys.ToList().Find(x => x == "Authorization");
-                    if (authHttpHeaderKey == null)
-                    {
-                        return JsonApiErrorResult(new List<ApiErrorModel> {
-                new ApiErrorModel{ Code = ApiErrorModel.ERROR_CODES.HTTP_REQU_BAD, Detail = "bad request" }
-            }, HttpStatusCode.BadRequest, "an error occurred", "authHttpHeaderKey == null", methodInfo);
-                    }
-                    if (authHttpHeaderKey != null)
-                    {
-                        string token = null;
-                        string authStr = HttpContext.Request.Headers[authHttpHeaderKey];
-                        if (!String.IsNullOrEmpty(authStr))
-                        {
-                            string[] stringSplitter = authStr.Split(' ');
-                            if (stringSplitter.Length == 2)
-                            {
-                                token = stringSplitter[1];
-                            }
-                        }
-                        authModel = (!String.IsNullOrEmpty(token))
-                            ?
-                            await _authHandler.Login(HttpContext, token)
-                            :
-                            null;
-                    }
-                }
-            }
-            else
-            {
-                if (authUserModel != null)
-                {
-                    if (this.ModelState.IsValid)
-                    {
-                        authModel = await _authHandler.Login(HttpContext, authUserModel);
-                    }
+                    authModel = await _authHandler.Login(HttpContext, authUserModel);
                 }
             }
             AreaAttribute currentArea = this.GetArea();
@@ -181,7 +145,7 @@ namespace WebApiAuthentificationService.Controller
         public async Task<ActionResult> Validate([FromBody] AuthentificationTokenModel authentificationTokenModel)
         {
             MethodDescriptor methodInfo = _webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = this.GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
-            var response = await _authHandler.CheckLogin(HttpContext,authentificationTokenModel.Token, true);
+            var response = await _authHandler.CheckLogin(HttpContext,authentificationTokenModel.Token);
             if(response.IsAuthorizatiOk)
             {
                 return Ok();

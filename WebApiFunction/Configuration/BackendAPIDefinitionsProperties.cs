@@ -35,6 +35,8 @@ namespace WebApiFunction.Configuration
         public const string ErrorControllerName = "error";
         public const int RegisterActivationExpInDays = 7;
         public const int RegisterActivationCodeLen = 4;
+        public const int PasswordResetCodeLen = 6;
+        public const int PasswordResetExpInDays = 7;
 
         public const string NoReplyMailAddress = "no-reply@helixdb.org";
         public const string CmKeyFrontEndUser = "Front End User";

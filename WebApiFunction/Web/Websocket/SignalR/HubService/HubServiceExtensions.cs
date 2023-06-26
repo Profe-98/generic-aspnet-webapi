@@ -15,7 +15,7 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubService
 {
     public static class HubServiceExtensions
     {
-        public static Dictionary<string,HubService> RegisteredHubServices = new Dictionary<string, HubService>();
+        public static Dictionary<string,IHubService> RegisteredHubServices = new Dictionary<string, IHubService>();
         public static IEndpointRouteBuilder RegisterSignalRHubs(this IEndpointRouteBuilder builder, IServiceProvider serviceProvider)
         {
             Type builderType = typeof(HubEndpointRouteBuilderExtensions);
@@ -30,7 +30,7 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubService
                     foreach (Type type in types)
                     {
                         var attr = type.GetCustomAttribute<HubServiceRouteAttribute>();
-                        if (attr != null && type.BaseType == typeof(HubService))
+                        if (attr != null && type.GetInterface(nameof(IHubService))!=null)
                         {
                             var ctors = type.GetConstructors();
                             if (ctors.Length > 1)
@@ -50,7 +50,7 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubService
                                 i++;
                             }
 
-                            var hubServiceInstance = (HubService)Activator.CreateInstance(type, args: ctorArgsFilled);
+                            var hubServiceInstance = (IHubService)Activator.CreateInstance(type, args: ctorArgsFilled);
                             if(hubServiceInstance==null)
                                 throw new NotImplementedException();  
                             var methodParams = new List<Type> { typeof(IEndpointRouteBuilder), typeof(string) };
@@ -65,7 +65,7 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubService
                             var callParams = new List<object> { builder, attr.Route ?? ("/" + type.Name.ToLower()) };
                             if (hubServiceInstance.HttpConnectionDispatcherOptions != null)
                             {
-                                ;
+                                
                                 var action = new Action<HttpConnectionDispatcherOptions>(x => { });
                                 action(hubServiceInstance.HttpConnectionDispatcherOptions);
 

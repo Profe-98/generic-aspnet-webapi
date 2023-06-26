@@ -9,7 +9,7 @@ using WebApiFunction.Database;
 using MySql.Data.MySqlClient;
 using WebApiFunction.Configuration;
 
-namespace WebApiFunction.Application.Model.Database.MySql.Helix
+namespace WebApiFunction.Application.Model.Database.MySQL.Helix
 {
     /// <summary>
     /// INFO: Mail attachments would be stored on filesystem with the uuid in filename unindependent from extension + the path is given by environment config and not separated stored in database

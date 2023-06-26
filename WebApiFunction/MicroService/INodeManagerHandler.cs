@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
+using WebApiFunction.Application.Model.Database.MySQL.Table;
 
 namespace WebApiFunction.MicroService
 {

@@ -31,8 +31,6 @@ using WebApiFunction.Mail;
 using WebApiFunction.Data.Web.MIME;
 using WebApiFunction.Application.Controller.Modules;
 using WebApiFunction.Application.Model.Internal;
-using WebApiFunction.Application.Model.Database.MySql;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
@@ -43,14 +41,10 @@ using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
 using WebApiFunction.Collections;
-using WebApiFunction.Controller;
 using WebApiFunction.Data;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Database;
-using WebApiFunction.Database.MySQL;
-using WebApiFunction.Database.MySQL.Data;
-using WebApiFunction.Filter;
 using WebApiFunction.Formatter;
 using WebApiFunction.LocalSystem.IO.File;
 using WebApiFunction.Log;
@@ -69,22 +63,89 @@ using WebApiFunction.Web.AspNet;
 using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
-using WebApiFunction.Healthcheck;
 using WebApiFunction.Application;
 using WebApiFunction.Web.Authentification.JWT;
 using WebApiFunction.Database.Dapper.Converter;
-using WebApiFunction.Application.Model.Database.MySql.Dapper.TypeMapper;
-using WebApiFunction.Application.Model.Database.MySql.Dapper.Context;
 using Microsoft.AspNetCore.SignalR;
 using WebApiFunction.Web.Websocket.SignalR.HubService;
 using Microsoft.Identity.Client;
 using WebApiApplicationService;
+using System.Runtime.CompilerServices;
+using System.ComponentModel;
+using InfluxDB.Client.Core.Exceptions;
+using Microsoft.AspNetCore.Http.Connections;
+using WebApiFunction.Application.Model.Database.MySQL.Dapper.TypeMapper;
+using WebApiFunction.Application.Model.Database.MySQL.Dapper.Context;
+using WebApiFunction.Application.Model.Database.MySQL;
+using WebApiFunction.Web.AspNet.Filter;
+using WebApiFunction.Web.AspNet.Healthcheck;
+using WebApiFunction.Web.AspNet.Controller;
 
 namespace WebApiApplicationServiceV2
 {
     public static class WebApiApplicationServiceExtension
     {
+        private static bool IsDerivedFromType(Type derivedType, Type baseType)
+        {
+            if (derivedType == baseType)
+                return true;
+
+            Type currentBaseType = derivedType.BaseType;
+            while (currentBaseType != null)
+            {
+                if (currentBaseType == baseType)
+                    return true;
+
+                currentBaseType = currentBaseType.BaseType;
+            }
+
+            return false;
+        }
         private static readonly string AllowOrigin = "api-gateway";
+        public static IServiceCollection AddControllerModules(this IServiceCollection services,
+            ICachingHandler cachingHandler, 
+            ISingletonDatabaseHandler databaseHandler,
+            AbstractDapperContext mysqlDapperContext)
+        {
+            Type builderType = typeof(ServiceCollectionServiceExtensions);
+            if (builderType == null)
+                throw new NotImplementedException();
+            var targetAssembly = Assembly.GetAssembly(typeof(AbstractModel));
+            var allModelsFromRelfection = targetAssembly.GetTypes();
+
+            if(allModelsFromRelfection != null)
+            {
+                var filterForDataModels = allModelsFromRelfection.ToList().FindAll(x => (x.BaseType == typeof(AbstractModel) || IsDerivedFromType(x,typeof(AbstractModel))) && x.Name!=nameof(AbstractModel));
+                
+                if (filterForDataModels != null)
+                {
+                    var backendModuleAbstractType = typeof(AbstractBackendModule<>);
+                    foreach (var item in filterForDataModels)
+                    {
+                        var abstractBackendModuleType = typeof(AbstractBackendModule<>).MakeGenericType(item);
+                        var foundConcreteImplementation = allModelsFromRelfection.ToList().Find(x => (IsDerivedFromType(x, abstractBackendModuleType)));
+
+
+                        var backendModuleType = foundConcreteImplementation == null?backendModuleAbstractType.MakeGenericType(item): foundConcreteImplementation;
+                        var backendModuleInterfaceType = typeof(IAbstractBackendModule<>).MakeGenericType(item);
+                        var backendModuleInstance = Activator.CreateInstance(backendModuleType,databaseHandler,cachingHandler, mysqlDapperContext);
+
+
+
+                        var methodParams = new List<Type> { typeof(IServiceCollection) };
+                        
+                        var f = builderType.GetMethod("AddSingleton",2,methodParams.ToArray());
+                        MethodInfo method = f;
+                        if (method == null)
+                            throw new NotFoundException("IServiceCollection.AddSingleton<T,T2> not found");
+                        method = method.MakeGenericMethod(backendModuleInterfaceType, backendModuleType);
+                        var callParams = new List<object> { services } ;
+                        method.Invoke(services, callParams.ToArray());
+                    }
+                }
+            }
+            return services;
+        }
         public static IServiceCollection AddWebApi(this IServiceCollection services, IConfiguration configuration,string[] databaseEntityNamespace)
         {
             services.AddSingleton<IConfiguration>(configuration);
@@ -136,7 +197,7 @@ namespace WebApiApplicationServiceV2
             services.AddScoped<IJWTHandler, JWTHandler>();
             DataMapperForDapperExtension.UseCustomDataMapperForDapper(databaseEntityNamespace);
             DapperTypeConverterHandler.UseStringToGuidConversion();
-            services.AddSingleton<MysqlDapperContext>();
+            services.AddSingleton<IMysqlDapperContext,AbstractDapperContext>();
 
             services.AddTransient<ITransientDatabaseHandler, MySqlDatabaseHandler>();
             services.AddScoped<IScopedDatabaseHandler, MySqlDatabaseHandler>();
@@ -166,7 +227,8 @@ namespace WebApiApplicationServiceV2
 
             serviceProvider = services.BuildServiceProvider();
             var appConfig = serviceProvider.GetService<IAppconfig>();
-            var databaseService = serviceProvider.GetService<IScopedDatabaseHandler>();
+            var databaseSingletonService = serviceProvider.GetService<ISingletonDatabaseHandler>();
+            var databaseMySqlDapperService = serviceProvider.GetService<AbstractDapperContext>();
             var cacheService = serviceProvider.GetService<ICachingHandler>();
             var avService = serviceProvider.GetService<IScopedVulnerablityHandler>();
             var rabbitMqService = serviceProvider.GetService<IRabbitMqHandler>();
@@ -177,7 +239,7 @@ namespace WebApiApplicationServiceV2
                 {
                     new HealthCheckDescriptor(typeof(HealthCheckMySql),"mysql", HealthStatus.Unhealthy, new object[]
                     {
-                        HealthCheckMySql.CheckMySqlBackend, databaseService
+                        HealthCheckMySql.CheckMySqlBackend, databaseSingletonService
                     })
                 })
                 .AddHealthChecks(new List<HealthCheckDescriptor>()
@@ -208,6 +270,10 @@ namespace WebApiApplicationServiceV2
             {
                 options.InputFormatters.Insert(0, new RequestInputFormatter());
             }).;*/
+
+
+            services.AddControllerModules(cacheService, databaseSingletonService, databaseMySqlDapperService);
+
             services.AddControllers(options =>
             {
                 int minVal = int.MinValue;
@@ -240,6 +306,7 @@ namespace WebApiApplicationServiceV2
             {
 
                 services.AddSignalR(x => {
+
                     x.KeepAliveInterval = TimeSpan.FromSeconds(appConfig.AppServiceConfiguration.SignalRHubConfigurationModel.KeepaliveTimeout);
                     x.ClientTimeoutInterval = TimeSpan.FromSeconds(appConfig.AppServiceConfiguration.SignalRHubConfigurationModel.ClientTimeoutSec);
                     x.EnableDetailedErrors = appConfig.AppServiceConfiguration.SignalRHubConfigurationModel.DebugErrorsDetailedClientside;

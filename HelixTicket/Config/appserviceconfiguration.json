@@ -69,9 +69,9 @@
   "ampq_rabbitmq_configuration": {
     "host": "localhost",
     "port": 5672,
-    "user": "helix",
+    "user": "webapi",
     "password": "admin1234",
-    "virtual_host": "helix",
+    "virtual_host": "webapi",
     "heartbeat_ms": 30000
   },
   "app_paths": {}

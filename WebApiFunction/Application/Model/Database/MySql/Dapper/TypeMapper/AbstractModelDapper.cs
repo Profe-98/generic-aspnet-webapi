@@ -9,9 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using WebApiFunction.Configuration;
 using WebApiFunction.Database;
-using WebApiFunction.Database.MySQL;
 
-namespace WebApiFunction.Application.Model.Database.MySql.Dapper.TypeMapper
+namespace WebApiFunction.Application.Model.Database.MySQL.Dapper.TypeMapper
 {
     public static class DataMapperForDapperExtension
     {

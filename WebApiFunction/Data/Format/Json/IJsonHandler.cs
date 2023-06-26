@@ -25,7 +25,7 @@ namespace WebApiFunction.Data.Format.Json
         public string JsonSerialize<T>(T obj, JsonSerializerOptions presets = null);
         public T JsonDeserialize<T>(string json, JsonSerializerOptions presets = null);
         public object JsonDeserialize(string json, Type type, JsonSerializerOptions presets = null);
-        public Dictionary<string, dynamic> JsonDeserialize(string json, JsonSerializerOptions presets = null);
+        public dynamic JsonDeserialize(string json, JsonSerializerOptions presets = null);
     }
 
     public interface ISingletonJsonHandler : IJsonHandler

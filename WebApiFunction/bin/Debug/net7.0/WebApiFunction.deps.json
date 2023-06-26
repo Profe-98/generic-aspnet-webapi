@@ -10,13 +10,13 @@
         "dependencies": {
           "Dapper": "2.0.123",
           "InfluxDB.Client": "4.9.0",
-          "MailKit": "3.4.3",
+          "MailKit": "4.0.0",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "7.0.2",
           "Microsoft.AspNetCore.SignalR.Client": "7.0.5",
           "Microsoft.AspNetCore.SpaServices.Extensions": "7.0.2",
           "Microsoft.EntityFrameworkCore.Tools": "7.0.2",
           "Microsoft.Extensions.Caching.StackExchangeRedis": "7.0.2",
-          "MimeKit": "3.4.3",
+          "MimeKit": "4.0.0",
           "MySql.Data": "8.0.32",
           "RabbitMQ.Client": "6.4.0",
           "Serilog": "2.12.0",
@@ -26,6 +26,14 @@
         },
         "runtime": {
           "WebApiFunction.dll": {}
+        }
+      },
+      "BouncyCastle.Cryptography/2.1.1": {
+        "runtime": {
+          "lib/net6.0/BouncyCastle.Cryptography.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.1.1.34079"
+          }
         }
       },
       "CsvHelper/30.0.1": {
@@ -137,14 +145,14 @@
           }
         }
       },
-      "MailKit/3.4.3": {
+      "MailKit/4.0.0": {
         "dependencies": {
-          "MimeKit": "3.4.3"
+          "MimeKit": "4.0.0"
         },
         "runtime": {
           "lib/net6.0/MailKit.dll": {
-            "assemblyVersion": "3.4.0.0",
-            "fileVersion": "3.4.3.0"
+            "assemblyVersion": "4.0.0.0",
+            "fileVersion": "4.0.0.0"
           }
         }
       },
@@ -506,17 +514,17 @@
           }
         }
       },
-      "MimeKit/3.4.3": {
+      "MimeKit/4.0.0": {
         "dependencies": {
-          "Portable.BouncyCastle": "1.9.0",
+          "BouncyCastle.Cryptography": "2.1.1",
           "System.Runtime.CompilerServices.Unsafe": "6.0.0",
-          "System.Security.Cryptography.Pkcs": "6.0.0",
+          "System.Security.Cryptography.Pkcs": "6.0.2",
           "System.Text.Encoding.CodePages": "6.0.0"
         },
         "runtime": {
           "lib/net6.0/MimeKit.dll": {
-            "assemblyVersion": "3.4.0.0",
-            "fileVersion": "3.4.3.0"
+            "assemblyVersion": "4.0.0.0",
+            "fileVersion": "4.0.0.0"
           }
         }
       },
@@ -1088,7 +1096,7 @@
           "runtime.native.System.Security.Cryptography.OpenSsl": "4.3.2"
         }
       },
-      "System.Security.Cryptography.Pkcs/6.0.0": {
+      "System.Security.Cryptography.Pkcs/6.0.2": {
         "dependencies": {
           "System.Formats.Asn1": "6.0.0"
         }
@@ -1221,6 +1229,13 @@
       "serviceable": false,
       "sha512": ""
     },
+    "BouncyCastle.Cryptography/2.1.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-NNQaa4eyf5YjSdLKUWGPzq5HXZQc3yGybfIOkR6UY1C/rRFWdo0UhSzBqqnxwGnq3ie4vkN0JlzhhANjfTIJIQ==",
+      "path": "bouncycastle.cryptography/2.1.1",
+      "hashPath": "bouncycastle.cryptography.2.1.1.nupkg.sha512"
+    },
     "CsvHelper/30.0.1": {
       "type": "package",
       "serviceable": true,
@@ -1291,12 +1306,12 @@
       "path": "k4os.hash.xxhash/1.0.6",
       "hashPath": "k4os.hash.xxhash.1.0.6.nupkg.sha512"
     },
-    "MailKit/3.4.3": {
+    "MailKit/4.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-Iewef8mcE1B1LrVudxQjQ0LcriPPeTbxmWMoHQzFS+P6TpEY2eVDbdKdB0Qnbmqr/5w7WfK2mNWuoSX9pI470g==",
-      "path": "mailkit/3.4.3",
-      "hashPath": "mailkit.3.4.3.nupkg.sha512"
+      "sha512": "sha512-vtP6nUU0ByEZTnpbtsfdxyRvcssNSgIml4zi2hpBOV4gYNoaYSt+4VCx28MMnfaO/9J1IzcG+Hc8kXMkWX6iRQ==",
+      "path": "mailkit/4.0.0",
+      "hashPath": "mailkit.4.0.0.nupkg.sha512"
     },
     "Microsoft.AspNetCore.Authentication.JwtBearer/7.0.2": {
       "type": "package",
@@ -1599,12 +1614,12 @@
       "path": "microsoft.win32.systemevents/6.0.0",
       "hashPath": "microsoft.win32.systemevents.6.0.0.nupkg.sha512"
     },
-    "MimeKit/3.4.3": {
+    "MimeKit/4.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-7TSAcziEwk0bGWODpFTQASghXfYNBBa5VdM8KO4s5SBp5LYgIVXcQsdLBpPQ2XhZW74wfaX8RBUMs1GTMlLJcA==",
-      "path": "mimekit/3.4.3",
-      "hashPath": "mimekit.3.4.3.nupkg.sha512"
+      "sha512": "sha512-AIyj//7nDutepZjMlYFbc19PguEl+35lryQJX2YVr486G7ihfB4X4lPXjNUyjCcclr3Wq0P2yiQ6+Sonqc7z5A==",
+      "path": "mimekit/4.0.0",
+      "hashPath": "mimekit.4.0.0.nupkg.sha512"
     },
     "Mono.TextTemplating/2.2.1": {
       "type": "package",
@@ -2082,12 +2097,12 @@
       "path": "system.security.cryptography.openssl/4.3.0",
       "hashPath": "system.security.cryptography.openssl.4.3.0.nupkg.sha512"
     },
-    "System.Security.Cryptography.Pkcs/6.0.0": {
+    "System.Security.Cryptography.Pkcs/6.0.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-elM3x+xSRhzQysiqo85SbidJJ2YbZlnvmh+53TuSZHsD7dNuuEWser+9EFtY+rYupBwkq2avc6ZCO3/6qACgmg==",
-      "path": "system.security.cryptography.pkcs/6.0.0",
-      "hashPath": "system.security.cryptography.pkcs.6.0.0.nupkg.sha512"
+      "sha512": "sha512-1YcPZrdfjbHtzA2Y9EeAZ1zt7EWPBs30lgpG9PXgwP7onF91+sX1qijegcnuo4cULCcT8GiaaJFsDcEqdc9PVg==",
+      "path": "system.security.cryptography.pkcs/6.0.2",
+      "hashPath": "system.security.cryptography.pkcs.6.0.2.nupkg.sha512"
     },
     "System.Security.Cryptography.Primitives/4.3.0": {
       "type": "package",

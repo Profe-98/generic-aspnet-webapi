@@ -8,7 +8,7 @@ using WebApiFunction.Database;
 using WebApiFunction.Configuration;
 using MySql.Data.MySqlClient;
 
-namespace WebApiFunction.Application.Model.Database.MySql.View
+namespace WebApiFunction.Application.Model.Database.MySQL.View
 {
     [Serializable]
     public class NodeHealthEndpointViewModel : AbstractModel
@@ -20,7 +20,7 @@ namespace WebApiFunction.Application.Model.Database.MySql.View
 
         [Required(ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg)]
         [JsonPropertyName("node_name")]
-        [DatabaseColumnPropertyAttribute("node_name", MySqlDbType.String)]
+        [DatabaseColumnProperty("node_name", MySqlDbType.String)]
         public string NodeName { get; set; } = null;
 
         [Required(ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg)]
@@ -30,22 +30,22 @@ namespace WebApiFunction.Application.Model.Database.MySql.View
 
         [Required(ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg)]
         [JsonPropertyName("port")]
-        [DatabaseColumnPropertyAttribute("port", MySqlDbType.String)]
+        [DatabaseColumnProperty("port", MySqlDbType.String)]
         public int Port { get; set; } = 0;
 
         [Required(ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg)]
         [JsonPropertyName("last_keep_alive")]
-        [DatabaseColumnPropertyAttribute("last_keep_alive", MySqlDbType.DateTime)]
+        [DatabaseColumnProperty("last_keep_alive", MySqlDbType.DateTime)]
         public DateTime LastKeepAlive { get; set; } = DateTime.MinValue;
 
         [Required(ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg)]
         [JsonPropertyName("node_type_name")]
-        [DatabaseColumnPropertyAttribute("node_type_name", MySqlDbType.String)]
+        [DatabaseColumnProperty("node_type_name", MySqlDbType.String)]
         public string NodeTypeName { get; set; } = null;
 
         [Required(ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg)]
         [JsonPropertyName("node_type_uuid")]
-        [DatabaseColumnPropertyAttribute("node_type_uuid", MySqlDbType.String)]
+        [DatabaseColumnProperty("node_type_uuid", MySqlDbType.String)]
         public Guid NodeTypeUuid { get; set; } = Guid.Empty;
 
 

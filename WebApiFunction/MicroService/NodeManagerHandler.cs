@@ -8,8 +8,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Net.NetworkInformation;
 using System.Runtime;
-using WebApiFunction.Application.Model.Database.MySql;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
+
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
@@ -19,17 +18,16 @@ using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfe
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
-using WebApiFunction.Controller;
+using WebApiFunction.Web.AspNet.Controller;
 using WebApiFunction.Data;
 using WebApiFunction.Data.Web;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Database;
-using WebApiFunction.Database.MySQL;
-using WebApiFunction.Database.MySQL.Data;
-using WebApiFunction.Filter;
+using WebApiFunction.Application.Model.Database.MySQL.Data;
+using WebApiFunction.Web.AspNet.Filter;
 using WebApiFunction.Formatter;
-using WebApiFunction.Healthcheck;
+using WebApiFunction.Web.AspNet.Healthcheck;
 using WebApiFunction.LocalSystem.IO.File;
 using WebApiFunction.Log;
 using WebApiFunction.Metric;
@@ -47,6 +45,8 @@ using WebApiFunction.Web.AspNet;
 using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
+using WebApiFunction.Application.Model.Database.MySQL.Table;
+using WebApiFunction.Application.Model.Database.MySQL;
 
 namespace WebApiFunction.MicroService
 {
@@ -88,13 +88,21 @@ namespace WebApiFunction.MicroService
             var ipInfo = NetworkUtilityHandler.GetPhysicalEthernetIPAdress();
             string gwDataStr = null;
             string dnsDataStr = null;
-            foreach (var item in ipInfo.Gateway)
+            if(ipInfo.Gateway != null)
             {
-                gwDataStr += item.Address.ToString() + ";";
+
+                foreach (var item in ipInfo.Gateway)
+                {
+                    gwDataStr += item.Address.ToString() + ";";
+                }
             }
-            foreach (var item in ipInfo.DnsServers)
+            if (ipInfo.DnsServers!= null)
             {
-                dnsDataStr += item.ToString() + ";";
+
+                foreach (var item in ipInfo.DnsServers)
+                {
+                    dnsDataStr += item.ToString() + ";";
+                }
             }
             _node = new NodeModel()
             {

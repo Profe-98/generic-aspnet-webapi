@@ -14,9 +14,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Security.Cryptography;
 using WebApiFunction.Converter;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
-using WebApiFunction.Application.Model.Database.MySql;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
+
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
@@ -26,17 +24,17 @@ using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfe
 using WebApiFunction.Application.Model.DataTransferObject;
 using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
-using WebApiFunction.Controller;
+using WebApiFunction.Web.AspNet.Controller;
 using WebApiFunction.Data;
 using WebApiFunction.Data.Web;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Database;
-using WebApiFunction.Database.MySQL;
-using WebApiFunction.Database.MySQL.Data;
-using WebApiFunction.Filter;
+using WebApiFunction.Application.Model.Database.MySQL;
+using WebApiFunction.Application.Model.Database.MySQL.Data;
+using WebApiFunction.Web.AspNet.Filter;
 using WebApiFunction.Formatter;
-using WebApiFunction.Healthcheck;
+using WebApiFunction.Web.AspNet.Healthcheck;
 using WebApiFunction.LocalSystem.IO.File;
 using WebApiFunction.Log;
 using WebApiFunction.Metric;
@@ -54,6 +52,7 @@ using WebApiFunction.Web.AspNet;
 using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
+using WebApiFunction.Application.Model.Database.MySQL.Table;
 
 namespace WebApiFunction.Web.Authentification.JWT
 {
@@ -80,7 +79,7 @@ namespace WebApiFunction.Web.Authentification.JWT
 
         #region Methods
 
-        public string GenerateJwtToken(UserModel userModel, string secret, DateTime expires, bool forRegistration = false)
+        public string GenerateJwtToken(UserModel userModel, string secret, DateTime expires, bool withoutRoleClaims = false)
         {
             byte[] key = Encoding.UTF8.GetBytes(secret);
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
@@ -93,13 +92,13 @@ namespace WebApiFunction.Web.Authentification.JWT
                     new Claim("expires_time",expires.ToString()),
                 });
 
-            if (!forRegistration)
+            if (!withoutRoleClaims)
             {
-                claimsIdentity.AddClaim(new Claim("api_access_grant", userModel.ApiAccessGranted.ToString()));
+
                 foreach (RoleModel role in userModel.AvaibleRoles)
                 {
-                    Claim claim = new Claim(role.Name + "Role", "True");
-                    claimsIdentity.AddClaim(claim);
+                    Claim claimRole = new Claim("user_role", role.Name);
+                    claimsIdentity.AddClaim(claimRole);
                 }
             }
             SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor

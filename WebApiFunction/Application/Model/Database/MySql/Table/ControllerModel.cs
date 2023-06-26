@@ -8,8 +8,6 @@ using MySql.Data.MySqlClient;
 
 using WebApiFunction.Data.Web.MIME;
 using WebApiFunction.Application.Model.Internal;
-using WebApiFunction.Application.Model.Database.MySql;
-using WebApiFunction.Application.Model.Database.MySql.Entity;
 
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
@@ -18,18 +16,17 @@ using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
 using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
-using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
 using WebApiFunction.Collections;
-using WebApiFunction.Controller;
+using WebApiFunction.Web.AspNet.Controller;
 using WebApiFunction.Data;
 using WebApiFunction.Data.Web;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Database;
-using WebApiFunction.Database.MySQL;
-using WebApiFunction.Database.MySQL.Data;
-using WebApiFunction.Filter;
+using WebApiFunction.Application.Model.Database.MySQL;
+using WebApiFunction.Application.Model.Database.MySQL.Data;
+using WebApiFunction.Web.AspNet.Filter;
 using WebApiFunction.Formatter;
 using WebApiFunction.LocalSystem.IO.File;
 using WebApiFunction.Log;
@@ -48,8 +45,9 @@ using WebApiFunction.Web.AspNet;
 using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
+using WebApiFunction.Application.Model.Database.MySQL.View;
 
-namespace WebApiFunction.Application.Model.Database.MySql.Entity
+namespace WebApiFunction.Application.Model.Database.MySQL.Table
 {
     [Serializable]
     public class ControllerModel : AbstractModel
@@ -60,31 +58,31 @@ namespace WebApiFunction.Application.Model.Database.MySql.Entity
         #endregion Public
 
         [JsonIgnore]
-        [DatabaseColumnPropertyAttribute("api_uuid", MySqlDbType.String)]
+        [DatabaseColumnProperty("api_uuid", MySqlDbType.String)]
         public Guid ApiUuid { get; set; } = Guid.Empty;
 
         [DataType(DataType.Text)]
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(45, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonIgnore]
-        [DatabaseColumnPropertyAttribute("name", MySqlDbType.String)]
+        [DatabaseColumnProperty("name", MySqlDbType.String)]
         public string Name { get; set; }
 
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg)]
         [JsonIgnore]
-        [DatabaseColumnPropertyAttribute("is_authcontroller", MySqlDbType.Bit)]
+        [DatabaseColumnProperty("is_authcontroller", MySqlDbType.Bit)]
         public bool IsAuthcontroller { get; set; }
 
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg)]
         [JsonIgnore]
-        [DatabaseColumnPropertyAttribute("is_errorcontroller", MySqlDbType.Bit)]
+        [DatabaseColumnProperty("is_errorcontroller", MySqlDbType.Bit)]
         public bool IsErrorController { get; set; }
 
         [JsonIgnore]
-        [DatabaseColumnPropertyAttribute("is_registered", MySqlDbType.Bit)]
+        [DatabaseColumnProperty("is_registered", MySqlDbType.Bit)]
         public bool IsRegistered { get; set; }
 
         [JsonIgnore]
-        [DatabaseColumnPropertyAttribute("node_uuid", MySqlDbType.String)]
+        [DatabaseColumnProperty("node_uuid", MySqlDbType.String)]
         public Guid NodeUuid { get; set; } = Guid.Empty;
 
         [JsonIgnore]

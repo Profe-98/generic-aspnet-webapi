@@ -13,7 +13,7 @@ using System.Threading;
 using Microsoft.AspNetCore;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Web.Http;
-using WebApiFunction.Web.AspNet.ActionResult;
+using WebApiFunction.Web.AspNet.CustomActionResult;
 using WebApiFunction.Web.Authentification.JWT;
 using WebApiFunction.Configuration;
 
@@ -185,14 +185,32 @@ namespace WebApiFunction.Web.Authentification
                 return AuthenticateResultExtension.FailEx("unauthorized", _jsonHandler);
             }
 
+            var resp = AuthenticateResultExtension.FailEx("unauthorized", _jsonHandler);
             try
             {
-                return await ValidateTokenAuthenticateResult(token);
+                resp = await ValidateTokenAuthenticateResult(token);
+
             }
             catch (Exception ex)
             {
                 return AuthenticateResultExtension.FailEx("unauthorized", _jsonHandler);
             }
+            if(resp != null && !resp.Succeeded)
+            {
+                if(this.Context.WebSockets.IsWebSocketRequest)
+                {
+                    try
+                    {
+                        var webSocket = await this.Context.WebSockets.AcceptWebSocketAsync();
+                        await webSocket.CloseAsync(System.Net.WebSockets.WebSocketCloseStatus.NormalClosure, "forbidden", CancellationToken.None);
+                    }
+                    catch(Exception ex)
+                    {
+
+                    }
+                }
+            }
+            return resp;
         }
 
 
@@ -206,15 +224,20 @@ namespace WebApiFunction.Web.Authentification
         {
             JWTModel data = _authHandler.DecodeJWT(token);
             var result = await _authHandler.CheckLogin(this.Context, token);
-            if (result)
+            if (!result.IsAuthorizatiOk)
             {
-                var identity = new ClaimsIdentity(data.Payload.TokenInstance.Payload.Claims, Scheme.Name);
-
-                var principal = new System.Security.Principal.GenericPrincipal(identity, null);
-                var ticket = new AuthenticationTicket(principal, Scheme.Name);
-                return AuthenticateResult.Success(ticket);
+                return AuthenticateResultExtension.FailEx("unauthorized", _jsonHandler);
             }
-            return AuthenticateResultExtension.FailEx("unauthorized", _jsonHandler);
+            var claims = data.Payload.TokenInstance.Payload.Claims.ToList();
+            if(claims != null)
+            {
+
+            }
+            var identity = new ClaimsIdentity(claims, Scheme.Name);
+
+            var principal = new System.Security.Principal.GenericPrincipal(identity, null);
+            var ticket = new AuthenticationTicket(principal, Scheme.Name);
+            return AuthenticateResult.Success(ticket);
         }
     }
 }
