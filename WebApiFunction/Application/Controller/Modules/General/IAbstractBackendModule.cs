@@ -24,6 +24,7 @@ namespace WebApiFunction.Application.Controller.Modules
         void Rollback(DbTransaction transaction);
         Task<QueryResponseData<T>> Select(T model, T whereClauseModel = null);
         Task<QueryResponseData> Update(T modelToChange, T customWhereClauseObjectInstance, DbTransaction transaction = null);
+        Guid CreateUuid();
 
     }
 }

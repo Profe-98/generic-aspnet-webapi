@@ -167,6 +167,11 @@ namespace WebApiFunction.Application.Controller.Modules
 
         }
 
+        public Guid CreateUuid()
+        {
+            return Guid.NewGuid();
+        }
+
         #endregion
     }
 }

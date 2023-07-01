@@ -281,6 +281,7 @@ namespace WebApiApplicationServiceV2
                 options.Filters.Add(typeof(ValidateModelFilter), minVal + 1);
             }).AddJsonOptions(options =>
             {
+
                 options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             });
             //services.UseCustomModelStateResponseFactory();//wird nicht von der service collection berücksichtigt ????

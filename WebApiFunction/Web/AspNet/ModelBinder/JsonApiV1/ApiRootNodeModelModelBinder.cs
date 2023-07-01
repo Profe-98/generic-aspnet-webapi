@@ -35,12 +35,18 @@ namespace WebApiFunction.Web.AspNet.ModelBinder.JsonApiV1
                     bindingContext.Result = ModelBindingResult.Failed();
                     return;
                 }
+                if(data.Meta == null)
+                {
+                    bindingContext.Result = ModelBindingResult.Failed();
+                    return;
+                }
 
                 if (!data.HasAnyData)
                 {
                     bindingContext.Result = ModelBindingResult.Failed();
                     return;
                 }
+
                 var allTypes = Assembly.GetExecutingAssembly().GetTypes().ToList();
                 int i = 0;
                 bool[] foundTypes = new bool[data.RootNodes.Count];
@@ -65,7 +71,11 @@ namespace WebApiFunction.Web.AspNet.ModelBinder.JsonApiV1
                     bindingContext.Result = ModelBindingResult.Failed();
                     return;
                 }
-
+                if (data.Meta.Count == null || data.Meta.Count != dataFromFirstDepthLevel.Count)
+                {
+                    bindingContext.Result = ModelBindingResult.Failed();
+                    return;
+                }
                 if (bindingContext.ModelType == typeof(List<T>))
                 {
 
@@ -81,6 +91,7 @@ namespace WebApiFunction.Web.AspNet.ModelBinder.JsonApiV1
                     return;
                 }
 
+                return;
 
             }
 

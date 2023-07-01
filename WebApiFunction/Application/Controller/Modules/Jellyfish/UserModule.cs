@@ -48,6 +48,7 @@ using WebApiFunction.Web.Http;
 using WebApiFunction.Application.Model.Database.MySQL.Dapper.Context;
 using WebApiFunction.Application.Model.Database.MySQL.Jellyfish;
 using Dapper;
+using WebApiFunction.Application.Model.Database.MySQL.Jellyfish.DataTransferObject;
 
 namespace WebApiFunction.Application.Controller.Modules.Jellyfish
 {
@@ -69,19 +70,38 @@ namespace WebApiFunction.Application.Controller.Modules.Jellyfish
         {
             return await MysqlDapperContext.GetConnection().QueryAsync<UserModel>("SELECT * FROM user;");
         }
-        public async Task<string> GetUser(Guid userUuid)
+        public async Task<UserModel> GetUser(Guid userUuid)
         {
-            var res = await MysqlDapperContext.GetConnection().QueryAsync<string>("SELECT signalr_connection_id FROM user WHERE uuid = @uuid;", new {uuid= userUuid });
+            var res = await MysqlDapperContext.GetConnection().QueryAsync<UserModel>("SELECT * FROM user WHERE uuid = @uuid;", new {uuid= userUuid });
             if (res == null)
                 return null;
             return res.First();
         }
-        public async Task<List<UserModel>> GetUserOpenFriendshipRequests(Guid userUuid)
+        public async Task<List<UserFriendshipUserModelDTO>> GetUserOpenFriendshipRequests(Guid userUuid)
         {
-            var res = await MysqlDapperContext.GetConnection().QueryAsync<UserModel>("SELECT u.* FROM user_friendship_request as ufr inner join user as u on(u.uuid = ufr.user_uuid) WHERE ufr.target_user_uuid = @uuid;", new { uuid = userUuid });
+            var res = await MysqlDapperContext.GetConnection().QueryAsync<UserFriendshipUserModelDTO>("SELECT u.signalr_connection_id,u.user,user.first_name,user.last_name,ufr.* FROM user_friendship_request as ufr inner join user as u on(u.uuid = ufr.user_uuid) WHERE ufr.target_user_uuid = @uuid;", new { uuid = userUuid });
             if (res == null)
                 return null;
             return res.ToList();
+        }
+        public async Task<List<UserModel>> GetUserFriends(Guid userUuid)
+        {
+            var res = await MysqlDapperContext.GetConnection().QueryAsync<UserModel>("SELECT u.* FROM user_friends as uf inner join user as u on(u.uuid = uf.friend_user_uuid) WHERE uf.user_uuid = @uuid;", new { uuid = userUuid });
+            if (res == null)
+                return null;
+            return res.ToList();
+        }
+        public async Task<Guid> CreateFriendshipRequest(Guid fromUserUuid, Guid toUserUuid, string message)
+        {
+            var guid = CreateUuid();
+            var rowsAffected = await MysqlDapperContext.GetConnection().ExecuteAsync("INSERT INTO user_friendship_request (`uuid`,`user_uuid`,`target_user_uuid`,`target_user_request_message`) VALUES (@guid,@fromUserUuid,@toUserUuid,@message);", new { guid = guid, fromUserUuid = fromUserUuid, toUserUuid = toUserUuid, message = message });
+            return rowsAffected == 1 ? guid : Guid.Empty;
+        }
+        public async Task<Guid> AcceptFriendshipRequest(Guid fromUserUuid, Guid toUserUuid)
+        {
+            var guid = CreateUuid();
+            var rowsAffected = await MysqlDapperContext.GetConnection().ExecuteAsync("INSERT INTO user_friends (`uuid`,`user_uuid`,`friend_user_uuid`) VALUES (@guid,@fromUserUuid,@toUserUuid);", new { guid = guid, fromUserUuid = fromUserUuid, toUserUuid = toUserUuid });
+            return rowsAffected == 1 ? guid : Guid.Empty;
         }
         #endregion
     }

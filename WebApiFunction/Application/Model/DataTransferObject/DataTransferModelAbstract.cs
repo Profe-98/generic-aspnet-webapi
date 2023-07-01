@@ -10,6 +10,7 @@ namespace WebApiFunction.Application.Model.DataTransferObject
 {
     public abstract class DataTransferModelAbstract
     {
+        public virtual Guid Uuid { get; set; }
         public DataTransferModelAbstract()
         {
 

@@ -54,11 +54,6 @@ namespace WebApiFunction.Application.Model.Database.MySQL.Jellyfish
         #endregion Private
         #region Public
         #endregion Public
-        [JsonPropertyName("chat_uuid")]
-        public Guid ChatUuid { get; set; } = Guid.Empty;
-
-        [JsonPropertyName("user_uuid")]
-        public Guid UserUuid { get; set; } = Guid.Empty;
 
         [JsonPropertyName("target_user_uuid")]
         public Guid TargetUserUuid { get; set; } = Guid.Empty;
@@ -68,6 +63,7 @@ namespace WebApiFunction.Application.Model.Database.MySQL.Jellyfish
         public string TargetUserRequestMessage { get; set; }
 
         #region Ctor & Dtor
+        [JsonConstructor()]
         public UserFriendshipRequestDTO()
         {
 

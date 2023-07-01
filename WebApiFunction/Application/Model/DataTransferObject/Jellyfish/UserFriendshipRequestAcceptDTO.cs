@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System;
 using System.Text.Json.Serialization;
-using System.Text.Json;
+using System.Collections.Generic;
+using System.Collections;
+using System.ComponentModel.DataAnnotations;
+using MySql.Data.MySqlClient;
+using WebApiFunction.Data.Web.MIME;
 using WebApiFunction.Application.Model.Internal;
-
 
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
@@ -14,7 +14,6 @@ using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
 using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
-using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
 using WebApiFunction.Collections;
 using WebApiFunction.Web.AspNet.Controller;
@@ -45,32 +44,26 @@ using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
 
-namespace WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1
+namespace WebApiFunction.Application.Model.Database.MySQL.Jellyfish
 {
+
     [Serializable]
-    public class ApiMetaModel : BaseModel
+    public class UserFriendshipRequestAcceptDTO : DataTransferModelAbstract
     {
         #region Private
-        #endregion
+        #endregion Private
         #region Public
-        [JsonPropertyName("count")]
-        public int Count { get; set; }
-        [JsonPropertyName("message")]
-        public string ?OptionalMessage { get; set; }
-        /// <summary>
-        /// Debug Message is only avaible in development-mode
-        /// </summary>
-        [JsonPropertyName("debug-message")]
-        public string ?DebugMessage { get; set; }
-        /// <summary>
-        /// Debug Object is only avaible in development-mode
-        /// </summary>
-        [JsonPropertyName("debug-object")]
-        public object ?DebugObject { get; set; }
-        #endregion
+        #endregion Public
+        [JsonPropertyName("user_friendship_request_uuid")]
+        public List<Guid> UserFriendshipRequestUuids { get; set; } = null;
 
-        #region Ctor
-        #endregion
+        #region Ctor & Dtor
+        public UserFriendshipRequestAcceptDTO()
+        {
 
+        }
+        #endregion Ctor & Dtor
+        #region Methods
+        #endregion Methods
     }
 }

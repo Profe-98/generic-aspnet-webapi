@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System;
 using System.Text.Json.Serialization;
-using System.Text.Json;
+using System.Collections.Generic;
+using System.Collections;
+using System.ComponentModel.DataAnnotations;
+using MySql.Data.MySqlClient;
+using WebApiFunction.Data.Web.MIME;
 using WebApiFunction.Application.Model.Internal;
-
 
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
@@ -14,7 +14,6 @@ using WebApiFunction.Antivirus;
 using WebApiFunction.Antivirus.nClam;
 using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Application.Model.DataTransferObject;
-using WebApiFunction.Application.Model;
 using WebApiFunction.Configuration;
 using WebApiFunction.Collections;
 using WebApiFunction.Web.AspNet.Controller;
@@ -23,7 +22,6 @@ using WebApiFunction.Data.Web;
 using WebApiFunction.Data.Format.Json;
 using WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Database;
-using WebApiFunction.Application.Model.Database.MySQL;
 using WebApiFunction.Application.Model.Database.MySQL.Data;
 using WebApiFunction.Web.AspNet.Filter;
 using WebApiFunction.Formatter;
@@ -45,32 +43,36 @@ using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
 
-namespace WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1
+namespace WebApiFunction.Application.Model.Database.MySQL.Jellyfish.DataTransferObject
 {
+
     [Serializable]
-    public class ApiMetaModel : BaseModel
+    public class UserFriendshipUserModelDTO : UserDTO
     {
         #region Private
-        #endregion
+        #endregion Private
         #region Public
-        [JsonPropertyName("count")]
-        public int Count { get; set; }
-        [JsonPropertyName("message")]
-        public string ?OptionalMessage { get; set; }
-        /// <summary>
-        /// Debug Message is only avaible in development-mode
-        /// </summary>
-        [JsonPropertyName("debug-message")]
-        public string ?DebugMessage { get; set; }
-        /// <summary>
-        /// Debug Object is only avaible in development-mode
-        /// </summary>
-        [JsonPropertyName("debug-object")]
-        public object ?DebugObject { get; set; }
-        #endregion
+        #endregion Public
+        [JsonPropertyName("uuid")]
+        [DatabaseColumnProperty("uuid", MySqlDbType.String)]
+        public override Guid Uuid { get => base.Uuid; set => base.Uuid = value; }
+        [JsonPropertyName("target_user_uuid")]
+        [DatabaseColumnProperty("target_user_uuid", MySqlDbType.String)]
+        public Guid TargetUserUuid { get; set; } = Guid.Empty;
 
-        #region Ctor
-        #endregion
+        [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
+        [DatabaseColumnProperty("target_user_request_message", MySqlDbType.String)]
+        [JsonPropertyName("target_user_request_message")]
+        public string TargetUserRequestMessage { get; set; }
 
+        #region Ctor & Dtor
+        [JsonConstructor()]
+        public UserFriendshipUserModelDTO()
+        {
+
+        }
+        #endregion Ctor & Dtor
+        #region Methods
+        #endregion Methods
     }
 }

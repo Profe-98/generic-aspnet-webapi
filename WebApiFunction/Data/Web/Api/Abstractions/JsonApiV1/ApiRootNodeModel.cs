@@ -133,7 +133,7 @@ namespace WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1
         public List<ApiErrorModel> ?Errors { get; set; }
 
         [JsonPropertyName("meta")]
-        public ApiMetaModel ?Meta
+        public ApiMetaModel Meta
         {
             get
             {

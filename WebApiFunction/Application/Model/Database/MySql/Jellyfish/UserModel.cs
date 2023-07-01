@@ -12,6 +12,7 @@ using MySql.Data.MySqlClient;
 using WebApiFunction.Application.Model.DataTransferObject.Helix.Frontend.Transfer;
 using WebApiFunction.Mail;
 using System.Xml.Linq;
+using WebApiFunction.Application.Model.Database.MySQL.Jellyfish.DataTransferObject;
 
 namespace WebApiFunction.Application.Model.Database.MySQL.Jellyfish
 {
@@ -66,6 +67,15 @@ namespace WebApiFunction.Application.Model.Database.MySQL.Jellyfish
             Phone = registerDataTransferModel.Phone;
             DateOfBirth = registerDataTransferModel.DateOfBirth;
             _registerDataTransferModel = registerDataTransferModel;
+        }
+        public UserModel(UserFriendshipUserModelDTO userFriendshipUserModel)
+        {
+            Uuid = userFriendshipUserModel.Uuid;
+            User = userFriendshipUserModel.User;
+            FirstName = userFriendshipUserModel.FirstName;
+            LastName = userFriendshipUserModel.LastName;
+            Phone = userFriendshipUserModel.Phone;
+            DateOfBirth = userFriendshipUserModel.DateOfBirth;
         }
         #endregion Ctor & Dtor
         #region Methods
