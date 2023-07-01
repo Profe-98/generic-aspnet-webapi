@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿#define USEDIRTYTIMERFORRECONNECT
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Connections;
 using System.Net;
 using System.Security.Policy;
+using Microsoft.Extensions.Logging;
 
 namespace WebApiFunction.Web.Websocket.SignalR.HubClient
 {
@@ -24,6 +26,10 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubClient
         public Func<Task<string>> AccessTokenProviderAction { get;private set; }
         public Microsoft.AspNetCore.Http.Connections.HttpTransportType TransportType { get; private set; }
         public Microsoft.AspNetCore.Connections.TransferFormat TransferFormat { get; private set; }
+
+#if USEDIRTYTIMERFORRECONNECT
+        private System.Timers.Timer ReConnectDirtyAction = new System.Timers.Timer();
+#endif
         public bool IsInit
         {
             get
@@ -40,6 +46,7 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubClient
         }
         public AbstractSignalRClient()
         {
+
         }
         public void Initialize(string url, Func<Task<string>> accessTokenProviderAction, Microsoft.AspNetCore.Http.Connections.HttpTransportType transportType, Microsoft.AspNetCore.Connections.TransferFormat transferFormat)
         {
@@ -51,8 +58,27 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubClient
             TransportType = transportType;
             TransferFormat = transferFormat;
             AccessTokenProviderAction = accessTokenProviderAction;
-            _isInit = true; 
+            _isInit = true;
+#if USEDIRTYTIMERFORRECONNECT
+            InitDirtyTimer();
+#endif
+
         }
+#if USEDIRTYTIMERFORRECONNECT
+        private void InitDirtyTimer()
+        {
+
+            ReConnectDirtyAction.Enabled = true;
+            ReConnectDirtyAction.Interval = 3000;
+            ReConnectDirtyAction.AutoReset = true;
+            ReConnectDirtyAction.Elapsed += ReConnectDirtyAction_Elapsed;
+        }
+        private void ReConnectDirtyAction_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+#endif
+
         public void BuildConnection()
         {
             if (!IsInit)
@@ -67,6 +93,7 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubClient
             ConnectionBuilder = new HubConnectionBuilder()
                 .WithUrl(SignalRHubUrl, options =>
                 {
+                    options.SkipNegotiation = false;
                     options.Headers.Add("User-Agent", userAgent);
                     options.AccessTokenProvider = () => AccessTokenProviderAction();
                     options.Transports = TransportType;
@@ -76,14 +103,15 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubClient
                 {
 
                     options.PayloadSerializerOptions.PropertyNamingPolicy = null;
-                });
+                })
+                .WithAutomaticReconnect(new TimeSpan[] { new TimeSpan(0, 2, 0) });
             HubConnection = ConnectionBuilder.Build();
             _isBuilded = true;
         }
         public string GetUserAgent()
         {
 
-            if (!IsInit || !IsBuilded)
+            if (!IsInit)
             {
                 throw new InvalidOperationException("please initialize the handler correctly via method: " + nameof(Initialize) + " and "+nameof(BuildConnection) +"");
             }
@@ -91,8 +119,42 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubClient
             var hubAssembly = Assembly.GetAssembly(typeof(HubConnection));
             var libInfoHub = System.Diagnostics.FileVersionInfo.GetVersionInfo(hubAssembly.Location);
             var libInfoCurAss = System.Diagnostics.FileVersionInfo.GetVersionInfo(hubAssembly.Location);
-            string userAgent = libInfoCurAss.ProductName + "@" + "" + libInfoCurAss.ProductVersion + "@" + libInfoHub.ProductName + "/" + libInfoHub.ProductVersion;
+            string userAgent = libInfoCurAss.ProductName;
             return userAgent;
+        }
+
+        public async void OpenConnection()
+        {
+            try
+            {
+
+                await HubConnection.StartAsync();
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+
+
+            }
+        }
+        public async void CloseConnection()
+        {
+            try
+            {
+
+                if (HubConnection != null && HubConnection.State == HubConnectionState.Connected)
+                {
+                    await HubConnection.StopAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
 
         public async void Send(string methodName, object[] args, CancellationToken cancellationToken)
@@ -101,27 +163,35 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubClient
             {
                 throw new InvalidOperationException("please initialize the handler correctly via method: " + nameof(Initialize) + " and " + nameof(BuildConnection) + "");
             }
-            if (HubConnection != null && HubConnection.State == HubConnectionState.Disconnected)
+            if (HubConnection == null || HubConnection.State != HubConnectionState.Connected)
             {
-                await HubConnection.StartAsync();
+                throw new InvalidOperationException("please open a new connection before you use "+ nameof(Send)+"");
             }
-            var methods = HubConnection.GetType().GetMethods();
-            var targetMethod = methods.FirstOrDefault(m => (m.GetParameters().Length - 2) == args.Length && m.Name == HubConnectionSendMethod);//m.GetParameters().Length-2 Subtraktion von 2, da MethodName und CancelationToken keine Methodparams der SignalR Function sind
-            if (targetMethod == null)
-            {
-                throw new InvalidOperationException("cant find a method of " + HubConnectionSendMethod + " with a signatur of " + args.Length + " params");
-            }
-            object[] methodParams = new object[args.Length + 2];
-            methodParams[0] = methodName;
-            int i = 1;//da Idx 0 == Methodname
-            args.ToList().ForEach(x =>
-            {
-                methodParams[i] = x;
-                i++;
-            });
-            methodParams[methodParams.Length - 1] = cancellationToken;
 
-            targetMethod.Invoke(HubConnection, args);
+            try
+            {
+                var methods = HubConnection.GetType().GetMethods();
+                var targetMethod = methods.FirstOrDefault(m => (m.GetParameters().Length - 2) == args.Length && m.Name == HubConnectionSendMethod);//m.GetParameters().Length-2 Subtraktion von 2, da MethodName und CancelationToken keine Methodparams der SignalR Function sind
+                if (targetMethod == null)
+                {
+                    throw new InvalidOperationException("cant find a method of " + HubConnectionSendMethod + " with a signatur of " + args.Length + " params");
+                }
+                object[] methodParams = new object[args.Length + 2];
+                methodParams[0] = methodName;
+                int i = 1;//da Idx 0 == Methodname
+                args.ToList().ForEach(x =>
+                {
+                    methodParams[i] = x;
+                    i++;
+                });
+                methodParams[methodParams.Length - 1] = cancellationToken;
+
+                targetMethod.Invoke(HubConnection, args);
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
 
         public void Dispose()
@@ -130,10 +200,7 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubClient
             {
                 throw new InvalidOperationException("please initialize the handler correctly via method: " + nameof(Initialize) + " and " + nameof(BuildConnection) + "");
             }
-            if (HubConnection != null && HubConnection.State == HubConnectionState.Connected)
-            {
-                HubConnection.StopAsync();
-            }
+            CloseConnection();
         }
     }
 }

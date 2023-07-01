@@ -49,6 +49,7 @@ using WebApiFunction.Application.Model.Database.MySQL.Dapper.Context;
 using WebApiFunction.Application.Model.Database.MySQL.Jellyfish;
 using Dapper;
 using WebApiFunction.Application.Model.Database.MySQL.Jellyfish.DataTransferObject;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace WebApiFunction.Application.Controller.Modules.Jellyfish
 {
@@ -79,14 +80,22 @@ namespace WebApiFunction.Application.Controller.Modules.Jellyfish
         }
         public async Task<List<UserFriendshipUserModelDTO>> GetUserOpenFriendshipRequests(Guid userUuid)
         {
-            var res = await MysqlDapperContext.GetConnection().QueryAsync<UserFriendshipUserModelDTO>("SELECT u.signalr_connection_id,u.user,user.first_name,user.last_name,ufr.* FROM user_friendship_request as ufr inner join user as u on(u.uuid = ufr.user_uuid) WHERE ufr.target_user_uuid = @uuid;", new { uuid = userUuid });
+            var res = await MysqlDapperContext.GetConnection().QueryAsync<UserFriendshipUserModelDTO>("SELECT u.signalr_connection_id,u.user,u.first_name,u.last_name,ufr.* FROM user_friendship_request as ufr inner join user as u on(u.uuid = ufr.user_uuid) WHERE ufr.target_user_uuid = @uuid;", new { uuid = userUuid });
             if (res == null)
                 return null;
             return res.ToList();
         }
         public async Task<List<UserModel>> GetUserFriends(Guid userUuid)
         {
-            var res = await MysqlDapperContext.GetConnection().QueryAsync<UserModel>("SELECT u.* FROM user_friends as uf inner join user as u on(u.uuid = uf.friend_user_uuid) WHERE uf.user_uuid = @uuid;", new { uuid = userUuid });
+            var res = await MysqlDapperContext.GetConnection().QueryAsync<UserModel>("SELECT u.* FROM user_friends as uf inner join user as u on(u.uuid = uf.friend_user_uuid) WHERE uf.user_uuid = @uuid or uf.friend_user_uuid = @uuid;", new { uuid = userUuid });
+            if (res == null)
+                return null;
+            return res.ToList();
+        }
+        public async Task<List<UserModel>> SearchUser(string searchStr)
+        {
+
+            var res = await MysqlDapperContext.GetConnection().QueryAsync<UserModel>("SELECT * FROM user WHERE LOWER(user) LIKE @searchStr;", new { searchStr = "%"+ searchStr+"%".ToLower() });
             if (res == null)
                 return null;
             return res.ToList();
@@ -102,6 +111,13 @@ namespace WebApiFunction.Application.Controller.Modules.Jellyfish
             var guid = CreateUuid();
             var rowsAffected = await MysqlDapperContext.GetConnection().ExecuteAsync("INSERT INTO user_friends (`uuid`,`user_uuid`,`friend_user_uuid`) VALUES (@guid,@fromUserUuid,@toUserUuid);", new { guid = guid, fromUserUuid = fromUserUuid, toUserUuid = toUserUuid });
             return rowsAffected == 1 ? guid : Guid.Empty;
+        }
+        public async Task<bool> SetSignalR(Guid userUuid, string signalRConnectionId)
+        {
+
+            var rowsAffected = (!String.IsNullOrEmpty(signalRConnectionId) ?
+                (await MysqlDapperContext.GetConnection().ExecuteAsync("UPDATE user SET signalr_connection_id = @signalRConnectionId WHERE uuid = @userUuid limit 1;", new { signalRConnectionId = signalRConnectionId, userUuid = userUuid })) : (await MysqlDapperContext.GetConnection().ExecuteAsync("UPDATE user SET signalr_connection_id = null WHERE uuid = @userUuid limit 1;", new { userUuid = userUuid })));
+            return rowsAffected == 1;
         }
         #endregion
     }

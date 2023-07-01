@@ -386,9 +386,9 @@ namespace WebApiFunction.Application.Model.Database.MySQL
         {
             return new MySqlCommand(query, _odbcConnection);
         }
-        public async Task<QueryResponseData> GetUUID()
+        public Guid GetUUID()
         {
-            return await ExecuteQuery("SELECT UUID();");
+            return Guid.NewGuid();
         }
         /// <summary>
         /// Last inserted id queried by user (only available for tables w/ auto_increment id column)
@@ -485,11 +485,8 @@ namespace WebApiFunction.Application.Model.Database.MySQL
 
                         if ((mySqlCommand.Parameters[indexOfUuidField].DbType == DbType.StringFixedLength || mySqlCommand.Parameters[indexOfUuidField].DbType == DbType.String) && (mySqlCommand.Parameters[indexOfUuidField].Value == null || (Guid)mySqlCommand.Parameters[indexOfUuidField].Value == Guid.Empty))
                         {
-                            QueryResponseData guidResp = await GetUUID();
-                            if (guidResp.HasData)
-                            {
-                                mySqlCommand.Parameters[indexOfUuidField].Value = (string)guidResp.Data.Rows[0][0];
-                            }
+                            Guid guidResp = GetUUID();
+                            mySqlCommand.Parameters[indexOfUuidField].Value = guidResp.ToString();
                         }
                     }
                 }

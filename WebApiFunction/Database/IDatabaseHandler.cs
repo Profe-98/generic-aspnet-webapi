@@ -82,7 +82,7 @@ namespace WebApiFunction.Database
         /// <returns></returns>
         public Task<QueryResponseData<T>> ExecuteQueryWithDapper<T>(string query, object param = default, [CallerFilePath] string file = "", [CallerMemberName] string member = "", [CallerLineNumber] int line = 0) where T : class;
 
-        public Task<QueryResponseData> GetUUID();
+        public Guid GetUUID();
         public string ConvertArrayToWhereInFieldArray<T>(T[] arrayOrList) where T : struct;
         public string ConvertListToWhereInFieldArray<T>(List<T> arrayOrList) where T : struct;
         public bool IsUUIDFormat(string value);

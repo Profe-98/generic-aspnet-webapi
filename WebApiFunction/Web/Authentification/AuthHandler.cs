@@ -83,12 +83,9 @@ namespace WebApiFunction.Web.Authentification
         }
         #endregion
         #region Methods
-        private async Task<string> GenerateRefreshToken(UserModel userModel)
+        private Guid GenerateRefreshToken()
         {
-            QueryResponseData queryResponseData = await _databaseHandler.GetUUID();
-
-            return queryResponseData.HasData ?
-                queryResponseData.Data.Rows[0].ItemArray[0].ToString() : null;
+            return Guid.NewGuid();
         }
         public string EncodeJWT(UserModel userModel, DateTime expiresToken, bool forRegistration)
         {
@@ -268,7 +265,7 @@ namespace WebApiFunction.Web.Authentification
                 {
 
                     string userAgentCurrentRequest = httpContext.HeaderValueGet("user-agent");
-                    if (userAgentCurrentRequest != null && userAgentCurrentRequest == oAuthModel.UserAgent)
+                    /*if (userAgentCurrentRequest != null && userAgentCurrentRequest == oAuthModel.UserAgent)
                     {
                         validUserAgent = true;
                         bool remoteEqual = false;
@@ -290,7 +287,9 @@ namespace WebApiFunction.Web.Authentification
                             validIp = true;
                         }
 
-                    }
+                    }*/
+                    validUserAgent = true;
+                    validIp = true;
                 }
 
             }
@@ -315,7 +314,7 @@ namespace WebApiFunction.Web.Authentification
             string ip = ipObj == null ? null : ipObj.ToString();
             string ipLocal = localIpObj == null ? null : localIpObj.ToString();
             string token = EncodeJWT(userModel, expiresToken, false);
-            string refreshToken = await GenerateRefreshToken(userModel);
+            string refreshToken = GenerateRefreshToken().ToString();
 
             authModel.Ipv4 = ipIsV4 ? ip : null;
             authModel.Ipv6 = ipIsV6 ? ip : null;

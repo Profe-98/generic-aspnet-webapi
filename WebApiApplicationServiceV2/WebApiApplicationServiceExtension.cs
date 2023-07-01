@@ -303,6 +303,7 @@ namespace WebApiApplicationServiceV2
                 };*/
             });
             services.UseAsyncTaskScheduler();
+            databaseSingletonService.ExecuteQuery("UPDATE user SET signalr_connection_id = null WHERE signalr_connection_id is not null;");
             if (appConfig.AppServiceConfiguration.SignalRHubConfigurationModel != null && appConfig.AppServiceConfiguration.SignalRHubConfigurationModel.UseLocalHub)
             {
 

@@ -79,7 +79,18 @@ namespace WebApiFunction.Application.Model.Database.MySQL.Jellyfish
         {
 
         }
-        
+        public UserDTO(UserModel userModel)
+        {
+            this.User = userModel.User;
+            this.FirstName = userModel.FirstName;
+            this.LastName = userModel.LastName;
+            this.Uuid = userModel.Uuid; 
+            this.Phone = userModel.Phone;
+            this.DateOfBirth = userModel.DateOfBirth;   
+            this.UserTypeUuid = userModel.UserTypeUuid;
+           
+        }
+
         #endregion Ctor & Dtor
         #region Methods
 

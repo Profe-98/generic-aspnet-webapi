@@ -92,7 +92,7 @@ namespace WebApiFunction.Application.Controller.Modules.Jellyfish
         public async Task<List<MessageAcknowledgeModel>> AcknowledgeMessages(Guid userUuid,List<MessageAcknowledgeDTO> acknowledgeMessages)
         {
             acknowledgeMessages.ForEach(async(x) => {
-                var rowsAffected = await MysqlDapperContext.GetConnection().ExecuteAsync("INSERT INTO message_acknowledge (`message_uuid`,`user_uuid`,`uuid`) VALUES (@messageUuid,@userUuid,(SELECT UUID()));", new { messageUuid = x.MessageUuid, userUuid = userUuid });
+                var rowsAffected = await MysqlDapperContext.GetConnection().ExecuteAsync("INSERT INTO message_acknowledge (`message_uuid`,`user_uuid`,`uuid`) VALUES (@messageUuid,@userUuid,@uuid);", new { messageUuid = x.MessageUuid, userUuid = userUuid,uuid=CreateUuid() });
                 
             });
 

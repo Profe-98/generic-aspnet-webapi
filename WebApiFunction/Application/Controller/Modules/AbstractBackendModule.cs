@@ -56,7 +56,7 @@ namespace WebApiFunction.Application.Controller.Modules
     public class AbstractBackendModule<T> : IAbstractBackendModule<T>, IDisposable where T : AbstractModel
     {
         #region Private
-        private readonly ICachingHandler _cachingHandler;
+        protected readonly ICachingHandler _cachingHandler;
         private readonly ISingletonDatabaseHandler _db = null;
         private IMysqlDapperContext _mysqlDapperContext;
         #endregion
