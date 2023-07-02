@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Connections;
 using System.Net;
 using System.Security.Policy;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace WebApiFunction.Web.Websocket.SignalR.HubClient
 {
@@ -48,6 +49,7 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubClient
         {
 
         }
+        public abstract void InitClientMethods();
         public void Initialize(string url, Func<Task<string>> accessTokenProviderAction, Microsoft.AspNetCore.Http.Connections.HttpTransportType transportType, Microsoft.AspNetCore.Connections.TransferFormat transferFormat)
         {
             if (IsInit)
@@ -78,7 +80,7 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubClient
             throw new NotImplementedException();
         }
 #endif
-
+        
         public void BuildConnection()
         {
             if (!IsInit)
@@ -98,16 +100,34 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubClient
                     options.AccessTokenProvider = () => AccessTokenProviderAction();
                     options.Transports = TransportType;
                     options.DefaultTransferFormat = TransferFormat;
+
                 })
+                
                 .AddJsonProtocol(options =>
                 {
 
                     options.PayloadSerializerOptions.PropertyNamingPolicy = null;
                 })
-                .WithAutomaticReconnect(new TimeSpan[] { new TimeSpan(0, 2, 0) });
+                .WithAutomaticReconnect(new TimeSpan[] { new TimeSpan(0, 0, 5) });
             HubConnection = ConnectionBuilder.Build();
+            HubConnection.Reconnected += HubConnection_Reconnected;
+            HubConnection.Reconnecting += HubConnection_Reconnecting;
+            InitClientMethods();
             _isBuilded = true;
         }
+
+        private Task HubConnection_Reconnecting(Exception? arg)
+        {
+
+            return Task.CompletedTask;
+        }
+
+        private Task HubConnection_Reconnected(string? arg)
+        {
+
+            return Task.CompletedTask;
+        }
+
         public string GetUserAgent()
         {
 
@@ -128,7 +148,7 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubClient
             try
             {
 
-                await HubConnection.StartAsync();
+                await HubConnection.ConnectWithRetryAsync(5000,CancellationToken.None);
 
             }
             catch (Exception ex)
