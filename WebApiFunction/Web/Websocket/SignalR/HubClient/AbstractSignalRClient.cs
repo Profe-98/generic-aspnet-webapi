@@ -27,10 +27,8 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubClient
         public Func<Task<string>> AccessTokenProviderAction { get;private set; }
         public Microsoft.AspNetCore.Http.Connections.HttpTransportType TransportType { get; private set; }
         public Microsoft.AspNetCore.Connections.TransferFormat TransferFormat { get; private set; }
+        public EventHandler<string> HubConnectionReconnectedEvent { get; set; } 
 
-#if USEDIRTYTIMERFORRECONNECT
-        private System.Timers.Timer ReConnectDirtyAction = new System.Timers.Timer();
-#endif
         public bool IsInit
         {
             get
@@ -61,25 +59,8 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubClient
             TransferFormat = transferFormat;
             AccessTokenProviderAction = accessTokenProviderAction;
             _isInit = true;
-#if USEDIRTYTIMERFORRECONNECT
-            InitDirtyTimer();
-#endif
 
         }
-#if USEDIRTYTIMERFORRECONNECT
-        private void InitDirtyTimer()
-        {
-
-            ReConnectDirtyAction.Enabled = true;
-            ReConnectDirtyAction.Interval = 3000;
-            ReConnectDirtyAction.AutoReset = true;
-            ReConnectDirtyAction.Elapsed += ReConnectDirtyAction_Elapsed;
-        }
-        private void ReConnectDirtyAction_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-#endif
         
         public void BuildConnection()
         {
@@ -110,6 +91,9 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubClient
                 })
                 .WithAutomaticReconnect(new TimeSpan[] { new TimeSpan(0, 0, 5) });
             HubConnection = ConnectionBuilder.Build();
+            HubConnection.ServerTimeout = HubConnection.DefaultServerTimeout;
+            HubConnection.HandshakeTimeout = new TimeSpan(0,0,5);
+            HubConnection.KeepAliveInterval = HubConnection.DefaultKeepAliveInterval;
             HubConnection.Reconnected += HubConnection_Reconnected;
             HubConnection.Reconnecting += HubConnection_Reconnecting;
             InitClientMethods();
@@ -124,7 +108,10 @@ namespace WebApiFunction.Web.Websocket.SignalR.HubClient
 
         private Task HubConnection_Reconnected(string? arg)
         {
-
+            if(HubConnectionReconnectedEvent!=null)
+            {
+                HubConnectionReconnectedEvent.Invoke(this, arg);    
+            }
             return Task.CompletedTask;
         }
 
