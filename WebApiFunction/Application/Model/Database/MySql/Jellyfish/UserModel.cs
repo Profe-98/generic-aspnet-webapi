@@ -52,6 +52,7 @@ namespace WebApiFunction.Application.Model.Database.MySQL.Jellyfish
             ActivationTokenExpires = userModel.ActivationTokenExpires;
             ActivationDateTime = userModel.ActivationDateTime;
             ActivationCode = userModel.ActivationCode;
+            
         }
         public UserModel(UserDataTransferModel userDataTransferModel)
         {

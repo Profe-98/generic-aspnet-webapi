@@ -154,6 +154,19 @@ namespace WebApiFunction.Application.Model.Database.MySQL.Table
         [DatabaseColumnProperty("user_profile_pic_file_ext", MySqlDbType.String)]
         public virtual string UserProfilePicFileExtension { get; set; }
 
+        [JsonIgnore]
+        [DatabaseColumnProperty("picture", MySqlDbType.Blob)]
+        public virtual byte[] Picture { get; set; }
+
+        [JsonPropertyName("picture")]
+        public virtual string PictureBase64
+        {
+            get
+            {
+                return this.Picture != null ? Convert.ToBase64String(this.Picture) : null; 
+            }
+        }
+
         [JsonConverter(typeof(Converter.JsonConverter.JsonBoolConverter))]
         [JsonPropertyName("is_adm")]
         public virtual bool IsAdmin { get; set; }

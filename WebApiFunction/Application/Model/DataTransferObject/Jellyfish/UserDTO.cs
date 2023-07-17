@@ -67,6 +67,14 @@ namespace WebApiFunction.Application.Model.Database.MySQL.Jellyfish
         [DatabaseColumnProperty("user_profile_pic_file_ext", MySqlDbType.String)]
         public virtual string UserProfilePicFileExtension { get; set; }
 
+        /// <summary>
+        /// Base64 String that would be decoded to byte array and stored as blob in mysql
+        /// </summary>
+        [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
+        [MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg)]
+        [JsonPropertyName("picture")]
+        [DatabaseColumnProperty("picture", MySqlDbType.Text)]
+        public virtual string Picture { get; set; }
 
         [Required(AllowEmptyStrings = false, ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg), MinLength(1, ErrorMessage = DataValidationMessageStruct.StringMinLengthExceededMsg), MaxLength(255, ErrorMessage = DataValidationMessageStruct.StringMaxLengthExceededMsg)]
         [JsonPropertyName("signalr_connection_id")]

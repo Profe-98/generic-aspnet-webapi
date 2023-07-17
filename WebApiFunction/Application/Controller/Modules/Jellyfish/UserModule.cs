@@ -92,6 +92,11 @@ namespace WebApiFunction.Application.Controller.Modules.Jellyfish
                 return null;
             return res.ToList();
         }
+        public async Task<bool> UpdateProfilePicture(Guid userUuid, byte[] image)
+        {
+            var res = await MysqlDapperContext.GetConnection().ExecuteAsync("UPDATE user SET picture = @blobdata WHERE uuid = @uuid;", new { blobdata = image, uuid = userUuid });
+            return res == 1;
+        }
         public async Task<List<UserModel>> SearchUser(string searchStr)
         {
 

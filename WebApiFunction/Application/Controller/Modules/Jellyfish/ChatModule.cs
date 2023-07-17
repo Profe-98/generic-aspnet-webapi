@@ -83,6 +83,11 @@ namespace WebApiFunction.Application.Controller.Modules.Jellyfish
                 return null;
             return res.ToList();
         }
+        public async Task<bool> UpdateChatPicture(Guid chatUuid, byte[] image)
+        {
+            var res = await MysqlDapperContext.GetConnection().ExecuteAsync("UPDATE chat SET picture = @blobdata WHERE uuid = @uuid;", new { blobdata = image, uuid = chatUuid });
+            return res == 1;
+        }
         #endregion
     }
 }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using WebApiFunction.Application.Model.Database.MySQL;
 
@@ -10,6 +11,7 @@ namespace WebApiFunction.Application.Model.DataTransferObject
 {
     public abstract class DataTransferModelAbstract
     {
+        [JsonPropertyName("uuid")]
         public virtual Guid Uuid { get; set; }
         public DataTransferModelAbstract()
         {
