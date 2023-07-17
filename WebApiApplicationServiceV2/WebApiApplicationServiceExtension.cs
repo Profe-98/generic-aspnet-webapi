@@ -80,6 +80,7 @@ using WebApiFunction.Application.Model.Database.MySQL;
 using WebApiFunction.Web.AspNet.Filter;
 using WebApiFunction.Web.AspNet.Healthcheck;
 using WebApiFunction.Web.AspNet.Controller;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApiApplicationServiceV2
 {
@@ -278,7 +279,8 @@ namespace WebApiApplicationServiceV2
             {
                 int minVal = int.MinValue;
                 options.Filters.Add(typeof(HttpFlowFilter), minVal);//wird immer als erster Filter(Global-Filter, pre-executed vor allen Controllern) ausgeführt, danach kommt wenn als Attribute an Controller-Action 'CustomConsumesFilter' mit Order=int.MinValue+1
-                options.Filters.Add(typeof(ValidateModelFilter), minVal + 1);
+                options.Filters.Add(typeof(ContextualResponseSerializerFilter),minVal+1);
+                options.Filters.Add(typeof(ValidateModelFilter), minVal + 2);
             }).AddJsonOptions(options =>
             {
 

@@ -559,7 +559,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         [CustomConsumesFilter(GeneralDefs.ApiContentType)]
         [HttpGet]
 
-        public virtual async Task<ActionResult<ApiRootNodeModel>> Get()
+        public virtual async Task<ObjectResult> Get()
         {
             return await Get(Guid.Empty.ToString());
         }
@@ -609,7 +609,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         [CustomConsumesFilter(GeneralDefs.ApiContentType)]
         [HttpGet(BackendAPIDefinitionsProperties.ActionParameterIdWildcard)]
 
-        public virtual async Task<ActionResult<ApiRootNodeModel>> Get(string id, int maxDepth = 0)
+        public virtual async Task<ObjectResult> Get(string id, int maxDepth = 0)
         {
             MethodDescriptor methodInfo = _webHostEnvironment == null || _webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
             Logger.TraceHttpTraffic(MethodBase.GetCurrentMethod(), HttpContext, ControllerName);
@@ -995,7 +995,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         [CustomConsumesFilter(GeneralDefs.ApiContentType)]
         [HttpGet(BackendAPIDefinitionsProperties.ActionParameterIdWildcard + "/relation/{relationname}/" + BackendAPIDefinitionsProperties.ActionParameterOptionalIdSecondaryWildcard)]
 
-        public virtual async Task<ActionResult<ApiRootNodeModel>> GetRelation(string id, string relationname, string relationid = null)
+        public virtual async Task<ObjectResult> GetRelation(string id, string relationname, string relationid = null)
         {
             MethodDescriptor methodInfo = _webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
             if (!CheckGuid(id) || !CheckGuid(relationid) && relationid != null)
@@ -1038,70 +1038,66 @@ namespace WebApiFunction.Web.AspNet.Controller
             }, HttpStatusCode.NotFound, "an error occurred", "parent == null", methodInfo);
                     }
                     string dictKey = relation.fGenerateNetClassNameFromTableName(relation.DatabaseTable).ToLower();
-                    ActionResult<ApiRootNodeModel> parent = await Get(id);
+                    ObjectResult parent = await Get(id);
                     if (parent != null)
                     {
-                        if (parent.Result != null)
+                        if (parent.Value != null)
                         {
-                            Type t = parent.Result.GetType();
+                            Type t = parent.Value.GetType();
 
-                            if (t == typeof(OkObjectResult))
+                            switch (parent.StatusCode)
                             {
-                                OkObjectResult okObject = (OkObjectResult)parent.Result;
-                                switch (okObject.StatusCode)
-                                {
-                                    case 200:
-                                        if (okObject.Value != null)
+                                case 200:
+                                    if (parent.Value != null)
+                                    {
+                                        ApiRootNodeModel parentObject = (ApiRootNodeModel)parent.Value;
+                                        ApiDataModel dataModel = (ApiDataModel)parentObject.Data;
+                                        List<ApiDataModel> tmp = await dataModel.SetRelationMaxDepth(1, dataModel, new List<ApiDataModel>() { dataModel });
+
+                                        if (dataModel != null)
                                         {
-                                            ApiRootNodeModel parentObject = (ApiRootNodeModel)okObject.Value;
-                                            ApiDataModel dataModel = (ApiDataModel)parentObject.Data;
-                                            List<ApiDataModel> tmp = await dataModel.SetRelationMaxDepth(1, dataModel, new List<ApiDataModel>() { dataModel });
-
-                                            if (dataModel != null)
+                                            ApiRelationshipModel responseRelations = new ApiRelationshipModel();
+                                            responseRelations.Links = new ApiLinkModel()
                                             {
-                                                ApiRelationshipModel responseRelations = new ApiRelationshipModel();
-                                                responseRelations.Links = new ApiLinkModel()
+                                                Related = "/" + ControllerName + "/" + id + "/relation/" + relationname + "/" + (relationid == null ?
+                                                "" : relationid),
+                                                Self = "/" + ControllerName + "/" + id + "/"
+                                            };
+                                            if (dataModel.Relationships != null && dataModel.Relationships.ContainsKey(dictKey))
+                                            {
+                                                var data = relationid != null ?
+                                                    dataModel.Relationships[dictKey].FindAll(x => ((ApiDataModel)x.Data).Id == new Guid(relationid)) : dataModel.Relationships[dictKey].ToList();
+                                                if (data != null)
                                                 {
-                                                    Related = "/" + ControllerName + "/" + id + "/relation/" + relationname + "/" + (relationid == null ?
-                                                    "" : relationid),
-                                                    Self = "/" + ControllerName + "/" + id + "/"
-                                                };
-                                                if (dataModel.Relationships != null && dataModel.Relationships.ContainsKey(dictKey))
-                                                {
-                                                    var data = relationid != null ?
-                                                        dataModel.Relationships[dictKey].FindAll(x => ((ApiDataModel)x.Data).Id == new Guid(relationid)) : dataModel.Relationships[dictKey].ToList();
-                                                    if (data != null)
+                                                    List<ApiDataModel> relModels = new List<ApiDataModel>();
+                                                    data.ForEach(x =>
                                                     {
-                                                        List<ApiDataModel> relModels = new List<ApiDataModel>();
-                                                        data.ForEach(x =>
-                                                        {
-                                                            var tmp = dataModel.Included.Find(x => x.Id == x.Id);
-                                                            if (tmp != null)
-                                                                tmp.AttributeVisibility = true;
-                                                            relModels.Add(tmp);
-                                                        });
-                                                        if (relModels.Count > 0)
-                                                        {
-
-                                                            responseRelations.Data = data;
-
-                                                            ApiRootNodeModel apiRootNodeModel = new ApiRootNodeModel();
-                                                            apiRootNodeModel.Data = responseRelations;
-                                                            apiRootNodeModel.Meta = new ApiMetaModel { Count = data != null ? data.Count : 0 };
-
-                                                            return Ok(apiRootNodeModel);
-                                                        }
-                                                    }
-                                                    else
+                                                        var tmp = dataModel.Included.Find(x => x.Id == x.Id);
+                                                        if (tmp != null)
+                                                            tmp.AttributeVisibility = true;
+                                                        relModels.Add(tmp);
+                                                    });
+                                                    if (relModels.Count > 0)
                                                     {
 
+                                                        responseRelations.Data = data;
+
+                                                        ApiRootNodeModel apiRootNodeModel = new ApiRootNodeModel();
+                                                        apiRootNodeModel.Data = responseRelations;
+                                                        apiRootNodeModel.Meta = new ApiMetaModel { Count = data != null ? data.Count : 0 };
+
+                                                        return Ok(apiRootNodeModel);
                                                     }
+                                                }
+                                                else
+                                                {
 
                                                 }
+
                                             }
                                         }
-                                        break;
-                                }
+                                    }
+                                    break;
                             }
 
                         }
@@ -1140,7 +1136,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         [CustomConsumesFilter(GeneralDefs.ApiContentType)]
         [HttpPatch(BackendAPIDefinitionsProperties.ActionParameterOptionalIdWildcard)]
 
-        public virtual async Task<ActionResult<ApiRootNodeModel>> Update(string? id, [FromBody] ApiRootNodeModel body)//model == null wenn formattierung fail, id == 0 wenn int nicht formattiert werden kann wie bsp bei angabe von einem string
+        public virtual async Task<ObjectResult> Update(string? id, [FromBody] ApiRootNodeModel body)//model == null wenn formattierung fail, id == 0 wenn int nicht formattiert werden kann wie bsp bei angabe von einem string
         {
 
             MethodDescriptor methodInfo = _webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
@@ -1821,7 +1817,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         [CustomConsumesFilter(GeneralDefs.ApiContentType)]
         [HttpPost]
 
-        public virtual async Task<ActionResult<ApiRootNodeModel>> Create([FromBody] ApiRootNodeModel body, bool allowDuplicates)
+        public virtual async Task<ObjectResult> Create([FromBody] ApiRootNodeModel body, bool allowDuplicates)
         {
             MethodDescriptor methodInfo = _webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
             Logger.TraceHttpTraffic(MethodBase.GetCurrentMethod(), HttpContext, ControllerName);
@@ -2080,7 +2076,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         [CustomConsumesFilter(GeneralDefs.ApiContentType)]
         [HttpDelete(BackendAPIDefinitionsProperties.ActionParameterIdWildcard)]
 
-        public virtual async Task<ActionResult<ApiRootNodeModel>> Delete(string id)
+        public virtual async Task<ObjectResult> Delete(string id)
         {
             MethodDescriptor methodInfo = _webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
             if (!CheckGuid(id))
@@ -2099,85 +2095,81 @@ namespace WebApiFunction.Web.AspNet.Controller
 
             ApiRootNodeModel response = new ApiRootNodeModel();
             List<ApiDataModel> responseDeletionValues = new List<ApiDataModel>();
-            ActionResult<ApiRootNodeModel> parent = await Get(id);
+            ObjectResult parent = await Get(id);
             if (parent != null)
             {
-                if (parent.Result != null)
+                if (parent.Value != null)
                 {
-                    Type t = parent.Result.GetType();
+                    Type t = parent.Value.GetType();
 
-                    if (t == typeof(OkObjectResult))
+                    switch (parent.StatusCode)
                     {
-                        OkObjectResult okObject = (OkObjectResult)parent.Result;
-                        switch (okObject.StatusCode)
-                        {
-                            case 200:
-                                ApiRootNodeModel model = (ApiRootNodeModel)okObject.Value;
-                                if (model.Data != null)
+                        case 200:
+                            ApiRootNodeModel model = (ApiRootNodeModel)parent.Value;
+                            if (model.Data != null)
+                            {
+                                bool isDataList = Utils.IsList<ApiDataModel>(model.Data);
+                                List<ApiDataModel> targetModels = new List<ApiDataModel>();
+                                if (isDataList)
                                 {
-                                    bool isDataList = Utils.IsList<ApiDataModel>(model.Data);
-                                    List<ApiDataModel> targetModels = new List<ApiDataModel>();
-                                    if (isDataList)
+                                    targetModels = (List<ApiDataModel>)model.Data;
+                                }
+                                else
+                                {
+                                    targetModels.Add((ApiDataModel)model.Data);
+                                }
+                                response.Errors = new List<ApiErrorModel>();
+                                foreach (ApiDataModel item in targetModels)
+                                {
+                                    AbstractModel abstractModel = (AbstractModel)item.Attributes;
+                                    if (!abstractModel.Deleted)
                                     {
-                                        targetModels = (List<ApiDataModel>)model.Data;
-                                    }
-                                    else
-                                    {
-                                        targetModels.Add((ApiDataModel)model.Data);
-                                    }
-                                    response.Errors = new List<ApiErrorModel>();
-                                    foreach (ApiDataModel item in targetModels)
-                                    {
-                                        AbstractModel abstractModel = (AbstractModel)item.Attributes;
-                                        if (!abstractModel.Deleted)
+                                        var queryResponse = await DeleteObject(item);
+                                        if (queryResponse == HttpStatusCode.InternalServerError)
                                         {
-                                            var queryResponse = await DeleteObject(item);
-                                            if (queryResponse == HttpStatusCode.InternalServerError)
-                                            {
 
-                                                ApiErrorModel errMod = new ApiErrorModel();
-                                                errMod.Title = "error";
-                                                errMod.Detail = queryResponse.ToString();
-                                                errMod.Id = item.Id;
-                                                errMod.Code = ApiErrorModel.ERROR_CODES.INTERNAL;
-                                                errMod.HttpStatus = ((int)HttpStatusCode.UnprocessableEntity).ToString();
-                                                response.Errors.Add(errMod);
-                                            }
-                                            else
-                                            {
-                                                responseDeletionValues.Add(item);
-
-                                            }
+                                            ApiErrorModel errMod = new ApiErrorModel();
+                                            errMod.Title = "error";
+                                            errMod.Detail = queryResponse.ToString();
+                                            errMod.Id = item.Id;
+                                            errMod.Code = ApiErrorModel.ERROR_CODES.INTERNAL;
+                                            errMod.HttpStatus = ((int)HttpStatusCode.UnprocessableEntity).ToString();
+                                            response.Errors.Add(errMod);
                                         }
                                         else
                                         {
-                                            ApiErrorModel errMod = new ApiErrorModel();
-                                            errMod.Title = "error";
-                                            errMod.Detail = "already deleted";
-                                            errMod.Id = item.Id;
-                                            errMod.Code = ApiErrorModel.ERROR_CODES.HTTP_REQU_CONFLICT;
-                                            errMod.HttpStatus = ((int)HttpStatusCode.Conflict).ToString();
-                                            response.Errors.Add(errMod);
+                                            responseDeletionValues.Add(item);
+
                                         }
                                     }
-                                    response.Data = responseDeletionValues;
-                                    if (response.HasErrors)
+                                    else
                                     {
-                                        return JsonApiErrorResult(response.Errors, HttpStatusCode.BadRequest, "an error occurred", "response.HasErrors == true", methodInfo);
+                                        ApiErrorModel errMod = new ApiErrorModel();
+                                        errMod.Title = "error";
+                                        errMod.Detail = "already deleted";
+                                        errMod.Id = item.Id;
+                                        errMod.Code = ApiErrorModel.ERROR_CODES.HTTP_REQU_CONFLICT;
+                                        errMod.HttpStatus = ((int)HttpStatusCode.Conflict).ToString();
+                                        response.Errors.Add(errMod);
                                     }
-
-                                    var tmp = Activator.CreateInstance<T>();
-                                    await _cacheHandler.RemoveAsync(tmp.DatabaseTable);
-                                    tmp.Dispose();
-
-                                    string message = "entity-deleted";
-                                    _rabbitMqHandler.PublishObject(GetExchangeDeclarationName(), response, RabbitMqEntityDeleteRoutingKey, message, null, null);
-                                    return Ok(response);
                                 }
-                                break;
-                            default:
-                                break;
-                        }
+                                response.Data = responseDeletionValues;
+                                if (response.HasErrors)
+                                {
+                                    return JsonApiErrorResult(response.Errors, HttpStatusCode.BadRequest, "an error occurred", "response.HasErrors == true", methodInfo);
+                                }
+
+                                var tmp = Activator.CreateInstance<T>();
+                                await _cacheHandler.RemoveAsync(tmp.DatabaseTable);
+                                tmp.Dispose();
+
+                                string message = "entity-deleted";
+                                _rabbitMqHandler.PublishObject(GetExchangeDeclarationName(), response, RabbitMqEntityDeleteRoutingKey, message, null, null);
+                                return Ok(response);
+                            }
+                            break;
+                        default:
+                            break;
                     }
                 }
             }

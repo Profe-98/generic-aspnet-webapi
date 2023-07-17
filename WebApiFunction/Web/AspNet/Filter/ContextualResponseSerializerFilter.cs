@@ -9,8 +9,6 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Reflection;
 using WebApiFunction.Application.Model.Internal;
-
-
 using WebApiFunction.Cache.Distributed.RedisCache;
 using WebApiFunction.Ampq.Rabbitmq.Data;
 using WebApiFunction.Ampq.Rabbitmq;
@@ -46,40 +44,48 @@ using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
 using WebApiFunction.Web.AspNet.Controller;
+using Org.BouncyCastle.Asn1.X509.Qualified;
+using Microsoft.AspNetCore.Authorization;
+using System.Text.Json;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using MailKit.Net.Smtp;
+using System.Text;
+using Microsoft.AspNetCore.Hosting;
+using System.Net;
 
 namespace WebApiFunction.Web.AspNet.Filter
 {
-    public class HttpFlowFilter : IAsyncActionFilter, IResultFilter, IOrderedFilter
+    public class ContextualResponseSerializerFilter : IAsyncResultFilter
     {
         private readonly ILogger<ContextualResponseSerializerFilter> _logger;
         public int Order { get; } = int.MinValue;
 
-        public HttpFlowFilter(ILogger<ContextualResponseSerializerFilter> logger)
+        public ContextualResponseSerializerFilter(ILogger<ContextualResponseSerializerFilter> logger)
         {
             _logger = logger;
         }
-        //Bevor Action ausgeführt wird, pre-request-execution
-        public Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        public Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
         {
+            var userClaims = context.HttpContext.User.Claims.ToList();
+            var objectResultFromController = context.Result as ObjectResult;
+            if (objectResultFromController != null)
+            {
+                var newSettedObject = objectResultFromController.Value.SetSensitivePropertiesToDefault(userClaims);
+                objectResultFromController.Value = newSettedObject;
 
-            _logger.TraceHttpTraffic(MethodBase.GetCurrentMethod(), context.HttpContext, GetType().Name);
+                /*string json = null;
+                using (JsonHandler jsonHandler = new JsonHandler())
+                {
+                    json = jsonHandler.JsonSerialize(newSettedObject);
+                }
+                byte[] data = Encoding.UTF8.GetBytes(json);
+                await context.HttpContext.Response.Body.WriteAsync(data, 0, data.Length);*/
+
+                context.Result = objectResultFromController;
+
+            }
             return next();
-        }
-        /// <summary>
-        /// Wenn Action ausgeführt wurde, Result Callback
-        /// </summary>
-        /// <param name="context"></param>
-        public void OnResultExecuted(ResultExecutedContext context)
-        {
-            _logger.TraceHttpTraffic(MethodBase.GetCurrentMethod(), context.HttpContext, GetType().Name);
-        }
-        /// <summary>
-        /// Während Execution
-        /// </summary>
-        /// <param name="context"></param>
-        public void OnResultExecuting(ResultExecutingContext context)
-        {
-
         }
     }
 }

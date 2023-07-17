@@ -71,6 +71,11 @@ namespace WebApiFunction.Application.Model.Database.MySQL.Jellyfish
         [DatabaseColumnProperty("target_user_request_message", MySqlDbType.String)]
         public string TargetUserRequestMessage { get; set; }
 
+
+        [JsonPropertyName("test")]
+        [SensitiveDataAttribute("dieserollegibtesnicht")]
+        public string Test { get; set; } = "testeintrag";
+
         #region Ctor & Dtor
         public UserFriendshipRequestModel()
         {

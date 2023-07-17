@@ -11,7 +11,7 @@ using WebApiFunction.Data.Format.Json;
 
 namespace WebApiFunction.Web.AspNet.CustomActionResult
 {
-    public class JsonApiAbstractObjectResult<T> : OkObjectResult, IDisposable
+    public class JsonApiAbstractObjectResult<T> : ObjectResult, IDisposable
     {
         public virtual void Dispose()
         {

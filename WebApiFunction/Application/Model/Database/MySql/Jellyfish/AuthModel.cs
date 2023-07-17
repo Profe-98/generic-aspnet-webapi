@@ -46,6 +46,7 @@ using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
 using WebApiFunction.Application.Model.Database.MySQL.Jellyfish;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApiFunction.Application.Model.Database.MySQL.Jellyfish
 {
@@ -61,6 +62,10 @@ namespace WebApiFunction.Application.Model.Database.MySQL.Jellyfish
         [DatabaseColumnProperty("uuid", MySqlDbType.String)]
         public override Guid Uuid { get; set; } = Guid.Empty;
 
+
+        [JsonPropertyName("test")]
+        [SensitiveDataAttribute("user,admin,root")]
+        public string Test { get; set; } = "testeintrag";
 
         #region Ctor & Dtor
         public AuthModel()

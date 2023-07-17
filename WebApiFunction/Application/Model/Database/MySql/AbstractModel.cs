@@ -52,6 +52,7 @@ using WebApiFunction.Application.Model.Database.MySQL.Table;
 
 namespace WebApiFunction.Application.Model.Database.MySQL
 {
+
     public class AbstractModel : IDisposable
     {
         #region Private

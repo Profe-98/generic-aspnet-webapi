@@ -403,9 +403,9 @@ namespace WebApiFunction.Web.AspNet.Controller
 
     public static class CustomControllerBaseExtensions
     {
-        public static Task<ActionResult> ToJsonApiObjectResultTaskResult(this JsonApiErrorResult jsonApiObjectResult)
+        public static Task<ObjectResult> ToJsonApiObjectResultTaskResult(this JsonApiErrorResult jsonApiObjectResult)
         {
-            return Task.FromResult((ActionResult)jsonApiObjectResult);
+            return Task.FromResult((ObjectResult)jsonApiObjectResult);
         }
         public static bool IsErrorControllerRequest(this PathString uri)
         {
