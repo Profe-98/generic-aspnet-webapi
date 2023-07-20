@@ -58,6 +58,7 @@ using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
 using Microsoft.Extensions.DependencyInjection;
 using WebApiFunction.Application.Model.Database.MySQL;
+using WebApiFunction.Web.AspNet.Swagger.Attribut;
 
 namespace WebApiFunction.Web.AspNet.Controller
 {
@@ -1825,7 +1826,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         [CustomConsumesFilter(GeneralDefs.ApiContentType)]
         [HttpPost]
         [NonAction]
-        public virtual async Task<ActionResult<ApiRootNodeModel>> Create([FromBody] ApiRootNodeModel body, bool allowDuplicates)
+        public virtual async Task<ActionResult<ApiRootNodeModel>> Create([FromBody] ApiRootNodeModel body, [OpenApiIgnoreMethodParameter] bool allowDuplicates)
         {
             MethodDescriptor methodInfo = _webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
             Logger.TraceHttpTraffic(MethodBase.GetCurrentMethod(), HttpContext, ControllerName);
