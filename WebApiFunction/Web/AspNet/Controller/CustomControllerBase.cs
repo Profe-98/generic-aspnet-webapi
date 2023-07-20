@@ -98,8 +98,6 @@ namespace WebApiFunction.Web.AspNet.Controller
             get
             {
                 string tmpName = GetType().Name.ToLower();
-                if (tmpName == "ControllerActionRelationToHttpMethodController")
-                { }
 
                 int countController = tmpName.LastIndexOf("controller");
                 tmpName = tmpName.Substring(0, countController);

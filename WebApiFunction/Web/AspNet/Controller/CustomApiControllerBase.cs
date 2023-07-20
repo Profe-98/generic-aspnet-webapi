@@ -117,6 +117,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         [CustomConsumesFilter(GeneralDefs.MultipartFormData)]
         [CustomProducesFilter(GeneralDefs.ApiContentType)]
         [HttpPut(BackendAPIDefinitionsProperties.PhysicalFileLocationRoutes.GeneralFilePutRoute)]
+        [NonAction]
         public virtual async Task<ActionResult<ApiRootNodeModel>> PutFile(string id, [FromForm] T3 file)
         {
 
@@ -133,6 +134,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         [CustomConsumesFilter(GeneralDefs.BinarayContentType)]
         [CustomProducesFilter(GeneralDefs.BinarayContentType, GeneralDefs.ApiContentType)]
         [HttpGet(BackendAPIDefinitionsProperties.PhysicalFileLocationRoutes.GeneralFileGetRoute)]
+        [NonAction]
         public virtual async Task<ActionResult> GetFile(string id, string file)
         {
             Func<T, string, Task<ActionResult>> f = (x, y) => Utils.CallAsyncFunc<T, string, ActionResult>(x, y, async (x, y) =>
@@ -563,7 +565,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         [CustomProducesFilter(GeneralDefs.ApiContentType)]
         [CustomConsumesFilter(GeneralDefs.ApiContentType)]
         [HttpGet]
-
+        [NonAction]
         public virtual async Task<ObjectResult> Get()
         {
             return await Get(Guid.Empty.ToString());
@@ -614,6 +616,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         [CustomProducesFilter(GeneralDefs.ApiContentType)]
         [CustomConsumesFilter(GeneralDefs.ApiContentType)]
         [HttpGet(BackendAPIDefinitionsProperties.ActionParameterIdWildcard)]
+        [NonAction]
         public virtual async Task<ObjectResult> Get(string id, int maxDepth = 0)
         {
             MethodDescriptor methodInfo = _webHostEnvironment == null || _webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
@@ -999,7 +1002,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         [CustomProducesFilter(GeneralDefs.ApiContentType)]
         [CustomConsumesFilter(GeneralDefs.ApiContentType)]
         [HttpGet(BackendAPIDefinitionsProperties.ActionParameterIdWildcard + "/relation/{relationname}/" + BackendAPIDefinitionsProperties.ActionParameterOptionalIdSecondaryWildcard)]
-
+        [NonAction]
         public virtual async Task<ObjectResult> GetRelation(string id, string relationname, string relationid = null)
         {
             MethodDescriptor methodInfo = _webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
@@ -1140,7 +1143,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         [CustomProducesFilter(GeneralDefs.ApiContentType)]
         [CustomConsumesFilter(GeneralDefs.ApiContentType)]
         [HttpPatch(BackendAPIDefinitionsProperties.ActionParameterOptionalIdWildcard)]
-
+        [NonAction]
         public virtual async Task<ObjectResult> Update(string? id, [FromBody] ApiRootNodeModel body)//model == null wenn formattierung fail, id == 0 wenn int nicht formattiert werden kann wie bsp bei angabe von einem string
         {
 
@@ -1821,6 +1824,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         [CustomProducesFilter(GeneralDefs.ApiContentType)]
         [CustomConsumesFilter(GeneralDefs.ApiContentType)]
         [HttpPost]
+        [NonAction]
         public virtual async Task<ActionResult<ApiRootNodeModel>> Create([FromBody] ApiRootNodeModel body, bool allowDuplicates)
         {
             MethodDescriptor methodInfo = _webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
@@ -2080,6 +2084,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         [CustomProducesFilter(GeneralDefs.ApiContentType)]
         [CustomConsumesFilter(GeneralDefs.ApiContentType)]
         [HttpDelete(BackendAPIDefinitionsProperties.ActionParameterIdWildcard)]
+        [NonAction]
         public virtual async Task<ObjectResult> Delete(string id)
         {
             MethodDescriptor methodInfo = _webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
