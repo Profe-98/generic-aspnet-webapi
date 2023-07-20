@@ -99,6 +99,7 @@ namespace WebApiFunction.Data.Web.Api.Abstractions.JsonApiV1
         public bool HideJsonRelation { get; set; } = false;*/
 
         [JsonIgnore]
+            
         public Type NetType
         {
             get

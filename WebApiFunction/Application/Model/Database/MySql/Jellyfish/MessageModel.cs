@@ -9,10 +9,12 @@ using MimeKit;
 using WebApiFunction.Configuration;
 using WebApiFunction.Database;
 using MySql.Data.MySqlClient;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WebApiFunction.Application.Model.Database.MySQL.Jellyfish
 {
     [Serializable]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class MessageModel : AbstractModel
     {
         [Required(ErrorMessage = DataValidationMessageStruct.MemberIsRequiredButNotSetMsg)]

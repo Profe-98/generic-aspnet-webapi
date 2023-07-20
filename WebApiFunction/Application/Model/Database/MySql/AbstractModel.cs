@@ -49,10 +49,11 @@ using WebApiFunction.Application.Controller.Modules;
 using System.Runtime.CompilerServices;
 using WebApiFunction.Application.Model.Database.MySQL.Data;
 using WebApiFunction.Application.Model.Database.MySQL.Table;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WebApiFunction.Application.Model.Database.MySQL
 {
-
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class AbstractModel : IDisposable
     {
         #region Private

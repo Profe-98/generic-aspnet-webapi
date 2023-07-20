@@ -61,6 +61,7 @@ using WebApiFunction.Application.Model.Database.MySQL;
 
 namespace WebApiFunction.Web.AspNet.Controller
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     public abstract class CustomApiControllerBase<T, T3> : CustomApiControllerBase<T>
         where T : AbstractModel
         where T3 : GeneralMimeFileFormData
@@ -346,11 +347,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         }
     }
 
-
-    [Controller]
-    [ApiController]
-    [Area(GeneralDefs.ApiAreaV1)]
-    [Route("[area]/[controller]")]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public abstract class CustomApiControllerBase<T> : CustomControllerBase
         where T : AbstractModel
     {
@@ -403,6 +400,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         /// <summary>
         /// Controller Identifier for ResponseCaching
         /// </summary>
+        
         internal Guid ControllerResponseCacheIdentifier
         {
             get
@@ -524,6 +522,12 @@ namespace WebApiFunction.Web.AspNet.Controller
         {
 
         }
+        public CustomApiControllerBase()
+        {
+            
+        }
+
+        [NonAction]
         public abstract AbstractBackendModule<T> GetConcreteModule();
 
         [NonAction]
@@ -546,6 +550,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         }
 
         #endregion
+
         #region HttpMethods
         /// <summary>
         /// Gets all objects with type of generic type T of the controller instance 
@@ -564,6 +569,7 @@ namespace WebApiFunction.Web.AspNet.Controller
             return await Get(Guid.Empty.ToString());
         }
 
+        [NonAction]
         public async Task<JsonApiTreeSearchFilterModel> CreateSearchFilterModelChain(string[] x, int y, JsonApiTreeSearchFilterModel z)
         {
 
@@ -608,7 +614,6 @@ namespace WebApiFunction.Web.AspNet.Controller
         [CustomProducesFilter(GeneralDefs.ApiContentType)]
         [CustomConsumesFilter(GeneralDefs.ApiContentType)]
         [HttpGet(BackendAPIDefinitionsProperties.ActionParameterIdWildcard)]
-
         public virtual async Task<ObjectResult> Get(string id, int maxDepth = 0)
         {
             MethodDescriptor methodInfo = _webHostEnvironment == null || _webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
@@ -1816,8 +1821,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         [CustomProducesFilter(GeneralDefs.ApiContentType)]
         [CustomConsumesFilter(GeneralDefs.ApiContentType)]
         [HttpPost]
-
-        public virtual async Task<ObjectResult> Create([FromBody] ApiRootNodeModel body, bool allowDuplicates)
+        public virtual async Task<ActionResult<ApiRootNodeModel>> Create([FromBody] ApiRootNodeModel body, bool allowDuplicates)
         {
             MethodDescriptor methodInfo = _webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
             Logger.TraceHttpTraffic(MethodBase.GetCurrentMethod(), HttpContext, ControllerName);
@@ -2008,6 +2012,7 @@ namespace WebApiFunction.Web.AspNet.Controller
             }, HttpStatusCode.BadRequest, "an error occurred", "bodyObject == null", methodInfo);
         }
 
+        [NonController]
         public class CreatedAbstractModelResponse<T3>
             where T3 : AbstractModel
         {
@@ -2075,7 +2080,6 @@ namespace WebApiFunction.Web.AspNet.Controller
         [CustomProducesFilter(GeneralDefs.ApiContentType)]
         [CustomConsumesFilter(GeneralDefs.ApiContentType)]
         [HttpDelete(BackendAPIDefinitionsProperties.ActionParameterIdWildcard)]
-
         public virtual async Task<ObjectResult> Delete(string id)
         {
             MethodDescriptor methodInfo = _webHostEnvironment.IsDevelopment() ? new MethodDescriptor { c = GetType().Name, m = MethodBase.GetCurrentMethod().Name } : null;
@@ -2176,6 +2180,7 @@ namespace WebApiFunction.Web.AspNet.Controller
             return parent;
         }
         #endregion
+
         #region InteralMethods
 
         [NonAction]
@@ -2208,6 +2213,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         #endregion
     }
 
+    [ApiExplorerSettings(IgnoreApi = true)]
     public abstract class CustomApiV1ControllerBase<T> : CustomApiControllerBase<T>
         where T : AbstractModel
     {
@@ -2220,6 +2226,10 @@ namespace WebApiFunction.Web.AspNet.Controller
             base(logger, vulnerablityHandler, mailHandler, authHandler, databaseHandler, jsonApiHandler, queue, jsonHandler, cache, env, configuration, rabbitMqHandler, appConfig, nodeManagerHandler, scopedEncryptionHandler, abstractBackendModule, serviceProvider)
         {
 
+        }
+        public CustomApiV1ControllerBase() : base() 
+        {
+            
         }
     }
 

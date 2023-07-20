@@ -78,6 +78,7 @@ using WebApiFunction.Application.Model.Database.MySQL;
 
 namespace WebApiFunction.Web.AspNet.Controller
 {
+    [ApiExplorerSettings(IgnoreApi =true)]
     [EnableCors("api-gateway")]
     public class CustomControllerBase : ControllerBase, IDisposable
     {
@@ -150,6 +151,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         {
             GC.SuppressFinalize(this);
         }
+        [NonAction]
         public ActionDescriptor GetMatchingAction(string path, string httpMethod)
         {
             var actionDescriptors = _actionDescriptorCollectionProvider.ActionDescriptors.Items;
@@ -183,6 +185,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         }
 
 
+        [NonAction]
         public bool MatchesTemplate(string routeTemplate, string requestPath)
         {
             var template = TemplateParser.Parse(routeTemplate);
@@ -192,6 +195,7 @@ namespace WebApiFunction.Web.AspNet.Controller
             return matcher.TryMatch(requestPath, values);
         }
 
+        [NonAction]
         private RouteValueDictionary GetDefaults(RouteTemplate parsedTemplate)
         {
             var result = new RouteValueDictionary();
@@ -206,6 +210,7 @@ namespace WebApiFunction.Web.AspNet.Controller
 
             return result;
         }
+        [NonAction]
         public bool CheckGuid(string guid)
         {
             if (string.IsNullOrEmpty(guid))
@@ -224,6 +229,7 @@ namespace WebApiFunction.Web.AspNet.Controller
             }
             return false;
         }
+        [NonAction]
         public AreaAttribute GetArea()
         {
             Type classType = GetType();
@@ -237,6 +243,7 @@ namespace WebApiFunction.Web.AspNet.Controller
             }
             return null;
         }
+        [NonAction]
         public List<RouteAttribute> GetRoutes()
         {
             List<RouteAttribute> routeAttributes = new List<RouteAttribute>();
@@ -256,14 +263,17 @@ namespace WebApiFunction.Web.AspNet.Controller
             }
             return routeAttributes;
         }
+        [NonAction]
         public List<HttpMethodAttribute> GetHttpMethods()
         {
             return GetMethodAttributesGeneric<HttpMethodAttribute>(GetType());
         }
+        [NonAction]
         public List<HttpMethodAttribute> GetHttpMethods(Type type)
         {
             return GetMethodAttributesGeneric<HttpMethodAttribute>(type);
         }
+        [NonAction]
         private List<T> GetAttributesGeneric<T>(Type type) where T : Attribute
         {
 
@@ -285,6 +295,7 @@ namespace WebApiFunction.Web.AspNet.Controller
             }
             return responseValues;
         }
+        [NonAction]
         private List<T> GetMethodAttributesGeneric<T>(Type type) where T : Attribute
         {
 
@@ -310,6 +321,7 @@ namespace WebApiFunction.Web.AspNet.Controller
 
         #region ActionsResuls
 
+        [NonAction]
         public JsonApiObjectResult JsonApiResult(List<ApiDataModel> value, HttpStatusCode httpStatusCode, string message = null, string debugMessage = null, object debugObj = null, [CallerFilePath] string file = "", [CallerMemberName] string member = "", [CallerLineNumber] int line = 0)
         {
             bool devMode = _webHostEnvironment.IsDevelopment();
@@ -331,6 +343,7 @@ namespace WebApiFunction.Web.AspNet.Controller
             AppendHeaderWhenStatusTooManyRequ(httpStatusCode);
             return result;
         }
+        [NonAction]
         public JsonApiErrorResult JsonApiErrorResult(List<ApiErrorModel> value, HttpStatusCode httpStatusCode, string message = null, string debugMessage = null, object debugObj = null, [CallerFilePath] string file = "", [CallerMemberName] string member = "", [CallerLineNumber] int line = 0)
         {
             bool devMode = _webHostEnvironment.IsDevelopment();
@@ -353,6 +366,7 @@ namespace WebApiFunction.Web.AspNet.Controller
             AppendHeaderWhenStatusTooManyRequ(httpStatusCode);
             return result;
         }
+        [NonAction]
         public static JsonApiErrorResult JsonApiErrorResultS(List<ApiErrorModel> value, HttpStatusCode httpStatusCode, string message = null, string debugMessage = null, object debugObj = null, [CallerFilePath] string file = "", [CallerMemberName] string member = "", [CallerLineNumber] int line = 0)
         {
             JsonApiErrorResult result = new JsonApiErrorResult(value, message);
@@ -372,6 +386,7 @@ namespace WebApiFunction.Web.AspNet.Controller
 
             return result;
         }
+        [NonAction]
         public JsonApiErrorResult JsonApiErrorResult(ApiRootNodeModel value, HttpStatusCode httpStatusCode, string message = null, string debugMessage = null, object debugObj = null)
         {
             bool devMode = _webHostEnvironment.IsDevelopment();
@@ -382,6 +397,7 @@ namespace WebApiFunction.Web.AspNet.Controller
             AppendHeaderWhenStatusTooManyRequ(httpStatusCode);
             return result;
         }
+        [NonAction]
         public static JsonApiErrorResult JsonApiErrorResultS(ApiRootNodeModel value, HttpStatusCode httpStatusCode, string message = null, string debugMessage = null, object debugObj = null)
         {
             JsonApiErrorResult result = new JsonApiErrorResult(value.Errors, message);
@@ -390,6 +406,7 @@ namespace WebApiFunction.Web.AspNet.Controller
             result.Value = value;
             return result;
         }
+        [NonAction]
         private void AppendHeaderWhenStatusTooManyRequ(HttpStatusCode httpStatusCode)
         {
             if (httpStatusCode == HttpStatusCode.TooManyRequests)
@@ -403,10 +420,12 @@ namespace WebApiFunction.Web.AspNet.Controller
 
     public static class CustomControllerBaseExtensions
     {
+        [NonAction]
         public static Task<ObjectResult> ToJsonApiObjectResultTaskResult(this JsonApiErrorResult jsonApiObjectResult)
         {
             return Task.FromResult((ObjectResult)jsonApiObjectResult);
         }
+        [NonAction]
         public static bool IsErrorControllerRequest(this PathString uri)
         {
             if (uri.Value == null)
@@ -415,6 +434,7 @@ namespace WebApiFunction.Web.AspNet.Controller
             bool response = uri.Value == BackendAPIDefinitionsProperties.ProductiveErrorController || uri.Value == BackendAPIDefinitionsProperties.DebugErrorController;
             return response;
         }
+        [NonAction]
         public static bool IsHealthControllerRequest(this PathString uri)
         {
             if (uri.Value == null)
@@ -423,16 +443,19 @@ namespace WebApiFunction.Web.AspNet.Controller
             bool response = uri.Value == BackendAPIDefinitionsProperties.HealthController;
             return response;
         }
+        [NonAction]
         public static bool IsBackendRequest(this PathString uri)
         {
             return uri.Value == null ?
                 false : uri.Value.StartsWith("/" + GeneralDefs.ApiAreaV1);
         }
+        [NonAction]
         public static List<string> GetUriParts(this PathString uri)
         {
             return uri.Value?.ToString().ToLower().Split('/')?.ToList();
         }
 
+        [NonAction]
         public static Dictionary<string, Uri> GetAuthentificationEndpoint(this HttpContext context)
         {
             Dictionary<string, Uri> responseValue = new Dictionary<string, Uri>();
@@ -443,6 +466,7 @@ namespace WebApiFunction.Web.AspNet.Controller
             }
             return responseValue;
         }
+        [NonAction]
         public static ActionResult Cookie(this ActionResult result, HttpContext context, string key, string value, CookieOptions cookieOptions = null)
         {
             bool exist = context.Request.Cookies.ContainsKey(key);
@@ -464,6 +488,7 @@ namespace WebApiFunction.Web.AspNet.Controller
 
             return result;
         }
+        [NonAction]
         public static string HeaderValueGet(this HttpContext context, string key, bool headerFromResponse = false)
         {
             if (context == null)
@@ -478,6 +503,7 @@ namespace WebApiFunction.Web.AspNet.Controller
             }
             return null;
         }
+        [NonAction]
         public static void HeaderValueSet(this HttpContext context, string key, string value, bool headerFromResponse = false)
         {
             if (context == null)
@@ -511,6 +537,7 @@ namespace WebApiFunction.Web.AspNet.Controller
                 }
             }
         }
+        [NonAction]
         public static string GetRequestJWTFromHeader(this HttpContext context)
         {
             string headerValue = context.HeaderValueGet("Authorization");
@@ -533,6 +560,7 @@ namespace WebApiFunction.Web.AspNet.Controller
             return null;
         }
 
+        [NonAction]
         public static ILogger TraceHttpTraffic(this ILogger logger, MethodBase executedMethod, HttpContext httpContext, string caller)
         {
             string traceId = httpContext.TraceIdentifier;
@@ -589,6 +617,7 @@ namespace WebApiFunction.Web.AspNet.Controller
             }
             return logger;
         }
+        [NonAction]
         public static ILogger Logging(this ILogger logger, LogLevel logLevel, string msg, MethodBase executedMethod, string caller, int eventId = CustomLogEvents.GeneralInfo)
         {
 
@@ -599,6 +628,7 @@ namespace WebApiFunction.Web.AspNet.Controller
             return logger;
         }
 
+        [NonAction]
         public static async void RegisterNetClasses(ISingletonNodeDatabaseHandler databaseHandler, string[] databaseEntiyNamespaces)
         {
 
@@ -812,6 +842,7 @@ namespace WebApiFunction.Web.AspNet.Controller
             }
         }
 
+        [NonAction]
         public static async void RegisterBackend(this IEndpointRouteBuilder endpoints, INodeManagerHandler nodeManagerHandler, IServiceProvider services, IWebHostEnvironment env, ISingletonNodeDatabaseHandler databaseHandler, IActionDescriptorCollectionProvider actionDescriptorCollectionProvider, IConfiguration configuration, string[] databaseEntiyNamespace, Dictionary<string, IHubService> hubServiceRoutes = null)
         {
             ApiModule apiModule = new ApiModule(databaseHandler, nodeManagerHandler);
@@ -1001,34 +1032,42 @@ namespace WebApiFunction.Web.AspNet.Controller
 
                         }
                         var repository = Activator.CreateInstance(controllerType, ctorP);
-                        CustomControllerBase customControllerBase = (CustomControllerBase)repository;
-                        if (controllerType.BaseType != null)
+                        try
                         {
-                            if (controllerType.BaseType.GenericTypeArguments.Length != 0)
-                            {
-                                foreach (var item in controllerType.BaseType.GenericTypeArguments)
-                                {
-                                    if (databaseEntiyNamespace.ToList().IndexOf(item.Namespace) != -1)
-                                    {
-                                        ConstructorInfo[] ctorInfo2 = item.GetConstructors();
-                                        ParameterInfo[] ctorParams2 = ctorInfo2[0].GetParameters();
-                                        AbstractModel abstractModel1 = (AbstractModel)Activator.CreateInstance(item, ctorParams2);
-                                        string tablename = abstractModel1.fGenerateTableNameFromNetClassName(item.Name);
-                                        if (SQLDefinitionProperties.BackendTablesEx.ContainsKey(tablename))
-                                        {
-                                            SQLDefinitionProperties.BackendTablesEx[tablename].SetController(controlller);
-                                        }
 
+                            CustomControllerBase customControllerBase = (CustomControllerBase)repository;
+                            if (controllerType.BaseType != null)
+                            {
+                                if (controllerType.BaseType.GenericTypeArguments.Length != 0)
+                                {
+                                    foreach (var item in controllerType.BaseType.GenericTypeArguments)
+                                    {
+                                        if (databaseEntiyNamespace.ToList().IndexOf(item.Namespace) != -1)
+                                        {
+                                            ConstructorInfo[] ctorInfo2 = item.GetConstructors();
+                                            ParameterInfo[] ctorParams2 = ctorInfo2[0].GetParameters();
+                                            AbstractModel abstractModel1 = (AbstractModel)Activator.CreateInstance(item, ctorParams2);
+                                            string tablename = abstractModel1.fGenerateTableNameFromNetClassName(item.Name);
+                                            if (SQLDefinitionProperties.BackendTablesEx.ContainsKey(tablename))
+                                            {
+                                                SQLDefinitionProperties.BackendTablesEx[tablename].SetController(controlller);
+                                            }
+
+                                        }
                                     }
                                 }
                             }
+                            var controllerEndpoints = controllers.FindAll(x => x.ControllerName.ToLower() == controlller.ControllerName.ToLower());
+
+                            if (appSettingsVarRegisterEndpointBehaviourEnvVar)
+                                apiModule.RegisterApi(customControllerBase, controllerEndpoints, httpMethodQueryResponseData.DataStorage, roleModelRoot, roleModelAnonymous);
+
+                            workItems.Add(controllerType);
                         }
-                        var controllerEndpoints = controllers.FindAll(x => x.ControllerName.ToLower() == controlller.ControllerName.ToLower());
+                        catch (Exception ex)
+                        {
 
-                        if (appSettingsVarRegisterEndpointBehaviourEnvVar)
-                            apiModule.RegisterApi(customControllerBase, controllerEndpoints, httpMethodQueryResponseData.DataStorage, roleModelRoot, roleModelAnonymous);
-
-                        workItems.Add(controllerType);
+                        }
                     }
                 }
 

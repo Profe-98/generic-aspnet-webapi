@@ -85,10 +85,8 @@ namespace WebApiFunction.Web.Authentification.JWT
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             ClaimsIdentity claimsIdentity = new ClaimsIdentity(new[]
                 {
-                    new Claim("uuid", userModel.Uuid.ToString()),
-                    new Claim("user", userModel.User.ToString()),
-                    new Claim("user_type_id", userModel.UserTypeUuid.ToString()),
-                    new Claim("email", userModel.AccountUuid.ToString()),
+                    new Claim(BackendAPIDefinitionsProperties.Claim.ClaimTypeUserUuid, userModel.Uuid.ToString()),
+                    new Claim(BackendAPIDefinitionsProperties.Claim.ClaimTypeUser, userModel.User.ToString()),
                     new Claim("expires_time",expires.ToString()),
                 });
 
@@ -97,7 +95,7 @@ namespace WebApiFunction.Web.Authentification.JWT
 
                 foreach (RoleModel role in userModel.AvaibleRoles)
                 {
-                    Claim claimRole = new Claim("user_role", role.Name);
+                    Claim claimRole = new Claim(BackendAPIDefinitionsProperties.Claim.ClaimTypeUserRole, role.Name);
                     claimsIdentity.AddClaim(claimRole);
                 }
             }

@@ -33,6 +33,7 @@ namespace WebApiFunction.Configuration
         public const string RootUserPassword = "root";
         public const string AuthentificationControllerName = "authentification";
         public const string ErrorControllerName = "error";
+        
         public const int RegisterActivationExpInDays = 7;
         public const int RegisterActivationCodeLen = 4;
         public const int PasswordResetCodeLen = 6;
@@ -60,6 +61,12 @@ namespace WebApiFunction.Configuration
             { CmKeyWhatsappBusiness,Guid.Empty }
         };
 
+        public struct Claim
+        {
+            public static string ClaimTypeUserRole = "user_role";
+            public static string ClaimTypeUserUuid = "user_uuid";
+            public static string ClaimTypeUser = "user_name";
+        }
 
         public struct NodeTypes
         {

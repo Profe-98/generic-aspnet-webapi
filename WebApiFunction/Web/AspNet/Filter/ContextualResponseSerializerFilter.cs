@@ -56,6 +56,9 @@ using System.Net;
 
 namespace WebApiFunction.Web.AspNet.Filter
 {
+    /// <summary>
+    /// Removes Properties in Object that are marked with the SensitiveDataAttribute when the User Identity Claims not contain a specific role that is defined in SensitiveDataAttribute
+    /// </summary>
     public class ContextualResponseSerializerFilter : IAsyncResultFilter
     {
         private readonly ILogger<ContextualResponseSerializerFilter> _logger;
@@ -74,13 +77,6 @@ namespace WebApiFunction.Web.AspNet.Filter
                 var newSettedObject = objectResultFromController.Value.SetSensitivePropertiesToDefault(userClaims);
                 objectResultFromController.Value = newSettedObject;
 
-                /*string json = null;
-                using (JsonHandler jsonHandler = new JsonHandler())
-                {
-                    json = jsonHandler.JsonSerialize(newSettedObject);
-                }
-                byte[] data = Encoding.UTF8.GetBytes(json);
-                await context.HttpContext.Response.Body.WriteAsync(data, 0, data.Length);*/
 
                 context.Result = objectResultFromController;
 
