@@ -59,6 +59,9 @@ namespace WebApiFunction.Application.Model.Database.MySQL.Jellyfish.DataTransfer
         [JsonPropertyName("target_user_uuid")]
         [DatabaseColumnProperty("target_user_uuid", MySqlDbType.String)]
         public Guid TargetUserUuid { get; set; } = Guid.Empty;
+        [JsonPropertyName("user_uuid")]
+        [DatabaseColumnProperty("user_uuid", MySqlDbType.String)]
+        public Guid UserUuid { get; set; } = Guid.Empty;
 
         [DataType(DataType.Text, ErrorMessage = DataValidationMessageStruct.WrongDataTypeGivenMsg)]
         [DatabaseColumnProperty("target_user_request_message", MySqlDbType.String)]
