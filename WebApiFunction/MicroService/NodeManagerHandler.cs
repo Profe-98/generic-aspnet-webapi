@@ -47,6 +47,7 @@ using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
 using WebApiFunction.Application.Model.Database.MySQL.Table;
 using WebApiFunction.Application.Model.Database.MySQL;
+using Microsoft.Extensions.Logging;
 
 namespace WebApiFunction.MicroService
 {
@@ -58,6 +59,7 @@ namespace WebApiFunction.MicroService
         private readonly IAppconfig _appConfig;
         private readonly ITaskSchedulerBackgroundServiceQueuer _taskSchedulerBackgroundServiceQueuer;
         private NodeModel _node = null;
+        private bool _isRegisterActionProceeded;
 
         public NodeModel NodeModel => _node;
         #endregion
@@ -116,7 +118,6 @@ namespace WebApiFunction.MicroService
                 LastKeepAlive = DateTime.Now,
                 Uuid = _appConfig.AppServiceConfiguration.WebApiConfigurationModel.NodeUuid
             };
-            Register();
 
         }
         #endregion
@@ -124,35 +125,44 @@ namespace WebApiFunction.MicroService
         public async void Register()
         {
 
-            NodeModel tmpNode = new NodeModel { Uuid = _appConfig.AppServiceConfiguration.WebApiConfigurationModel.NodeUuid };
-            string queryS = tmpNode.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.SELECT).ToString();
-            QueryResponseData<NodeModel> queryResponseDataS = await _databaseHandler.ExecuteQueryWithMap<NodeModel>(queryS, tmpNode);
-            if (!queryResponseDataS.HasStorageData)
+            try
             {
-                throw new NotImplementedException("node is not found in database, that means the node must be registered in database and the uuid must be stored in appserviceconfiguration.json file for authentification of the node with the backend");
 
+                NodeModel tmpNode = new NodeModel { Uuid = _appConfig.AppServiceConfiguration.WebApiConfigurationModel.NodeUuid };
+                string queryS = tmpNode.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.SELECT).ToString();
+                QueryResponseData<NodeModel> queryResponseDataS = await _databaseHandler.ExecuteQueryWithMap<NodeModel>(queryS, tmpNode);
+                if (!queryResponseDataS.HasStorageData)
+                {
+                    throw new NotImplementedException("node is not found in database, that means the node must be registered in database and the uuid must be stored in appserviceconfiguration.json file for authentification of the node with the backend");
+
+                }
+                NodeModel currentDataFromDb = queryResponseDataS.FirstRow;
+                if (_node.NodeTypeUuid != currentDataFromDb.NodeTypeUuid)
+                    _node.NodeTypeUuid = currentDataFromDb.NodeTypeUuid;
+
+                if (_node.Name != currentDataFromDb.Name)
+                    _node.Name = currentDataFromDb.Name;
+
+
+                NodeModel nodeModelNetworkParams = new NodeModel
+                {
+                    Ip = _node.Ip,
+                    Port = _node.Port,
+                    DnsServers = _node.DnsServers,
+                    Mask = _node.Mask,
+                    NetId = _node.NetId,
+                    Gateway = _node.Gateway,
+                };
+                queryS = nodeModelNetworkParams.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.UPDATE, tmpNode).ToString();
+                nodeModelNetworkParams.Uuid = tmpNode.Uuid;
+                await _databaseHandler.ExecuteQueryWithMap<NodeModel>(queryS, nodeModelNetworkParams);
+                _isRegisterActionProceeded = true;
             }
-            NodeModel currentDataFromDb = queryResponseDataS.FirstRow;
-            if (_node.NodeTypeUuid != currentDataFromDb.NodeTypeUuid)
-                _node.NodeTypeUuid = currentDataFromDb.NodeTypeUuid;
-
-            if (_node.Name != currentDataFromDb.Name)
-                _node.Name = currentDataFromDb.Name;
-
-
-            NodeModel nodeModelNetworkParams = new NodeModel { 
-             Ip=_node.Ip,
-             Port=_node.Port,
-             DnsServers=_node.DnsServers,
-             Mask= _node.Mask,
-             NetId=_node.NetId,
-             Gateway= _node.Gateway,
-            };
-            queryS = nodeModelNetworkParams.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.UPDATE, tmpNode).ToString();
-            nodeModelNetworkParams.Uuid = tmpNode.Uuid;
-            await _databaseHandler.ExecuteQueryWithMap<NodeModel>(queryS, nodeModelNetworkParams);
-
+            catch(Exception ex) {
+                //wenn keine Verbindung zum nodemanager mysql backend besteht (service: ISingletonNodeDatabaseHandler)
+            }
             KeepAlive();
+
         }
         public async void KeepAlive()
         {
@@ -160,14 +170,21 @@ namespace WebApiFunction.MicroService
             {
                 taskObject = new TaskObject(async () =>
                 {
-                    _node.LastKeepAlive = DateTime.Now;
-                    NodeModel tmpNode = new NodeModel { Uuid = _node.Uuid };
+                    try
+                    {
+                        _node.LastKeepAlive = DateTime.Now;
+                        NodeModel tmpNode = new NodeModel { Uuid = _node.Uuid };
 
 
-                    string query = _node.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.UPDATE, tmpNode, _node).ToString();
-                    QueryResponseData queryResponseData = await _databaseHandler.ExecuteQueryWithMap<NodeModel>(query, _node);
-                    if (queryResponseData.HasErrors)
-                        throw new InvalidOperationException();
+                        string query = _node.GenerateQuery(SQLDefinitionProperties.SQL_STATEMENT_ART.UPDATE, tmpNode, _node).ToString();
+                        QueryResponseData queryResponseData = await _databaseHandler.ExecuteQueryWithMap<NodeModel>(query, _node);
+                        if (queryResponseData.HasErrors)
+                            throw new InvalidOperationException();
+                    }
+                    catch(Exception ex)
+                    {
+
+                    }
 
                 }, BackendAPIDefinitionsProperties.NodeSendKeepAliveTime);
                 _node.IsRegistered = true;

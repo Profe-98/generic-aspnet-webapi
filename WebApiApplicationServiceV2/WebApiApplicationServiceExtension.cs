@@ -209,6 +209,8 @@ namespace WebApiApplicationServiceV2
             }
             services.AddSingleton<ISingletonDatabaseHandler>(new MySqlDatabaseHandler(appConfigService.AppServiceConfiguration.DatabaseConfigurationModel.MysqlConnectionString, appConfigService.AppServiceConfiguration.DatabaseConfigurationModel.AutoCommit));
 
+
+
             services.AddSingleton<INodeManagerHandler, NodeManagerHandler>();
             services.AddScoped<IScopedSiteProtectHandler, SiteProtectHandler>();
             services.AddSingleton<ISingletonSiteProtectHandler, SiteProtectHandler>();
@@ -222,8 +224,6 @@ namespace WebApiApplicationServiceV2
 
             ISingletonNodeDatabaseHandler databaseHandler = serviceProvider.GetService<ISingletonNodeDatabaseHandler>();
             CustomControllerBaseExtensions.RegisterNetClasses(databaseHandler, databaseEntityNamespace);
-            INodeManagerHandler nodeManager = serviceProvider.GetService<INodeManagerHandler>();
-            nodeManager.Register();
             services.AddRabbitMq();
 
             serviceProvider = services.BuildServiceProvider();
@@ -266,7 +266,19 @@ namespace WebApiApplicationServiceV2
                 });
 
             serviceProvider = services.BuildServiceProvider();
-            var test = serviceProvider.GetService<HealthCheckService>();
+            var hCS = serviceProvider.GetService<HealthCheckService>();
+            var resultHealthCheck = async() => {
+                var result = await hCS.CheckHealthAsync();
+                foreach(var item in result.Entries)
+                {
+                    Console.WriteLine("[HealthCheckService]: "+item.Key+": "+item.Value.Description+"");
+                }
+            };
+            resultHealthCheck.Invoke();
+
+            INodeManagerHandler nodeManager = serviceProvider.GetService<INodeManagerHandler>();
+            nodeManager.Register();
+
             /*services.AddMvc(options => 
             {
                 options.InputFormatters.Insert(0, new RequestInputFormatter());

@@ -62,7 +62,7 @@ namespace WebApiFunction.Web.AspNet.Healthcheck
             var response = await cacheService.Ping();
             var responseLocal = cacheService.PingLocalCache();
             stopwatch.Stop();
-            HealthStatus[] cacheHealthStatus = new HealthStatus[response.Keys.Count];//+1 wegen localcache der immer existiert
+            HealthStatus[] cacheHealthStatus = new HealthStatus[response==null?0:response.Keys.Count];//+1 wegen localcache der immer existiert
             HealthStatus cacheHealthStatusLocalCache = HealthStatus.Unhealthy;
             if (responseLocal != GeneralDefs.NotFoundResponseValue)
             {
@@ -70,27 +70,31 @@ namespace WebApiFunction.Web.AspNet.Healthcheck
             }
             desciption += "local-cache=;Up-state=Up;GET=\"\";fetch-time=0ms;errors=no;warning=no;details=;\n";
             int i = 0;
-            foreach (var key in response.Keys)//index start by 1 wegen localcache
+            if(response != null)
             {
-                var data = response[key];
-                if (data == GeneralDefs.NotFoundResponseValue)
+
+                foreach (var key in response.Keys)//index start by 1 wegen localcache
                 {
-                    desciption += "distributed-cache=" + key.ToString() + ";Up-state=Down;GET=\"\";fetch-time=?;errors=yes;warning=no;details=host is not reachable;\n";
-                    cacheHealthStatus[i] = HealthStatus.Unhealthy;
+                    var data = response[key];
+                    if (data == GeneralDefs.NotFoundResponseValue)
+                    {
+                        desciption += "distributed-cache=" + key.ToString() + ";Up-state=Down;GET=\"\";fetch-time=?;errors=yes;warning=no;details=host is not reachable;\n";
+                        cacheHealthStatus[i] = HealthStatus.Unhealthy;
+                    }
+                    else
+                    {
+                        desciption += "distributed-cache=" + key.ToString() + ";Up-state=Up;GET=\"\";fetch-time=" + data + "ms;errors=no;warning=no;details=;\n";
+                        cacheHealthStatus[i] = data < 10 ? HealthStatus.Healthy : HealthStatus.Degraded;
+                    }
+                    i++;
                 }
-                else
-                {
-                    desciption += "distributed-cache=" + key.ToString() + ";Up-state=Up;GET=\"\";fetch-time=" + data + "ms;errors=no;warning=no;details=;\n";
-                    cacheHealthStatus[i] = data < 10 ? HealthStatus.Healthy : HealthStatus.Degraded;
-                }
-                i++;
             }
             healthStatus = HealthStatus.Unhealthy;
             int countHealthy = cacheHealthStatus.ToList().FindAll(x => x.HasFlag(HealthStatus.Healthy)).Count;
             int countUnHealthy = cacheHealthStatus.ToList().FindAll(x => x.HasFlag(HealthStatus.Unhealthy)).Count;
             int countDegraded = cacheHealthStatus.ToList().FindAll(x => x.HasFlag(HealthStatus.Degraded)).Count;
-            int ratioUnHealthy = 100 / cacheHealthStatus.Length * countUnHealthy;
-            int ratioDegraded = 100 / cacheHealthStatus.Length * countDegraded;
+            int ratioUnHealthy = cacheHealthStatus.Length != 0?(100 / cacheHealthStatus.Length * countUnHealthy):(100);
+            int ratioDegraded = cacheHealthStatus.Length != 0?(100 / cacheHealthStatus.Length * countDegraded):(0);
             if (ratioUnHealthy > 75)
             {
                 healthStatus = HealthStatus.Unhealthy;

@@ -108,12 +108,14 @@ namespace WebApiFunction.Application.Controller.Modules.Jellyfish
         public async Task<Guid> CreateFriendshipRequest(Guid fromUserUuid, Guid toUserUuid, string message)
         {
             var guid = CreateUuid();
+
             var rowsAffected = await MysqlDapperContext.GetConnection().ExecuteAsync("INSERT INTO user_friendship_request (`uuid`,`user_uuid`,`target_user_uuid`,`target_user_request_message`) VALUES (@guid,@fromUserUuid,@toUserUuid,@message);", new { guid = guid, fromUserUuid = fromUserUuid, toUserUuid = toUserUuid, message = message });
             return rowsAffected == 1 ? guid : Guid.Empty;
         }
-        public async Task<Guid> AcceptFriendshipRequest(Guid fromUserUuid, Guid toUserUuid)
+        public async Task<Guid> AcceptFriendshipRequest(Guid requestUuid,Guid fromUserUuid, Guid toUserUuid)
         {
             var guid = CreateUuid();
+            var resDelete = await MysqlDapperContext.GetConnection().ExecuteAsync("DELETE FROM user_friendship_request WHERE uuid = @requestuuid limit 1;", new { requestuuid = requestUuid });
             var rowsAffected = await MysqlDapperContext.GetConnection().ExecuteAsync("INSERT INTO user_friends (`uuid`,`user_uuid`,`friend_user_uuid`) VALUES (@guid,@fromUserUuid,@toUserUuid);", new { guid = guid, fromUserUuid = fromUserUuid, toUserUuid = toUserUuid });
             return rowsAffected == 1 ? guid : Guid.Empty;
         }

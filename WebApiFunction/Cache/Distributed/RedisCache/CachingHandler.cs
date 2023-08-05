@@ -68,12 +68,14 @@ using WebApiFunction.Web.AspNet;
 using WebApiFunction.Web.Authentification;
 using WebApiFunction.Web.Http.Api.Abstractions.JsonApiV1;
 using WebApiFunction.Web.Http;
+using Microsoft.Extensions.Logging;
 
 namespace WebApiFunction.Cache.Distributed.RedisCache
 {
     public class CachingHandler : ICachingHandler, IDisposable
     {
         #region Private
+        private readonly ILogger _logger;   
         private readonly bool _useLocalCache = true;
         private readonly IConnectionMultiplexer _connectionMultiplexer;
         private readonly IMemoryCache _localCache;
@@ -83,10 +85,11 @@ namespace WebApiFunction.Cache.Distributed.RedisCache
         private readonly IAppconfig _appconfig;
 
         #endregion
+
         #region Public
         #endregion
         #region Ctor & Dtor
-        public CachingHandler(IConnectionMultiplexer connectionMultiplexer, IAppconfig appconfig, ISingletonJsonHandler jsonHandler, IMemoryCache localCache/*, IDistributedMainCache mainDistributedCache,IDistributedFailoverCache failoverDistributedCache*/)
+        public CachingHandler(ILogger<CachingHandler> logger,IConnectionMultiplexer connectionMultiplexer, IAppconfig appconfig, ISingletonJsonHandler jsonHandler, IMemoryCache localCache/*, IDistributedMainCache mainDistributedCache,IDistributedFailoverCache failoverDistributedCache*/)
         {
             _localCache = localCache;
             /*_mainCache = mainDistributedCache;
@@ -95,9 +98,10 @@ namespace WebApiFunction.Cache.Distributed.RedisCache
             _connectionMultiplexer = connectionMultiplexer;
             _useLocalCache = true;
             _appconfig = appconfig;
+            _logger = logger;
 
         }
-        public CachingHandler(ISingletonJsonHandler jsonHandler, IAppconfig appconfig, IMemoryCache localCache/*, IDistributedMainCache mainDistributedCache,IDistributedFailoverCache failoverDistributedCache*/)
+        public CachingHandler(ILogger<CachingHandler> logger, ISingletonJsonHandler jsonHandler, IAppconfig appconfig, IMemoryCache localCache/*, IDistributedMainCache mainDistributedCache,IDistributedFailoverCache failoverDistributedCache*/)
         {
             _localCache = localCache;
             /*_mainCache = mainDistributedCache;
@@ -105,6 +109,7 @@ namespace WebApiFunction.Cache.Distributed.RedisCache
             _jsonHandler = jsonHandler;
             _useLocalCache = true;
             _appconfig = appconfig;
+            _logger = logger;
 
         }
         ~CachingHandler()
@@ -151,38 +156,47 @@ namespace WebApiFunction.Cache.Distributed.RedisCache
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message, ex);
                 response = GeneralDefs.NotFoundResponseValue;
             }
             return response;
         }
         public async Task<Dictionary<EndPoint, long>> Ping()
         {
-            Dictionary<EndPoint, long> response = new Dictionary<EndPoint, long>();
-            EndPoint[] endPoints = _appconfig.AppServiceConfiguration?.CacheConfigurationModel?.Hosts?.Select(x => x.EndPoint)?.ToArray();
-            for (int i = 0; i < endPoints.Length; i++)
+            try
             {
-                long responseMs = GeneralDefs.NotFoundResponseValue;
-                response.TryAdd(endPoints[i], responseMs);
-                Stopwatch stopwatch = Stopwatch.StartNew();
-                try
+                Dictionary<EndPoint, long> response = new Dictionary<EndPoint, long>();
+                EndPoint[] endPoints = _appconfig.AppServiceConfiguration?.CacheConfigurationModel?.Hosts?.Select(x => x.EndPoint)?.ToArray();
+                for (int i = 0; i < endPoints.Length; i++)
                 {
-                    if (_connectionMultiplexer == null)
-                        continue;
+                    long responseMs = GeneralDefs.NotFoundResponseValue;
+                    response.TryAdd(endPoints[i], responseMs);
+                    Stopwatch stopwatch = Stopwatch.StartNew();
+                    try
+                    {
+                        if (_connectionMultiplexer == null)
+                            continue;
 
-                    bool conn = _connectionMultiplexer.GetServer(endPoints[i]).IsConnected;
-                    stopwatch.Stop();
-                    if (conn)
-                        responseMs = stopwatch.ElapsedMilliseconds;
-                    else
-                        throw new Exception();
+                        bool conn = _connectionMultiplexer.GetServer(endPoints[i]).IsConnected;
+                        stopwatch.Stop();
+                        if (conn)
+                            responseMs = stopwatch.ElapsedMilliseconds;
+                        else
+                            throw new Exception();
+                    }
+                    catch (Exception ex)
+                    {
+                        responseMs = GeneralDefs.NotFoundResponseValue;
+                    }
+                    response[endPoints[i]] = responseMs;
                 }
-                catch (Exception ex)
-                {
-                    responseMs = GeneralDefs.NotFoundResponseValue;
-                }
-                response[endPoints[i]] = responseMs;
+                return response;
             }
+            catch (Exception ex){
 
+                _logger.LogError(ex.Message, ex);
+            }
+            return null;
 
             /*try
             {
@@ -206,7 +220,6 @@ namespace WebApiFunction.Cache.Distributed.RedisCache
                 response[2] = GeneralDefs.NotFoundResponseValue;
             }
             stopwatch.Stop();*/
-            return response;
         }
 
         public void ReInitConnectionMultiplexer(IServiceProvider serviceProvider)
@@ -251,6 +264,7 @@ namespace WebApiFunction.Cache.Distributed.RedisCache
                     catch (Exception ex)
                     {
 
+                        _logger.LogError(ex.Message, ex);
                     }
                     /*string resultFromMain = null;
                     try
@@ -287,6 +301,7 @@ namespace WebApiFunction.Cache.Distributed.RedisCache
             catch (Exception ex)
             {
 
+                _logger.LogError(ex.Message, ex);
             }
             return null;
         }
@@ -316,6 +331,7 @@ namespace WebApiFunction.Cache.Distributed.RedisCache
             catch (Exception ex)
             {
 
+                _logger.LogError(ex.Message, ex);
             }
             return false;
         }
@@ -341,6 +357,7 @@ namespace WebApiFunction.Cache.Distributed.RedisCache
                     catch (Exception ex)
                     {
 
+                        _logger.LogError(ex.Message, ex);
                     }
                     /*_mainCache.SetStringAsync(key, value, options, token);
                     
@@ -357,10 +374,12 @@ namespace WebApiFunction.Cache.Distributed.RedisCache
                 catch (Exception ex)
                 {
 
+                    _logger.LogError(ex.Message, ex);
                 }
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message, ex);
             }
             return Task.CompletedTask;
         }
@@ -389,40 +408,49 @@ namespace WebApiFunction.Cache.Distributed.RedisCache
         {
             if (cacheConfigurationModel == null)
                 return null;
-            var hosts = cacheConfigurationModel?.Hosts?.ToList();
-            EndPoint[] endPoints = hosts.Select<CacheHostConfigurationModel, EndPoint>(x => x.EndPoint).ToArray();
-            string clusterPassword = hosts.First().Password;
-
-            var multiplexerConfig = new ConfigurationOptions()
+            try
             {
-                ClientName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + "@" + Dns.GetHostName(),
-                AllowAdmin = true,
-                Password = clusterPassword,
-                /*CommandMap = CommandMap.Create(new HashSet<string>
-                { // EXCLUDE a few commands (security thing :) )
-                    "INFO", "CONFIG", "CLUSTER",
-                    "PING", "ECHO", "CLIENT"
-                }, available: false),*/
-            };
-            ConnectionMultiplexer multiplexer = null;
-            if (endPoints != null)
-            {
-                endPoints.ToList().ForEach(x => multiplexerConfig.EndPoints.Add(x));
-                try
-                {
+                var hosts = cacheConfigurationModel?.Hosts?.ToList();
+                EndPoint[] endPoints = hosts.Select<CacheHostConfigurationModel, EndPoint>(x => x.EndPoint).ToArray();
+                string clusterPassword = hosts.First().Password;
 
-                    multiplexer = ConnectionMultiplexer.Connect(multiplexerConfig);
-                }
-                catch (RedisConnectionException ex)
+                var multiplexerConfig = new ConfigurationOptions()
                 {
+                    ClientName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + "@" + Dns.GetHostName(),
+                    AllowAdmin = true,
+                    Password = clusterPassword,
+                    /*CommandMap = CommandMap.Create(new HashSet<string>
+                    { // EXCLUDE a few commands (security thing :) )
+                        "INFO", "CONFIG", "CLUSTER",
+                        "PING", "ECHO", "CLIENT"
+                    }, available: false),*/
+                };
+                ConnectionMultiplexer multiplexer = null;
+                if (endPoints != null)
+                {
+                    endPoints.ToList().ForEach(x => multiplexerConfig.EndPoints.Add(x));
+                    try
+                    {
 
+                        multiplexer = ConnectionMultiplexer.Connect(multiplexerConfig);
+                    }
+                    catch (RedisConnectionException ex)
+                    {
+
+                    }
+                    /*
+                     * Test @StackExchange.Redis
+                     * 
+                     */
                 }
-                /*
-                 * Test @StackExchange.Redis
-                 * 
-                 */
+                return multiplexer;
             }
-            return multiplexer;
+            catch(Exception ex)
+            {
+
+            }
+            return null;
+            
         }
         public static IServiceCollection UseServerSideCache(this IServiceCollection builder, CacheConfigurationModel cacheConfigurationModel)
         {

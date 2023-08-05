@@ -95,7 +95,7 @@ namespace WebApiFunction.Ampq.Rabbitmq
             _singletonEncryptionHandler = singletonEncryptionHandler;
 
             _connection = GetConnection();
-            if (_connection.IsOpen)
+            if (_connection != null&&_connection.IsOpen)
             {
                 _logger.LogDebug("rabbitmq connection established");
             }
@@ -108,21 +108,31 @@ namespace WebApiFunction.Ampq.Rabbitmq
             EventHandler<ShutdownEventArgs> shutDownEventHandler = null)
         {
             _logger.LogDebug("try to connect to rabbitmq");
-            var factory = new ConnectionFactory()
+            IConnection connection = null ;
+            try
             {
-                ClientProvidedName= _nodeManagerHandler.NodeModel.Name,
-                HostName = _appConfig.AppServiceConfiguration.RabbitMqConfigurationModel.Host,
-                UserName = _appConfig.AppServiceConfiguration.RabbitMqConfigurationModel.User,
-                Password = _appConfig.AppServiceConfiguration.RabbitMqConfigurationModel.Password,
-                VirtualHost = _appConfig.AppServiceConfiguration.RabbitMqConfigurationModel.VirtualHost,
-                Port = (int)_appConfig.AppServiceConfiguration.RabbitMqConfigurationModel.Port,
-                RequestedHeartbeat = new TimeSpan(0, 0, 0, 0, _appConfig.AppServiceConfiguration.RabbitMqConfigurationModel.HeartBeatMs)
-            };
-            var connection = factory.CreateConnection();
-            connection.ConnectionBlocked += connectionBlockedEventHandler == null ? Connection_ConnectionBlocked : connectionBlockedEventHandler;
-            connection.ConnectionShutdown += shutDownEventHandler == null ? Connection_ConnectionShutdown : shutDownEventHandler;
-            connection.ConnectionUnblocked += connectionUnblockedEventHandler == null ? Connection_ConnectionUnblocked : connectionUnblockedEventHandler;
-            connection.CallbackException += callBackExceptionEventHandler == null ? Connection_CallbackException : callBackExceptionEventHandler;
+
+                var factory = new ConnectionFactory()
+                {
+                    ClientProvidedName = _nodeManagerHandler.NodeModel.Name,
+                    HostName = _appConfig.AppServiceConfiguration.RabbitMqConfigurationModel.Host,
+                    UserName = _appConfig.AppServiceConfiguration.RabbitMqConfigurationModel.User,
+                    Password = _appConfig.AppServiceConfiguration.RabbitMqConfigurationModel.Password,
+                    VirtualHost = _appConfig.AppServiceConfiguration.RabbitMqConfigurationModel.VirtualHost,
+                    Port = (int)_appConfig.AppServiceConfiguration.RabbitMqConfigurationModel.Port,
+                    RequestedHeartbeat = new TimeSpan(0, 0, 0, 0, _appConfig.AppServiceConfiguration.RabbitMqConfigurationModel.HeartBeatMs)
+                };
+                connection = factory.CreateConnection();
+                connection.ConnectionBlocked += connectionBlockedEventHandler == null ? Connection_ConnectionBlocked : connectionBlockedEventHandler;
+                connection.ConnectionShutdown += shutDownEventHandler == null ? Connection_ConnectionShutdown : shutDownEventHandler;
+                connection.ConnectionUnblocked += connectionUnblockedEventHandler == null ? Connection_ConnectionUnblocked : connectionUnblockedEventHandler;
+                connection.CallbackException += callBackExceptionEventHandler == null ? Connection_CallbackException : callBackExceptionEventHandler;
+            }
+            catch(Exception ex)
+            {
+
+                _logger.LogDebug("connection failed");
+            }
             return connection;
         }
 
@@ -168,6 +178,8 @@ namespace WebApiFunction.Ampq.Rabbitmq
 
         public void SubscibeExchange(string exchangeName, Func<MessageModel, MessageModelResponse> consumeAction, Action okAct, string routingKey = "")
         {
+            if (Connection == null)
+                return;
             var _queueBind = RegisterExchange(exchangeName, consumeAction, okAct, routingKey);
         }
 
@@ -204,6 +216,8 @@ namespace WebApiFunction.Ampq.Rabbitmq
         }
         public void PublishObject(string exchangeName, object entity, string routingKey, string message, Func<MessageModel, MessageModelResponse> consumeAction, Action okAct)
         {
+            if (Connection == null)
+                return;
             var entT = entity.GetType().FullName;
             var objJson = _singletonJsonHandler.JsonSerialize(entity);
             var msgModel = new MessageModel { CreateTimestamp = DateTime.Now.Ticks, DataSerialized = objJson, DataType = entT, Message = message, NodeId = _nodeManagerHandler.NodeModel.Uuid };
@@ -218,6 +232,8 @@ namespace WebApiFunction.Ampq.Rabbitmq
 
         public void Publish(string exchangeName, MessageModel msg, Func<MessageModel, MessageModelResponse> consumeAction,Action okAct, string routingKey = "")
         {
+            if (Connection == null)
+                return;
             try
             {
                 var _queueBind = RegisterExchange(exchangeName, consumeAction, okAct, routingKey);

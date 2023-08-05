@@ -25,29 +25,37 @@ namespace WebApiFunction.Web.AspNet.Swagger.OperationFilter
             var descriptor = context.ApiDescription.ActionDescriptor as ControllerActionDescriptor;
             if (descriptor != null)
             {
-                var endpointAuthAttr = context.MethodInfo.GetCustomAttribute<AuthorizeAttribute>();
-                if (endpointAuthAttr!=null)
+                var endpointAuthAttrs = context.MethodInfo.GetCustomAttributes<AuthorizeAttribute>();
+                var  nonAuthhAttrs = context.MethodInfo.GetCustomAttributes<AllowAnonymousAttribute>();
+                if (endpointAuthAttrs == null || endpointAuthAttrs.Count() == 0)
                 {
-                    string endpointAuthDesc = "Authorization Token for HTTP Requests.";
-                    if(!String.IsNullOrEmpty(endpointAuthAttr.Policy))
+                    endpointAuthAttrs = descriptor.ControllerTypeInfo.GetCustomAttributes<AuthorizeAttribute>();  
+                }
+                if (endpointAuthAttrs!=null && !nonAuthhAttrs.Any())
+                {
+                    foreach (var endpointAuthAttr in endpointAuthAttrs) 
                     {
-                        endpointAuthDesc += "\nApplied Policy '"+ endpointAuthAttr.Policy + "'";
+                        string endpointAuthDesc = "Authorization Token for HTTP Requests.";
+                        if (!String.IsNullOrEmpty(endpointAuthAttr.Policy))
+                        {
+                            endpointAuthDesc += "\nApplied Policy '" + endpointAuthAttr.Policy + "'";
+                        }
+                        if (!String.IsNullOrEmpty(endpointAuthAttr.Roles))
+                        {
+                            endpointAuthDesc += "\nApplied Roles '" + endpointAuthAttr.Roles + "'";
+                        }
+                        if (!String.IsNullOrEmpty(endpointAuthAttr.AuthenticationSchemes))
+                        {
+                            endpointAuthDesc += "\nApplied Authentication Schemes '" + endpointAuthAttr + "'";
+                        }
+                        operation.Parameters.Add(new OpenApiParameter()
+                        {
+                            Name = "Authorization",
+                            In = ParameterLocation.Header,
+                            Description = endpointAuthDesc,
+                            Required = true
+                        });
                     }
-                    if(!String.IsNullOrEmpty(endpointAuthAttr.Roles))
-                    {
-                        endpointAuthDesc += "\nApplied Roles '"+endpointAuthAttr.Roles+"'";
-                    }
-                    if(!String.IsNullOrEmpty(endpointAuthAttr.AuthenticationSchemes))
-                    {
-                        endpointAuthDesc += "\nApplied Authentication Schemes '"+endpointAuthAttr+"'";
-                    }
-                    operation.Parameters.Add(new OpenApiParameter()
-                    {
-                        Name = "Authorization",
-                        In = ParameterLocation.Header,
-                        Description = endpointAuthDesc,
-                        Required = true
-                    });
                 }
             }
         }

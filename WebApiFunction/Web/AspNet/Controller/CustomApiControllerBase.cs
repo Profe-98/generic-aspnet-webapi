@@ -541,7 +541,7 @@ namespace WebApiFunction.Web.AspNet.Controller
         [NonAction]
         private void InitProcedure()
         {
-            if (_rabbitMqHandler != null)
+            if (_rabbitMqHandler != null && _rabbitMqHandler.Connection != null)
             {
 
                 string exchangeName = GetExchangeDeclarationName();
