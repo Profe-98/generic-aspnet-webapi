@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction_Test\\WebApiFunction_Test.csproj": {}
+    "C:\\Users\\Mika\\Desktop\\Projekte\\generic-aspnet-webapi\\WebApiFunction_Test\\WebApiFunction_Test.csproj": {}
   },
   "projects": {
-    "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj": {
+    "C:\\Users\\Mika\\Desktop\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj",
+        "projectUniqueName": "C:\\Users\\Mika\\Desktop\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj",
         "projectName": "WebApiFunction",
-        "projectPath": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj",
+        "projectPath": "C:\\Users\\Mika\\Desktop\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj",
         "packagesPath": "C:\\Users\\Mika\\.nuget\\packages\\",
-        "outputPath": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\obj\\",
+        "outputPath": "C:\\Users\\Mika\\Desktop\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -95,6 +95,18 @@
               "target": "Package",
               "version": "[2.12.0, )"
             },
+            "Swashbuckle.AspNetCore.Swagger": {
+              "target": "Package",
+              "version": "[6.5.0, )"
+            },
+            "Swashbuckle.AspNetCore.SwaggerGen": {
+              "target": "Package",
+              "version": "[6.5.0, )"
+            },
+            "Swashbuckle.AspNetCore.SwaggerUI": {
+              "target": "Package",
+              "version": "[6.5.0, )"
+            },
             "System.IdentityModel.Tokens.Jwt": {
               "target": "Package",
               "version": "[6.25.1, )"
@@ -128,14 +140,14 @@
         }
       }
     },
-    "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction_Test\\WebApiFunction_Test.csproj": {
+    "C:\\Users\\Mika\\Desktop\\Projekte\\generic-aspnet-webapi\\WebApiFunction_Test\\WebApiFunction_Test.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction_Test\\WebApiFunction_Test.csproj",
+        "projectUniqueName": "C:\\Users\\Mika\\Desktop\\Projekte\\generic-aspnet-webapi\\WebApiFunction_Test\\WebApiFunction_Test.csproj",
         "projectName": "WebApiFunction_Test",
-        "projectPath": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction_Test\\WebApiFunction_Test.csproj",
+        "projectPath": "C:\\Users\\Mika\\Desktop\\Projekte\\generic-aspnet-webapi\\WebApiFunction_Test\\WebApiFunction_Test.csproj",
         "packagesPath": "C:\\Users\\Mika\\.nuget\\packages\\",
-        "outputPath": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction_Test\\obj\\",
+        "outputPath": "C:\\Users\\Mika\\Desktop\\Projekte\\generic-aspnet-webapi\\WebApiFunction_Test\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -157,8 +169,8 @@
           "net7.0": {
             "targetAlias": "net7.0",
             "projectReferences": {
-              "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj": {
-                "projectPath": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj"
+              "C:\\Users\\Mika\\Desktop\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj": {
+                "projectPath": "C:\\Users\\Mika\\Desktop\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj"
               }
             }
           }

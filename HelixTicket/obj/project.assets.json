@@ -2260,6 +2260,9 @@
           "MySql.Data": "8.0.32",
           "RabbitMQ.Client": "6.4.0",
           "Serilog": "2.12.0",
+          "Swashbuckle.AspNetCore.Swagger": "6.5.0",
+          "Swashbuckle.AspNetCore.SwaggerGen": "6.5.0",
+          "Swashbuckle.AspNetCore.SwaggerUI": "6.5.0",
           "System.IdentityModel.Tokens.Jwt": "6.25.1",
           "System.Net.Http": "4.3.4",
           "nClam": "7.0.0"
@@ -6666,11 +6669,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\HelixTicket\\HelixTicket.csproj",
+      "projectUniqueName": "C:\\Users\\Mika\\Desktop\\Projekte\\generic-aspnet-webapi\\HelixTicket\\HelixTicket.csproj",
       "projectName": "HelixTicket",
-      "projectPath": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\HelixTicket\\HelixTicket.csproj",
+      "projectPath": "C:\\Users\\Mika\\Desktop\\Projekte\\generic-aspnet-webapi\\HelixTicket\\HelixTicket.csproj",
       "packagesPath": "C:\\Users\\Mika\\.nuget\\packages\\",
-      "outputPath": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\HelixTicket\\obj\\",
+      "outputPath": "C:\\Users\\Mika\\Desktop\\Projekte\\generic-aspnet-webapi\\HelixTicket\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -6692,8 +6695,8 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "projectReferences": {
-            "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj": {
-              "projectPath": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj"
+            "C:\\Users\\Mika\\Desktop\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj": {
+              "projectPath": "C:\\Users\\Mika\\Desktop\\Projekte\\generic-aspnet-webapi\\WebApiFunction\\WebApiFunction.csproj"
             }
           }
         }

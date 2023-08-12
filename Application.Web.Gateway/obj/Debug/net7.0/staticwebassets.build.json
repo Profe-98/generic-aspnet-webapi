@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "xpZkAmCryP0rYtvlLYhrWM+qV1bd34D+bpYONepruaw=",
+  "Source": "Application.Web.Gateway",
+  "BasePath": "_content/Application.Web.Gateway",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

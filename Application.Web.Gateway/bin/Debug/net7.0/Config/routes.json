@@ -1,0 +1,52 @@
+{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/messenger",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [],
+      "UpstreamPathTemplate": "/messenger",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/messenger/negotiate",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [],
+      "UpstreamPathTemplate": "/messenger/negotiate",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:5000/",
+    "DelegatingHandlers": [
+      "GeneralMiddlewareDelegate"
+    ]
+  }
+}

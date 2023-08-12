@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "GgnEqs/25ChelkWN5cQ1d/V90MmfEJNYALdPyQ5xPJM9P8SHVy+O0t/O522LyXcyD94SmBKKzCJcOB0n502h1g==",
+  "dgSpecHash": "HzNI9KVFzQPmIyUxvb9bxCz7rs1h/I6y1qQ02UDSvb818hg/rmt8mOXmB+ul4Jkgt2Q38F3HI04ib6J/ea/M8Q==",
   "success": true,
-  "projectFilePath": "F:\\Helix\\Projekte\\generic-aspnet-webapi\\WebApiFunction_Test\\WebApiFunction_Test.csproj",
+  "projectFilePath": "C:\\Users\\Mika\\Desktop\\Projekte\\generic-aspnet-webapi\\WebApiFunction_Test\\WebApiFunction_Test.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Mika\\.nuget\\packages\\autofac\\6.5.0\\autofac.6.5.0.nupkg.sha512",
     "C:\\Users\\Mika\\.nuget\\packages\\autofac.extensions.dependencyinjection\\8.0.0\\autofac.extensions.dependencyinjection.8.0.0.nupkg.sha512",
@@ -71,6 +71,7 @@
     "C:\\Users\\Mika\\.nuget\\packages\\microsoft.net.test.sdk\\17.4.1\\microsoft.net.test.sdk.17.4.1.nupkg.sha512",
     "C:\\Users\\Mika\\.nuget\\packages\\microsoft.netcore.platforms\\5.0.0\\microsoft.netcore.platforms.5.0.0.nupkg.sha512",
     "C:\\Users\\Mika\\.nuget\\packages\\microsoft.netcore.targets\\1.1.0\\microsoft.netcore.targets.1.1.0.nupkg.sha512",
+    "C:\\Users\\Mika\\.nuget\\packages\\microsoft.openapi\\1.2.3\\microsoft.openapi.1.2.3.nupkg.sha512",
     "C:\\Users\\Mika\\.nuget\\packages\\microsoft.testplatform.objectmodel\\17.4.1\\microsoft.testplatform.objectmodel.17.4.1.nupkg.sha512",
     "C:\\Users\\Mika\\.nuget\\packages\\microsoft.testplatform.testhost\\17.4.1\\microsoft.testplatform.testhost.17.4.1.nupkg.sha512",
     "C:\\Users\\Mika\\.nuget\\packages\\microsoft.win32.primitives\\4.3.0\\microsoft.win32.primitives.4.3.0.nupkg.sha512",
@@ -107,6 +108,9 @@
     "C:\\Users\\Mika\\.nuget\\packages\\runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl\\4.3.2\\runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl.4.3.2.nupkg.sha512",
     "C:\\Users\\Mika\\.nuget\\packages\\serilog\\2.12.0\\serilog.2.12.0.nupkg.sha512",
     "C:\\Users\\Mika\\.nuget\\packages\\stackexchange.redis\\2.2.4\\stackexchange.redis.2.2.4.nupkg.sha512",
+    "C:\\Users\\Mika\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.5.0\\swashbuckle.aspnetcore.swagger.6.5.0.nupkg.sha512",
+    "C:\\Users\\Mika\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.5.0\\swashbuckle.aspnetcore.swaggergen.6.5.0.nupkg.sha512",
+    "C:\\Users\\Mika\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\6.5.0\\swashbuckle.aspnetcore.swaggerui.6.5.0.nupkg.sha512",
     "C:\\Users\\Mika\\.nuget\\packages\\system.appcontext\\4.3.0\\system.appcontext.4.3.0.nupkg.sha512",
     "C:\\Users\\Mika\\.nuget\\packages\\system.buffers\\4.5.1\\system.buffers.4.5.1.nupkg.sha512",
     "C:\\Users\\Mika\\.nuget\\packages\\system.collections\\4.3.0\\system.collections.4.3.0.nupkg.sha512",
