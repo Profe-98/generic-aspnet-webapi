@@ -61,7 +61,7 @@ namespace Application.Web.Gateway
     public class Startup : WebApiStartup
     {
         private object FileAccessLockObject = new object();
-        public static string[] DatabaseEntityNamespaces { get; } = new string[] { "Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.Jellyfish.Table",
+        public override string[] DatabaseEntityNamespaces { get; } = new string[] { "Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.Jellyfish.Table",
                             "Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGateway.View",
                             "Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGateway.Table",
                             "Application.Shared.Kernel.Application.Model.DataTransferObject.ConcreteImplementation.Jellyfish" };
@@ -178,21 +178,21 @@ namespace Application.Web.Gateway
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options);*/
 
 
-            //Selfmade JWT Bearer Auth mit Authorization
+
+            /*
             var envVars = Environment.GetEnvironmentVariables();
             if(!envVars.Contains("AUTH_HOST"))
             {
                 throw new InvalidOperationException("ENV Var 'AUTH_HOST' contains not the ip of the auth endpoint");
             }
-            var authHost = envVars["AUTH_HOST"].ToString();
-
+            var authHost = envVars["AUTH_HOST"].ToString(); 
             services.AddHttpClient("RemoteAuthentificationServiceClient", c => 
             {
                 
                 c.BaseAddress = new Uri("http://"+ authHost + ":5009/helix-api-1/authentification/validate");
 
                 c.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-            });
+            });*/
             services.AddAuthentication("Base").
                 AddScheme<BasicAuthenticationOptions, AuthentificationHandler>("Base",null, new Action<BasicAuthenticationOptions>(o =>
                 {

@@ -1,0 +1,19 @@
+Key create:
+openssl genrsa -des3 -out domain.key 2048
+CSR (common name == fqdn):
+openssl req -key domain.key -new -out domain.csr
+
+Cert create:
+openssl x509 -signkey domain.key -in domain.csr -req -days 365 -out domain.crt
+
+
+
+Cert lookat:
+openssl x509 -text -noout -in domain.crt
+
+
+PFX Create from certificate and private-key:
+openssl pkcs12 -export -out domain.pfx -inkey domain.key -in domain.crt
+
+
+

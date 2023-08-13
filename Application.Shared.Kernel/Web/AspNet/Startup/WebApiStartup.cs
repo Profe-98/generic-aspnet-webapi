@@ -12,6 +12,7 @@ namespace Application.Shared.Kernel.Web.AspNet.Startup
     public abstract class WebApiStartup : IWebApiStartup
     {
         public IConfiguration Configuration { get; protected set; }
+        public abstract string[] DatabaseEntityNamespaces { get; }
         public WebApiStartup(IConfiguration previousConfig, IWebHostEnvironment env)
         {
             PreConfigurationInitialAction();

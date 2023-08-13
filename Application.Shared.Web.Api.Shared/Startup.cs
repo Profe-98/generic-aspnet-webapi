@@ -28,7 +28,7 @@ namespace Application.Shared.Web.Api.Shared
 {
     public class Startup: WebApiStartup
     {
-        public static string[] DatabaseEntityNamespaces { get; } = new string[] { "Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGateway.View",
+        public override string[] DatabaseEntityNamespaces { get; } = new string[] { "Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGateway.View",
                             "Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGateway.Table" };
 
         readonly string AllowOrigin = "api-gateway";
