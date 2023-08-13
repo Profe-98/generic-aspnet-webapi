@@ -36,7 +36,7 @@ namespace Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiG
         public bool IsRegistered { get; set; }
 
         [JsonPropertyName("node_uuid")]
-        [DatabaseColumnProperty("node_type_uuid", MySqlDbType.String)]
+        [DatabaseColumnProperty("node_uuid", MySqlDbType.String)]
         public Guid NodeUuid { get; set; } = Guid.Empty;
 
         [JsonPropertyName("hub_method_uuid")]

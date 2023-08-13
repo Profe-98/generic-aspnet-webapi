@@ -52,7 +52,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WebApiFunction\Application.Shared.Kernel.csproj" />
+    <ProjectReference Include="..\Application.Shared.Kernel\Application.Shared.Kernel.csproj" />
   </ItemGroup>
 
 

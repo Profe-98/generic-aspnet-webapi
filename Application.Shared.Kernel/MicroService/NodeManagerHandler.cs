@@ -5,6 +5,7 @@ using Application.Shared.Kernel.Threading.Task;
 using Application.Shared.Kernel.Configuration.Const;
 using Application.Shared.Kernel.Configuration.Service;
 using Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGateway.Table;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Shared.Kernel.MicroService
 {
@@ -14,18 +15,18 @@ namespace Application.Shared.Kernel.MicroService
         private TaskObject taskObject;
         private readonly ISingletonNodeDatabaseHandler _databaseHandler;
         private readonly IAppconfig _appConfig;
-        private readonly ITaskSchedulerBackgroundServiceQueuer _taskSchedulerBackgroundServiceQueuer;
+        private readonly IServiceProvider _serviceProvider;
         private NodeModel _node = null;
         private bool _isRegisterActionProceeded;
 
         public NodeModel NodeModel => _node;
         #endregion
         #region Ctor
-        public NodeManagerHandler(ISingletonNodeDatabaseHandler databaseHandler, ITaskSchedulerBackgroundServiceQueuer taskSchedulerBackgroundServiceQueuer, IAppconfig appconfig)
+        public NodeManagerHandler(ISingletonNodeDatabaseHandler databaseHandler,IServiceProvider serviceProvider, IAppconfig appconfig)
         {
+            _serviceProvider = serviceProvider;
             _appConfig = appconfig;
             _databaseHandler = databaseHandler;
-            _taskSchedulerBackgroundServiceQueuer = taskSchedulerBackgroundServiceQueuer;
             var envVars = Environment.GetEnvironmentVariables();
 
 
@@ -90,7 +91,7 @@ namespace Application.Shared.Kernel.MicroService
                 QueryResponseData<NodeModel> queryResponseDataS = await _databaseHandler.ExecuteQueryWithMap<NodeModel>(queryS, tmpNode);
                 if (!queryResponseDataS.HasStorageData)
                 {
-                    throw new NotImplementedException("node is not found in database, that means the node must be registered in database and the uuid must be stored in appserviceconfiguration.json file for authentification of the node with the backend");
+                    throw new InvalidOperationException("node is not found in database, that means the node must be registered in database and the uuid must be stored in appserviceconfiguration.json file for authentification of the node with the backend");
 
                 }
                 NodeModel currentDataFromDb = queryResponseDataS.FirstRow;
@@ -117,6 +118,7 @@ namespace Application.Shared.Kernel.MicroService
             }
             catch(Exception ex) {
                 //wenn keine Verbindung zum nodemanager mysql backend besteht (service: ISingletonNodeDatabaseHandler)
+                throw;
             }
             KeepAlive();
 
@@ -145,7 +147,9 @@ namespace Application.Shared.Kernel.MicroService
 
                 }, BackendAPIDefinitionsProperties.NodeSendKeepAliveTime);
                 _node.IsRegistered = true;
-                _taskSchedulerBackgroundServiceQueuer.Enqueue(taskObject);
+
+                var t = _serviceProvider.GetService<ITaskSchedulerBackgroundServiceQueuer>();
+                t.Enqueue(taskObject);
             }
         }
         public async void Unregister()

@@ -13,7 +13,14 @@ namespace Application.Shared.Kernel.Threading.Service
     /// </summary>
     public class TaskSchedulerBackgroundServiceQueuer : ITaskSchedulerBackgroundServiceQueuer
     {
-        private ConcurrentQueue<TaskObject> _queue = new ConcurrentQueue<TaskObject>();
+        private static ConcurrentQueue<TaskObject> _queue;
+        public TaskSchedulerBackgroundServiceQueuer()
+        {
+            if(_queue == null)
+            {
+                _queue = new ConcurrentQueue<TaskObject>(); 
+            }
+        }
 
         public ConcurrentQueue<TaskObject> Queue
         {

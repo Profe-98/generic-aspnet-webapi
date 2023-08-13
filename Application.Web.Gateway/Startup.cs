@@ -53,12 +53,17 @@ using Application.Shared.Kernel.Infrastructure.Database;
 using Application.Shared.Kernel.Web.AspNet.Startup;
 using Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGateway.View;
 using Application.Web.Gateway.Middleware;
+using Application.Shared.Kernel.Web.AspNet.Controller;
 
 namespace Application.Web.Gateway
 {
     public class Startup : WebApiStartup
     {
         private object FileAccessLockObject = new object();
+        public static string[] DatabaseEntityNamespaces { get; } = new string[] { "Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.Jellyfish.Table",
+                            "Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGateway.View",
+                            "Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGateway.Table",
+                            "Application.Shared.Kernel.Application.Model.DataTransferObject.ConcreteImplementation.Jellyfish" };
         public Startup(IConfiguration configuration, Microsoft.AspNetCore.Hosting.IWebHostEnvironment env) : base(configuration, env)
         {
 
@@ -118,6 +123,8 @@ namespace Application.Web.Gateway
 
             serviceProvider = services.BuildServiceProvider();
 
+            ISingletonNodeDatabaseHandler databaseHandler = serviceProvider.GetService<ISingletonNodeDatabaseHandler>();
+            CustomControllerBaseExtensions.RegisterNetClasses(databaseHandler, DatabaseEntityNamespaces);
             INodeManagerHandler nodeManager = serviceProvider.GetService<INodeManagerHandler>();
             nodeManager.Register();
             services.AddRabbitMq();
@@ -397,6 +404,9 @@ namespace Application.Web.Gateway
                         bool available = (DateTime.Now - new TimeSpan(0, 0, 60) < item.Value);
                         if (available)
                             route.DownstreamHostAndPorts.Add(new RoutesConfigurationModel.DownstreamHostAndPortModel() { Host = ipStr, Port = endPoint.Port });
+                        else
+                        {
+                        }
 
 
                     }
@@ -419,6 +429,7 @@ namespace Application.Web.Gateway
                     };
                     if (row.ActionRoute == null || row.HttpMethods == null || row.Roles == null || route.DownstreamHostAndPorts.Count == 0)
                     {
+                        Console.WriteLine("avoid route '" + row.ActionRoute + "' because (if (row.ActionRoute == null || row.HttpMethods == null || row.Roles == null || route.DownstreamHostAndPorts.Count == 0))");
                         continue;
                     }
                     List<string> claims = new List<string>();
@@ -514,6 +525,10 @@ namespace Application.Web.Gateway
                 connStr.Password = "meinDatabasePassword!";
                 MySqlDatabaseHandler mySqlDatabaseHandler = new MySqlDatabaseHandler(connStr,true);
                 var r = await CreateRoutes(mySqlDatabaseHandler);
+                if(r != null && r.Routes.FindAll(x=>x.DownstreamHostAndPorts.Count == 0).Count != 0) 
+                {
+                    throw new InvalidOperationException("is seems that at least one route has no defined DownstreamHostAndPorts");
+                }
                 WriteRouteToFile(contentRootPath,r,new JsonHandler());
             }), "register-notification");
             app.UseCors(AllowOrigin);

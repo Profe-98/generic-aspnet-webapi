@@ -8,6 +8,7 @@ using Application.Shared.Kernel.Web.AspNet.Filter;
 using Application.Shared.Kernel.Web.AspNet.Controller;
 using Application.Shared.Kernel.Configuration.Const;
 using Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGateway.Table;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Application.Shared.Kernel.Application.Controller.Modules
 {
@@ -40,6 +41,7 @@ namespace Application.Shared.Kernel.Application.Controller.Modules
         {
             public string Route;
             public string HttpMethod;
+            public List<AuthorizeAttribute> AuthorizeAttributes;
 
             public string UniqueIdentifiers
             {
@@ -59,7 +61,7 @@ namespace Application.Shared.Kernel.Application.Controller.Modules
                 return UniqueIdentifiers;
             }
         }
-        public async void RegisterHub(IHubService hubService, RoleModel rootModel, RoleModel anonymousRole) 
+        public async void RegisterHub(IHubService hubService) 
         {
             string query = null;
             SignalrHubModel hubModel = new SignalrHubModel();
@@ -130,6 +132,8 @@ namespace Application.Shared.Kernel.Application.Controller.Modules
                 }
                 methodModel = queryResponseDataHubMethod.FirstRow;
 
+
+
                 RoleRelationToSignalrHubMethodModel roleRelationToSignalrHubMethodModel = new RoleRelationToSignalrHubMethodModel();
                 roleRelationToSignalrHubMethodModel.RoleUuid = rootModel.Uuid;
                 roleRelationToSignalrHubMethodModel.SignalrHubMethodUuid = methodModel.Uuid;
@@ -184,7 +188,7 @@ namespace Application.Shared.Kernel.Application.Controller.Modules
 
 
         }
-        public async void RegisterApi(CustomControllerBase controller, List<ControllerActionDescriptor> controllerDesc, List<HttpMethodModel> httpMethodModels, RoleModel rootRole, RoleModel anonymous)
+        public async void RegisterApi(IAuthorizationPolicyProvider authorizationPolicyProvider, CustomControllerBase controller, List<ControllerActionDescriptor> controllerDesc, List<HttpMethodModel> httpMethodModels)
 
         {
             List<ControllerModel> responseValues = new List<ControllerModel>();
@@ -257,11 +261,22 @@ namespace Application.Shared.Kernel.Application.Controller.Modules
                 if (c.AttributeRouteInfo != null && c.AttributeRouteInfo.Template != null)
                 {
                     var methods = controller.GetType().GetMethods();
+                    var authAttFromController = controller.GetType().GetCustomAttributes<AuthorizeAttribute>();
+                    List<AuthorizeAttribute> authAttr = new List<AuthorizeAttribute>();
                     foreach (MethodInfo method in methods)
                     {
                         var methodHttpAttr = method.GetCustomAttributes<HttpMethodAttribute>();
                         var methodConsumesAttr = method.GetCustomAttributes<CustomConsumesFilter>();
                         var methodProducesAttr = method.GetCustomAttributes<CustomProducesFilter>();
+                        authAttr = authAttFromController.ToList();
+
+                        var authAttFromMethod = method.GetCustomAttributes<AuthorizeAttribute>();
+                        if (authAttFromMethod.Count() > 0)
+                        {
+                            authAttFromMethod.ToList().ForEach(x => authAttr.Add(x));
+                        }
+
+
                         if (methodHttpAttr.Count() != 0 && actionName.ToLower().Equals(method.Name.ToLower()))
                         {
                             methodHttpAttr.ToList().ForEach(x => x.HttpMethods.ToList().ForEach(y =>
@@ -281,10 +296,11 @@ namespace Application.Shared.Kernel.Application.Controller.Modules
                     {
                         controllerActions[currentIterationLevelControllerName].Add(actionName, new List<ControllerActionDescriptorExt>());
                     }
+
                     httpMethod.ForEach(x =>
                     {
                         if (controllerActions[currentIterationLevelControllerName][actionName].Find(y => y.HttpMethod == x && y.Route == routeData) == null)
-                            controllerActions[currentIterationLevelControllerName][actionName].Add(new ControllerActionDescriptorExt { HttpMethod = x, Route = routeData.ToLower() + (routeData.ToLower().EndsWith('}') ? string.Empty : "/") });
+                            controllerActions[currentIterationLevelControllerName][actionName].Add(new ControllerActionDescriptorExt { HttpMethod = x, Route = routeData.ToLower() + (routeData.ToLower().EndsWith('}') ? string.Empty : "/"), AuthorizeAttributes = authAttr });
                     }
 
                     );
@@ -306,11 +322,30 @@ namespace Application.Shared.Kernel.Application.Controller.Modules
                         query = controllerActionModel.GenerateQuery(MySqlDefinitionProperties.SQL_STATEMENT_ART.INSERT).ToString();
                         queryResponseDataControllerAction = await Db.ExecuteQueryWithMap<ControllerActionModel>(query, controllerActionModel);
                     }
+
+                    //1.
+                    /*
+                     
+                            foreach (var item in data.AuthorizeAttributes)
+                            {
+                                if (!String.IsNullOrEmpty(item.Policy))
+                                {
+
+                                    var policy = await authorizationPolicyProvider.GetPolicyAsync(item.Policy);
+
+                                }
+                            }
+                     */
+                    //2.
+                    //3.
+
                     foreach (ControllerActionDescriptorExt data in controllerActions[controllerName][action])
                     {
                         HttpMethodModel httpMethodModel = httpMethodModels.Find(x => x.Name.ToLower().Equals(data.HttpMethod.ToLower()));
                         if (httpMethodModel == null)
                             throw new Exception();
+
+
 
                         ControllerActionRelationToHttpMethodModel relationToHttpMethodModel = new ControllerActionRelationToHttpMethodModel();
                         relationToHttpMethodModel.ActionRoute = data.Route;
@@ -323,6 +358,8 @@ namespace Application.Shared.Kernel.Application.Controller.Modules
                         {
                             query = relationToHttpMethodModel.GenerateQuery(MySqlDefinitionProperties.SQL_STATEMENT_ART.INSERT).ToString();
                             queryResponseDataControllerActionRelToHttp = await Db.ExecuteQueryWithMap<ControllerActionRelationToHttpMethodModel>(query, relationToHttpMethodModel);
+
+
 
                             RoleRelationToControllerActionRelationToHttpMethodModel controllerActionRelationToHttpMethod = new RoleRelationToControllerActionRelationToHttpMethodModel();
                             controllerActionRelationToHttpMethod.RoleUuid = queryResponseDataController.FirstRow.IsAuthcontroller || queryResponseDataController.FirstRow.IsErrorController ? anonymous.Uuid : rootRole.Uuid;//role

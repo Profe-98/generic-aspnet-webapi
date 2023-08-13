@@ -1,9 +1,64 @@
 {
   "Routes": [
     {
+      "DownstreamPathTemplate": "/health",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5000
+        }
+      ],
+      "UpstreamPathTemplate": "/4b14ba01-2278-4408-acea-cc6758ec38cd/health",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/health",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/49bf8a55-e8e3-11ed-bdf1-7085c294413b/health",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
       "DownstreamPathTemplate": "/messenger",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [],
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
       "UpstreamPathTemplate": "/messenger",
       "UpstreamHttpMethod": [
         "Get",
@@ -24,10 +79,519 @@
     {
       "DownstreamPathTemplate": "/messenger/negotiate",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [],
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
       "UpstreamPathTemplate": "/messenger/negotiate",
       "UpstreamHttpMethod": [
         "Get",
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/authentification/connection/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/authentification/connection/",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/authentification/login/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/authentification/login/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/authentification/logout/{token}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/authentification/logout/{token}",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/authentification/refresh/{refresh_token}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/authentification/refresh/{refresh_token}",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/authentification/session/{token}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/authentification/session/{token}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/authentification/validate/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/authentification/validate/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/chat/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/chat/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/health/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/health/",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/message/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/message/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/message/ack/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/message/ack/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/message/nack/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/message/nack/",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/user/activation/{base64}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/user/activation/{base64}",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/user/friends/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/user/friends/",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/user/friendship/request/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/user/friendship/request/",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/user/friendship/request/accept/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/user/friendship/request/accept/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/user/password/reset/confirmation/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/user/password/reset/confirmation/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/user/password/reset/request/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/user/password/reset/request/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/user/password/reset/{base64}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/user/password/reset/{base64}",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/user/picture/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/user/picture/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/user/profile/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/user/profile/",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/user/register/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/user/register/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": [
+          "root"
+        ]
+      },
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/jelly-api-1/user/search/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "10.100.0.200",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/jelly-api-1/user/search/",
+      "UpstreamHttpMethod": [
         "Post"
       ],
       "AuthenticationOptions": {

@@ -42,10 +42,15 @@ namespace Application.Shared.Kernel.Web.Websocket.SignalR.HubService
                             int i = 0;
                             foreach(var param in ctorParams)
                             {
-                                var foundService = serviceProvider.GetService(param.ParameterType);
+                                object foundService = serviceProvider.GetService(param.ParameterType);
+
+                                var tmp = serviceProvider.GetServices(param.ParameterType);
+
+                                if (tmp != null &&tmp.Count() > 1)
+                                    throw new InvalidOperationException("more than one ServiceProvider, need an exact Service");
+
                                 if (foundService == null)
                                     throw new NotFoundException(""+param.Name+" not found in given ServiceProvider");
-
                                 ctorArgsFilled[i] = foundService;
                                 i++;
                             }

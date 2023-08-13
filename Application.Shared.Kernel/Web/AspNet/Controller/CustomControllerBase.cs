@@ -26,6 +26,7 @@ using Application.Shared.Kernel.Infrastructure.Ampq.Rabbitmq;
 using Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGateway.Table;
 using Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGateway.View;
 using Application.Shared.Kernel.Data.Web.Api.Abstractions.JsonApiV1;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Application.Shared.Kernel.Web.AspNet.Controller
 {
@@ -793,23 +794,8 @@ namespace Application.Shared.Kernel.Web.AspNet.Controller
                 OfType<ControllerActionDescriptor>().
                 ToList();
             List<Type> workItems = new List<Type>();
-            RoleModel roleModelRoot = new RoleModel();
-            RoleModel roleModelAnonymous = new RoleModel();
-
-
 
             var appSettingsVarRegisterEndpointBehaviourEnvVar = configuration.GetValue<bool>("RegisterEndpointMode");
-            roleModelRoot.Name = BackendAPIDefinitionsProperties.RootRoleName;
-            roleModelRoot.Active = true;
-            query = roleModelRoot.GenerateQuery(MySqlDefinitionProperties.SQL_STATEMENT_ART.SELECT, roleModelRoot).ToString();
-            var rootRoleExists = await singletonNodeDatabaseHandler.ExecuteQueryWithMap<RoleModel>(query, roleModelRoot);
-            roleModelRoot = rootRoleExists.FirstRow;
-
-            roleModelAnonymous.Name = BackendAPIDefinitionsProperties.AnonymousRoleName;
-            roleModelAnonymous.Active = true;
-            query = roleModelAnonymous.GenerateQuery(MySqlDefinitionProperties.SQL_STATEMENT_ART.SELECT, roleModelAnonymous).ToString();
-            var rootAnonExists = await singletonNodeDatabaseHandler.ExecuteQueryWithMap<RoleModel>(query, roleModelAnonymous);
-            roleModelAnonymous = rootAnonExists.FirstRow;
 
             //1.controller actions in datenbank
             //2.actions zu rollen
@@ -874,7 +860,7 @@ namespace Application.Shared.Kernel.Web.AspNet.Controller
                             var controllerEndpoints = controllers.FindAll(x => x.ControllerName.ToLower() == controlller.ControllerName.ToLower());
 
                             if (appSettingsVarRegisterEndpointBehaviourEnvVar)
-                                apiModule.RegisterApi(customControllerBase, controllerEndpoints, httpMethodQueryResponseData.DataStorage, roleModelRoot, roleModelAnonymous);
+                                apiModule.RegisterApi(services.GetService<IAuthorizationPolicyProvider>(),customControllerBase, controllerEndpoints, httpMethodQueryResponseData.DataStorage);
 
                             workItems.Add(controllerType);
                         }
@@ -893,7 +879,7 @@ namespace Application.Shared.Kernel.Web.AspNet.Controller
             {
                 foreach (var hubRoute in hubServiceRoutes)
                 {
-                    apiModule.RegisterHub(hubRoute.Value, roleModelRoot, roleModelAnonymous);
+                    apiModule.RegisterHub(hubRoute.Value);
                 }
             }
 

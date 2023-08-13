@@ -70,7 +70,7 @@ namespace Application.Shared.Web.Api.Shared
 
             if(allModelsFromRelfection != null)
             {
-                var filterForDataModels = allModelsFromRelfection.ToList().FindAll(x => (x.BaseType == typeof(AbstractModel) || IsDerivedFromType(x,typeof(AbstractModel))) && x.Name!=nameof(AbstractModel));
+                var filterForDataModels = allModelsFromRelfection.ToList().FindAll(x => (x.BaseType == typeof(AbstractModel) || IsDerivedFromType(x,typeof(AbstractModel))) && x.Name!=nameof(AbstractModel) && !x.Namespace.StartsWith("Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGateway"));
                 
                 if (filterForDataModels != null)
                 {
