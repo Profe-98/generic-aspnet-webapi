@@ -9,6 +9,7 @@ using Application.Shared.Kernel.Web.AspNet.Controller;
 using Application.Shared.Kernel.Configuration.Const;
 using Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGateway.Table;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 
 namespace Application.Shared.Kernel.Application.Controller.Modules
 {
@@ -135,7 +136,7 @@ namespace Application.Shared.Kernel.Application.Controller.Modules
 
 
                 RoleRelationToSignalrHubMethodModel roleRelationToSignalrHubMethodModel = new RoleRelationToSignalrHubMethodModel();
-                roleRelationToSignalrHubMethodModel.RoleUuid = rootModel.Uuid;
+                roleRelationToSignalrHubMethodModel.RoleUuid = Guid.Empty;// rootModel.Uuid;
                 roleRelationToSignalrHubMethodModel.SignalrHubMethodUuid = methodModel.Uuid;
                 query = roleRelationToSignalrHubMethodModel.GenerateQuery(MySqlDefinitionProperties.SQL_STATEMENT_ART.SELECT, roleRelationToSignalrHubMethodModel).ToString();
                 QueryResponseData<RoleRelationToSignalrHubMethodModel> queryResponseDataRoleRelationToHubMethod = await Db.ExecuteQueryWithMap<RoleRelationToSignalrHubMethodModel>(query, roleRelationToSignalrHubMethodModel);
@@ -260,31 +261,45 @@ namespace Application.Shared.Kernel.Application.Controller.Modules
                 List<string> httpMethod = new List<string>();
                 if (c.AttributeRouteInfo != null && c.AttributeRouteInfo.Template != null)
                 {
-                    var methods = controller.GetType().GetMethods();
+                    bool isAnonRoute = false;
+                    var method= c.MethodInfo;
                     var authAttFromController = controller.GetType().GetCustomAttributes<AuthorizeAttribute>();
                     List<AuthorizeAttribute> authAttr = new List<AuthorizeAttribute>();
-                    foreach (MethodInfo method in methods)
-                    {
-                        var methodHttpAttr = method.GetCustomAttributes<HttpMethodAttribute>();
-                        var methodConsumesAttr = method.GetCustomAttributes<CustomConsumesFilter>();
-                        var methodProducesAttr = method.GetCustomAttributes<CustomProducesFilter>();
-                        authAttr = authAttFromController.ToList();
+                    var methodHttpAttr = method.GetCustomAttributes<HttpMethodAttribute>();
+                    var methodConsumesAttr = method.GetCustomAttributes<CustomConsumesFilter>();
+                    var methodProducesAttr = method.GetCustomAttributes<CustomProducesFilter>();
+                    authAttr = authAttFromController.ToList();
 
-                        var authAttFromMethod = method.GetCustomAttributes<AuthorizeAttribute>();
+                    var authAttFromMethod = method.GetCustomAttributes<AuthorizeAttribute>();
+                    var anonAttrFromMethod = method.GetCustomAttributes<AllowAnonymousAttribute>();
+                    if (!anonAttrFromMethod.Any() && !authAttFromMethod.Any() && authAttr.Any())
+                    {
+
+                    }
+                    else
+                    {
                         if (authAttFromMethod.Count() > 0)
                         {
                             authAttFromMethod.ToList().ForEach(x => authAttr.Add(x));
                         }
-
-
-                        if (methodHttpAttr.Count() != 0 && actionName.ToLower().Equals(method.Name.ToLower()))
+                        if (anonAttrFromMethod.Any() && !isAnonRoute)
                         {
-                            methodHttpAttr.ToList().ForEach(x => x.HttpMethods.ToList().ForEach(y =>
-                            {
-                                if (!httpMethod.Contains(y))
-                                    httpMethod.Add(y);
-                            }));
+                            isAnonRoute = true;
                         }
+                    }
+
+
+                    if (methodHttpAttr.Count() != 0 && actionName.ToLower().Equals(method.Name.ToLower()))
+                    {
+                        methodHttpAttr.ToList().ForEach(x => x.HttpMethods.ToList().ForEach(y =>
+                        {
+                            if (!httpMethod.Contains(y))
+                                httpMethod.Add(y);
+                        }));
+                    }
+                    if (isAnonRoute)
+                    {
+                        authAttr.Clear();
                     }
                     string currentIterationLevelControllerName = c.ControllerName.ToLower();
                     string routeData = c.AttributeRouteInfo.Template;
@@ -345,6 +360,15 @@ namespace Application.Shared.Kernel.Application.Controller.Modules
                         if (httpMethodModel == null)
                             throw new Exception();
 
+                        //Delete all Action before insert new
+                        ControllerActionRelationToHttpMethodModel relationToHttpMethodModelDeleteAll = new ControllerActionRelationToHttpMethodModel();
+                        relationToHttpMethodModelDeleteAll.ActionRoute = data.Route;
+                        relationToHttpMethodModelDeleteAll.ControllerActionUuid = queryResponseDataControllerAction.FirstRow.Uuid;//controlleraction
+                        relationToHttpMethodModelDeleteAll.Active = true;
+                        query = relationToHttpMethodModelDeleteAll.GenerateQuery(MySqlDefinitionProperties.SQL_STATEMENT_ART.DELETE, relationToHttpMethodModelDeleteAll).ToString();
+                        QueryResponseData<ControllerActionRelationToHttpMethodModel> queryResponseDataControllerActionRelToHttpDeleteAll = await Db.ExecuteQueryWithMap<ControllerActionRelationToHttpMethodModel>(query, relationToHttpMethodModelDeleteAll);
+
+
 
 
                         ControllerActionRelationToHttpMethodModel relationToHttpMethodModel = new ControllerActionRelationToHttpMethodModel();
@@ -358,21 +382,93 @@ namespace Application.Shared.Kernel.Application.Controller.Modules
                         {
                             query = relationToHttpMethodModel.GenerateQuery(MySqlDefinitionProperties.SQL_STATEMENT_ART.INSERT).ToString();
                             queryResponseDataControllerActionRelToHttp = await Db.ExecuteQueryWithMap<ControllerActionRelationToHttpMethodModel>(query, relationToHttpMethodModel);
+                        }
+
+                        //Delete all Controller Roles before insert new. Reason why is: it can happend that the attributes of Authorize on the action are changing
+                        RoleRelationToControllerActionRelationToHttpMethodModel controllerActionRelationToHttpMethodDeleteAll = new RoleRelationToControllerActionRelationToHttpMethodModel();
+                        controllerActionRelationToHttpMethodDeleteAll.ControllerActionRelationToHttpMethodUuid = queryResponseDataControllerActionRelToHttp.FirstRow.Uuid;//http rel w/ controller action
+                        controllerActionRelationToHttpMethodDeleteAll.Active = true;
+                        query = controllerActionRelationToHttpMethodDeleteAll.GenerateQuery(MySqlDefinitionProperties.SQL_STATEMENT_ART.DELETE, controllerActionRelationToHttpMethodDeleteAll).ToString();
+                        QueryResponseData<RoleRelationToControllerActionRelationToHttpMethodModel> queryResponseDataRoleToContActHttpDeleteAll = await Db.ExecuteQueryWithMap<RoleRelationToControllerActionRelationToHttpMethodModel>(query, controllerActionRelationToHttpMethodDeleteAll);
 
 
+                        if (data.Route == "jelly-api-1/authentification/connection/")
+                        {
 
-                            RoleRelationToControllerActionRelationToHttpMethodModel controllerActionRelationToHttpMethod = new RoleRelationToControllerActionRelationToHttpMethodModel();
-                            controllerActionRelationToHttpMethod.RoleUuid = queryResponseDataController.FirstRow.IsAuthcontroller || queryResponseDataController.FirstRow.IsErrorController ? anonymous.Uuid : rootRole.Uuid;//role
-                            controllerActionRelationToHttpMethod.ControllerActionRelationToHttpMethodUuid = queryResponseDataControllerActionRelToHttp.FirstRow.Uuid;//http rel w/ controller action
-                            controllerActionRelationToHttpMethod.Active = true;
-                            query = controllerActionRelationToHttpMethod.GenerateQuery(MySqlDefinitionProperties.SQL_STATEMENT_ART.SELECT, controllerActionRelationToHttpMethod).ToString();
-                            QueryResponseData<RoleRelationToControllerActionRelationToHttpMethodModel> queryResponseDataRoleToContActHttp = await Db.ExecuteQueryWithMap<RoleRelationToControllerActionRelationToHttpMethodModel>(query, controllerActionRelationToHttpMethod);
-                            if (!queryResponseDataRoleToContActHttp.HasData)
+                        }
+                        if(data.AuthorizeAttributes.Count != 0)
+                        {
+                            foreach (var item in data.AuthorizeAttributes)
                             {
-                                query = controllerActionRelationToHttpMethod.GenerateQuery(MySqlDefinitionProperties.SQL_STATEMENT_ART.INSERT).ToString();
-                                queryResponseDataRoleToContActHttp = await Db.ExecuteQueryWithMap<RoleRelationToControllerActionRelationToHttpMethodModel>(query, controllerActionRelationToHttpMethod);
+                                if (!String.IsNullOrEmpty(item.Policy))//user muss policy konform sein
+                                {
+
+                                    var policy = await authorizationPolicyProvider.GetPolicyAsync(item.Policy);
+                                    foreach (var requ in policy.Requirements)
+                                    {
+                                        string[] roleNames = null;
+                                        if (requ is ClaimsAuthorizationRequirement)
+                                        {
+                                            roleNames = ((ClaimsAuthorizationRequirement)requ).AllowedValues.ToArray();
+                                        }
+                                        foreach (string roleName in roleNames)
+                                        {
+                                            RoleModel roleModel = new RoleModel();
+                                            roleModel.Name = roleName;
+                                            roleModel.Active = true;
+                                            query = roleModel.GenerateQuery(MySqlDefinitionProperties.SQL_STATEMENT_ART.SELECT, roleModel).ToString();
+                                            QueryResponseData<RoleModel> queryResponseDataRole = await Db.ExecuteQueryWithMap<RoleModel>(query, roleModel);
+                                            if (!queryResponseDataRole.HasData)
+                                            {
+                                                query = roleModel.GenerateQuery(MySqlDefinitionProperties.SQL_STATEMENT_ART.INSERT).ToString();
+                                                queryResponseDataRole = await Db.ExecuteQueryWithMap<RoleModel>(query, roleModel);
+                                            }
+                                            RoleRelationToControllerActionRelationToHttpMethodModel controllerActionRelationToHttpMethod = new RoleRelationToControllerActionRelationToHttpMethodModel();
+                                            controllerActionRelationToHttpMethod.RoleUuid = queryResponseDataRole.FirstRow.Uuid;//role
+                                            controllerActionRelationToHttpMethod.ControllerActionRelationToHttpMethodUuid = queryResponseDataControllerActionRelToHttp.FirstRow.Uuid;//http rel w/ controller action
+                                            controllerActionRelationToHttpMethod.Active = true;
+                                            query = controllerActionRelationToHttpMethod.GenerateQuery(MySqlDefinitionProperties.SQL_STATEMENT_ART.SELECT, controllerActionRelationToHttpMethod).ToString();
+                                            QueryResponseData<RoleRelationToControllerActionRelationToHttpMethodModel> queryResponseDataRoleToContActHttp = await Db.ExecuteQueryWithMap<RoleRelationToControllerActionRelationToHttpMethodModel>(query, controllerActionRelationToHttpMethod);
+                                            if (!queryResponseDataRoleToContActHttp.HasData)
+                                            {
+                                                query = controllerActionRelationToHttpMethod.GenerateQuery(MySqlDefinitionProperties.SQL_STATEMENT_ART.INSERT).ToString();
+                                                queryResponseDataRoleToContActHttp = await Db.ExecuteQueryWithMap<RoleRelationToControllerActionRelationToHttpMethodModel>(query, controllerActionRelationToHttpMethod);
+                                            }
+                                        }
+                                    }
+                                }
+                                else//nur login reicht für access
+                                {
+                                    RoleModel roleModel = new RoleModel();
+                                    roleModel.Name = "user";
+                                    roleModel.Active = true;
+                                    query = roleModel.GenerateQuery(MySqlDefinitionProperties.SQL_STATEMENT_ART.SELECT, roleModel).ToString();
+                                    QueryResponseData<RoleModel> queryResponseDataRole = await Db.ExecuteQueryWithMap<RoleModel>(query, roleModel);
+                                    if (!queryResponseDataRole.HasData)
+                                    {
+                                        query = roleModel.GenerateQuery(MySqlDefinitionProperties.SQL_STATEMENT_ART.INSERT).ToString();
+                                        queryResponseDataRole = await Db.ExecuteQueryWithMap<RoleModel>(query, roleModel);
+                                    }
+                                    RoleRelationToControllerActionRelationToHttpMethodModel controllerActionRelationToHttpMethod = new RoleRelationToControllerActionRelationToHttpMethodModel();
+                                    controllerActionRelationToHttpMethod.RoleUuid = queryResponseDataRole.FirstRow.Uuid;//role
+                                    controllerActionRelationToHttpMethod.ControllerActionRelationToHttpMethodUuid = queryResponseDataControllerActionRelToHttp.FirstRow.Uuid;//http rel w/ controller action
+                                    controllerActionRelationToHttpMethod.Active = true;
+                                    query = controllerActionRelationToHttpMethod.GenerateQuery(MySqlDefinitionProperties.SQL_STATEMENT_ART.SELECT, controllerActionRelationToHttpMethod).ToString();
+                                    QueryResponseData<RoleRelationToControllerActionRelationToHttpMethodModel> queryResponseDataRoleToContActHttp = await Db.ExecuteQueryWithMap<RoleRelationToControllerActionRelationToHttpMethodModel>(query, controllerActionRelationToHttpMethod);
+                                    if (!queryResponseDataRoleToContActHttp.HasData)
+                                    {
+                                        query = controllerActionRelationToHttpMethod.GenerateQuery(MySqlDefinitionProperties.SQL_STATEMENT_ART.INSERT).ToString();
+                                        queryResponseDataRoleToContActHttp = await Db.ExecuteQueryWithMap<RoleRelationToControllerActionRelationToHttpMethodModel>(query, controllerActionRelationToHttpMethod);
+                                    }
+                                }
+
                             }
                         }
+                        else//anon route
+                        {
+
+                        }
+                        
                     }
                 }
             }

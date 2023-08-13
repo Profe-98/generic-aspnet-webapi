@@ -54,6 +54,7 @@ using Application.Shared.Kernel.Web.AspNet.Startup;
 using Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGateway.View;
 using Application.Web.Gateway.Middleware;
 using Application.Shared.Kernel.Web.AspNet.Controller;
+using StackExchange.Redis;
 
 namespace Application.Web.Gateway
 {
@@ -272,7 +273,6 @@ namespace Application.Web.Gateway
             {
                 foreach (var item in routesHealthQueryData.DataStorage)
                 {
-                    var claims = new List<string> {"root" };
                     var route = new RoutesConfigurationModel.RouteModel();
                     route.AuthenticationOptions = new RoutesConfigurationModel.AuthenticationOptionsModel
                     {
@@ -285,7 +285,7 @@ namespace Application.Web.Gateway
 
                     route.UpstreamHttpMethod = new List<string>() { "Get" };
                     route.UpstreamPathTemplate = pathTemplateUpStream;
-                    route.RouteClaimsRequirement = new RoutesConfigurationModel.RouteClaimsRequirementModel { Role=claims };
+                    route.RouteClaimsRequirement = new RoutesConfigurationModel.RouteClaimsRequirementModel { Role=new Dictionary<string, string> { { BackendAPIDefinitionsProperties.Claim.ClaimTypeUserRole, "root" } } };
                     route.LoadBalancerOptions = new RoutesConfigurationModel.LoadBalancerOptionsModel
                     {
                         Type = "RoundRobin"
@@ -300,14 +300,14 @@ namespace Application.Web.Gateway
             {
                 foreach (var item in routesSignalRHubsQueryData.DataStorage)
                 {
-                    bool isAnonEndpoint = item.Roles != null ? item.Roles.Contains(BackendAPIDefinitionsProperties.AnonymousRoleName) : false;
+                    bool isAnonEndpoint = item.Roles == null ? true : false;
                     var route = new RoutesConfigurationModel.RouteModel();
                     route.AuthenticationOptions = new RoutesConfigurationModel.AuthenticationOptionsModel
                     {
                         AuthenticationProviderKey = "Base"
                     };
 
-                    List<string> claims = new List<string>();
+                    /*List<string> claims = new List<string>();
                     if (item.Roles != null && !isAnonEndpoint)
                     {
                         foreach (string role in item.Roles.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
@@ -317,12 +317,27 @@ namespace Application.Web.Gateway
                                 claims.Add(role);
                             }
                         }
-                    }
+                    }*/
                     string pathTemplateDownStream = item.Route;
                     string pathTemplateUpStream = item.Route;
                     route.DownstreamPathTemplate = pathTemplateDownStream;
                     route.DownstreamScheme = "http";
 
+                    Dictionary<string, string> claims = new Dictionary<string, string>();
+                    if (item.Roles != null && !isAnonEndpoint)
+                    {
+                        /*
+                        foreach (string role in row.Roles.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                        {
+                        }
+                        */
+                        if (!claims.ContainsKey(BackendAPIDefinitionsProperties.Claim.ClaimTypeUserRole))
+                        {
+                            claims.Add(BackendAPIDefinitionsProperties.Claim.ClaimTypeUserRole, null);
+                        }
+                        claims[BackendAPIDefinitionsProperties.Claim.ClaimTypeUserRole] = item.Roles.ToLower();
+                    }
+                    route.RouteClaimsRequirement = !isAnonEndpoint ? new RoutesConfigurationModel.RouteClaimsRequirementModel { Role = claims } : null;
 
                     List<string> methodData = item.HttpMethods != null ? item.HttpMethods.Split(',').ToList() : new List<string>();
                     for (int i = 0; i < methodData.Count; i++)
@@ -333,7 +348,6 @@ namespace Application.Web.Gateway
                     }
                     route.UpstreamHttpMethod = methodData;
                     route.UpstreamPathTemplate = pathTemplateUpStream;
-                    route.RouteClaimsRequirement = new RoutesConfigurationModel.RouteClaimsRequirementModel { Role= claims };
                     route.LoadBalancerOptions = new RoutesConfigurationModel.LoadBalancerOptionsModel
                     {
                         Type = "RoundRobin"
@@ -368,7 +382,7 @@ namespace Application.Web.Gateway
 
                 foreach (var row in routesQueryData.DataStorage)
                 {
-                    bool isAnonEndpoint = row.Roles != null ? row.Roles.Contains(BackendAPIDefinitionsProperties.AnonymousRoleName) : false;
+                    bool isAnonEndpoint = row.Roles == null ? true : false;
                     //optionale Routeparameter können von Ocelot nicht verarbeitet werden, diese rufe eine Exception in der UseRouting Methode von Ocelot aus und da die Mainroute eh besteht passt es auch so
                     //Bsp.:
                     // Route 1: /account
@@ -427,21 +441,28 @@ namespace Application.Web.Gateway
                     {
                         Type = "RoundRobin"
                     };
+                    if (row.Roles == null)
+                    {
+                        row.Roles = BackendAPIDefinitionsProperties.AnonymousRoleName;
+                    }
                     if (row.ActionRoute == null || row.HttpMethods == null || row.Roles == null || route.DownstreamHostAndPorts.Count == 0)
                     {
                         Console.WriteLine("avoid route '" + row.ActionRoute + "' because (if (row.ActionRoute == null || row.HttpMethods == null || row.Roles == null || route.DownstreamHostAndPorts.Count == 0))");
                         continue;
                     }
-                    List<string> claims = new List<string>();
+                    Dictionary<string,string> claims = new Dictionary<string,string>();
                     if (row.Roles != null && !isAnonEndpoint)
                     {
+                        /*
                         foreach (string role in row.Roles.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
                         {
-                            if (!claims.Contains(role))
-                            {
-                                claims.Add(role);
-                            }
                         }
+                        */
+                        if (!claims.ContainsKey(BackendAPIDefinitionsProperties.Claim.ClaimTypeUserRole))
+                        {
+                            claims.Add(BackendAPIDefinitionsProperties.Claim.ClaimTypeUserRole, null);
+                        }
+                        claims[BackendAPIDefinitionsProperties.Claim.ClaimTypeUserRole] = row.Roles.ToLower();
                     }
                     route.RouteClaimsRequirement = !isAnonEndpoint ? new RoutesConfigurationModel.RouteClaimsRequirementModel { Role=claims } : null;
 

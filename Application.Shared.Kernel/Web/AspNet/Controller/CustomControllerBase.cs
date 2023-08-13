@@ -27,6 +27,7 @@ using Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGatew
 using Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGateway.View;
 using Application.Shared.Kernel.Data.Web.Api.Abstractions.JsonApiV1;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
 
 namespace Application.Shared.Kernel.Web.AspNet.Controller
 {
@@ -861,7 +862,7 @@ namespace Application.Shared.Kernel.Web.AspNet.Controller
 
                             if (appSettingsVarRegisterEndpointBehaviourEnvVar)
                                 apiModule.RegisterApi(services.GetService<IAuthorizationPolicyProvider>(),customControllerBase, controllerEndpoints, httpMethodQueryResponseData.DataStorage);
-
+                            
                             workItems.Add(controllerType);
                         }
                         catch (Exception ex)
@@ -888,6 +889,7 @@ namespace Application.Shared.Kernel.Web.AspNet.Controller
                 Console.WriteLine("!!! Restart the application to fill the memory relations of classes and controllers !!!");
             }
 
+            endpoints.MapControllers();
             IRabbitMqHandler rabbitMqHandler = services.GetService<IRabbitMqHandler>();
             rabbitMqHandler.PublishObject("route-management", nodeManagerHandler.NodeModel, "register-notification", "node registered: " + nodeManagerHandler.NodeModel.Name + "", null, null);
 

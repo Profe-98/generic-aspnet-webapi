@@ -28,10 +28,10 @@ namespace Application.Shared.Web.Api.Shared
 {
     public class Startup: WebApiStartup
     {
-        public static string[] DatabaseEntityNamespaces { get; } = new string[] { "Application.Shared.Kernel.Application.Model.Database.MySql.Entity" };
+        public static string[] DatabaseEntityNamespaces { get; } = new string[] { "Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGateway.View",
+                            "Application.Shared.Kernel.Application.Model.Database.MySQL.Schema.ApiGateway.Table" };
 
         readonly string AllowOrigin = "api-gateway";
-        public IConfiguration Configuration { get; }
 
         public Startup(IConfiguration configuration, Microsoft.AspNetCore.Hosting.IWebHostEnvironment env) : base(configuration,env)
         {

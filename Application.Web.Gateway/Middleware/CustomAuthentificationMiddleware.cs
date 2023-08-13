@@ -27,11 +27,12 @@ namespace Application.Web.Gateway.Middleware
         public async Task Invoke(HttpContext httpContext)
         {
             var downstreamRoute = httpContext.Items.DownstreamRoute();
+            var isAuthOrOptionRoute = httpContext.Request.Method.ToUpper() != "OPTIONS" && IsAuthenticatedRoute(downstreamRoute);
 
-            if (httpContext.Request.Method.ToUpper() != "OPTIONS" && IsAuthenticatedRoute(downstreamRoute))
+            if (isAuthOrOptionRoute)
             {
                 Logger.LogInformation($"{httpContext.Request.Path} is an authenticated route. {MiddlewareName} checking if client is authenticated");
-
+                var tmp = downstreamRoute.RouteClaimsRequirement;
                 var result = await httpContext.AuthenticateAsync(downstreamRoute.AuthenticationOptions.AuthenticationProviderKey);//called den authentificationhandler für das Schema welches in der route.json für die Route definiert ist, Handler muss in ConfigureServices vorhanden/definiert sein
                 /*
                  

@@ -17,9 +17,9 @@
         "AuthenticationProviderKey": "Base"
       },
       "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
+        "Role": {
+          "user_role": "root"
+        }
       },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
@@ -42,9 +42,9 @@
         "AuthenticationProviderKey": "Base"
       },
       "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
+        "Role": {
+          "user_role": "root"
+        }
       },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
@@ -68,9 +68,9 @@
         "AuthenticationProviderKey": "Base"
       },
       "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
+        "Role": {
+          "user_role": "root"
+        }
       },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
@@ -94,9 +94,9 @@
         "AuthenticationProviderKey": "Base"
       },
       "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
+        "Role": {
+          "user_role": "root"
+        }
       },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
@@ -149,6 +149,14 @@
       "UpstreamHttpMethod": [
         "Post"
       ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": {
+          "user_role": "user"
+        }
+      },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
       }
@@ -166,6 +174,14 @@
       "UpstreamHttpMethod": [
         "Post"
       ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": {
+          "user_role": "user"
+        }
+      },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
       }
@@ -183,6 +199,14 @@
       "UpstreamHttpMethod": [
         "Get"
       ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": {
+          "user_role": "user"
+        }
+      },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
       }
@@ -200,6 +224,14 @@
       "UpstreamHttpMethod": [
         "Post"
       ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Base"
+      },
+      "RouteClaimsRequirement": {
+        "Role": {
+          "user_role": "user"
+        }
+      },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
       }
@@ -222,9 +254,9 @@
         "AuthenticationProviderKey": "Base"
       },
       "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
+        "Role": {
+          "user_role": "user"
+        }
       },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
@@ -247,9 +279,9 @@
         "AuthenticationProviderKey": "Base"
       },
       "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
+        "Role": {
+          "user_role": "admin"
+        }
       },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
@@ -272,9 +304,9 @@
         "AuthenticationProviderKey": "Base"
       },
       "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
+        "Role": {
+          "user_role": "user"
+        }
       },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
@@ -297,9 +329,9 @@
         "AuthenticationProviderKey": "Base"
       },
       "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
+        "Role": {
+          "user_role": "user"
+        }
       },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
@@ -322,9 +354,9 @@
         "AuthenticationProviderKey": "Base"
       },
       "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
+        "Role": {
+          "user_role": "user"
+        }
       },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
@@ -343,14 +375,6 @@
       "UpstreamHttpMethod": [
         "Post"
       ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Base"
-      },
-      "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
-      },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
       }
@@ -372,9 +396,9 @@
         "AuthenticationProviderKey": "Base"
       },
       "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
+        "Role": {
+          "user_role": "user"
+        }
       },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
@@ -398,9 +422,9 @@
         "AuthenticationProviderKey": "Base"
       },
       "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
+        "Role": {
+          "user_role": "user"
+        }
       },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
@@ -423,9 +447,9 @@
         "AuthenticationProviderKey": "Base"
       },
       "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
+        "Role": {
+          "user_role": "user"
+        }
       },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
@@ -444,14 +468,6 @@
       "UpstreamHttpMethod": [
         "Post"
       ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Base"
-      },
-      "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
-      },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
       }
@@ -469,14 +485,6 @@
       "UpstreamHttpMethod": [
         "Post"
       ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Base"
-      },
-      "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
-      },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
       }
@@ -494,14 +502,6 @@
       "UpstreamHttpMethod": [
         "Post"
       ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Base"
-      },
-      "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
-      },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
       }
@@ -523,9 +523,9 @@
         "AuthenticationProviderKey": "Base"
       },
       "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
+        "Role": {
+          "user_role": "user"
+        }
       },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
@@ -548,9 +548,9 @@
         "AuthenticationProviderKey": "Base"
       },
       "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
+        "Role": {
+          "user_role": "user"
+        }
       },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
@@ -569,14 +569,6 @@
       "UpstreamHttpMethod": [
         "Post"
       ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Base"
-      },
-      "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
-      },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
       }
@@ -598,9 +590,9 @@
         "AuthenticationProviderKey": "Base"
       },
       "RouteClaimsRequirement": {
-        "Role": [
-          "root"
-        ]
+        "Role": {
+          "user_role": "user"
+        }
       },
       "LoadBalancerOptions": {
         "Type": "RoundRobin"

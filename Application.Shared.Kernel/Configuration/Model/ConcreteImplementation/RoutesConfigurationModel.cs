@@ -28,7 +28,7 @@ namespace Application.Shared.Kernel.Configuration.Model.ConcreteImplementation
         }
         public class RouteClaimsRequirementModel
         {
-            public List<string> Role { get; set; } = new List<string>();
+            public Dictionary<string,string> Role { get; set; } = new Dictionary<string, string>();
         }
         public class RouteModel
         {

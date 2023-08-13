@@ -15,7 +15,8 @@ using Application.Shared.Kernel.Web.Http;
 using Application.Shared.Kernel.Web.AspNet.CustomActionResult;
 using Application.Shared.Kernel.Web.Authentification.JWT;
 using Application.Shared.Kernel.Configuration;
-
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Application.Shared.Kernel.Web.Authentification
 {
@@ -163,7 +164,13 @@ namespace Application.Shared.Kernel.Web.Authentification
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            
+            var endpoint = Context.GetEndpoint();
+            if (endpoint == null)
+                throw new NullReferenceException("endpoint is null; are endpoint mapped in Startup.Configure.UseEndpoints(endpoint=>{...})?");
+            if (endpoint?.Metadata?.GetMetadata<IAllowAnonymous>() != null)
+            {
+                return AuthenticateResult.NoResult();
+            }
             if (!Request.Headers.ContainsKey("Authorization"))
                 return AuthenticateResultExtension.FailEx("unauthorized", _jsonHandler);
 
